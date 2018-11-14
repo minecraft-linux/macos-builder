@@ -1,8 +1,9 @@
-from os import makedirs, path, cpu_count
+from os import makedirs, path, cpu_count, listdir
 from subprocess import check_call as call
 import subprocess
 from shutil import rmtree, copyfile
 from jinja2 import Template
+import dependency_copier
 
 # Change for each release
 VERSION = '0.0.1'
@@ -30,6 +31,7 @@ if path.exists(path.join(OUTPUT_DIR)):
 
 display_stage("Initializing")
 makedirs(path.join(APP_OUTPUT_DIR, 'Contents', 'Resources'))
+makedirs(path.join(APP_OUTPUT_DIR, 'Contents', 'Frameworks'))
 makedirs(path.join(APP_OUTPUT_DIR, 'Contents', 'MacOS'))
 if not path.isdir(SOURCE_DIR):
     makedirs(SOURCE_DIR)
@@ -73,6 +75,12 @@ display_stage("Building")
 build_component("msa", ['-DENABLE_MSA_QT_UI=ON', '-DMSA_UI_PATH_DEV=OFF'] + CMAKE_QT_EXTRA_OPTIONS)
 build_component("mcpelauncher", ['-DMSA_DAEMON_PATH=.', '-DENABLE_DEV_PATHS=OFF'])
 build_component("mcpelauncher-ui", ['-DGAME_LAUNCHER_PATH=.'] + CMAKE_QT_EXTRA_OPTIONS)
+
+display_stage("Copying dependencies")
+bin_dir = path.join(APP_OUTPUT_DIR, 'Contents', 'MacOS', 'bin')
+for f in listdir(bin_dir):
+    display_stage("Copying dependencies: " + f)
+    dependency_copier.copy_dependencies(path.join(bin_dir, f), path.join(APP_OUTPUT_DIR, 'Contents', 'Frameworks'))
 
 display_stage("Building Info.plist file")
 with open(path.join(TEMPLATES_DIR, 'Info.plist.tmpl'), 'r') as raw:
