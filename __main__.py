@@ -1,6 +1,6 @@
 from os import makedirs, path, cpu_count
 from subprocess import check_call as call
-from shutil import rmtree
+from shutil import rmtree, copyfile
 from jinja2 import Template
 
 # Change for each release
@@ -19,9 +19,13 @@ if path.exists(path.join(OUTPUT_DIR)):
 
 makedirs(path.join(APP_OUTPUT_DIR, 'Contents', 'Resources'))
 makedirs(path.join(APP_OUTPUT_DIR, 'Contents', 'MacOS'))
+makedirs(path.join(SOURCE_DIR))
 
 # Download .icns file
-call(['wget', 'https://github.com/minecraft-linux/mcpelauncher-proprietary/raw/master/minecraft.icns', '-q', '-o', '/dev/null', '-O', path.join(APP_OUTPUT_DIR, 'Contents', 'Resources', 'minecraft.icns')])
+ICON_FILE = path.join(SOURCE_DIR, 'minecraft.icns')
+if not path.exists(ICON_FILE):
+    call(['curl', '-s', '-o', ICON_FILE, 'https://github.com/minecraft-linux/mcpelauncher-proprietary/raw/master/minecraft.icns'])
+copyfile(ICON_FILE, path.join(APP_OUTPUT_DIR, 'Contents', 'Resources', 'minecraft.icns'))
 
 # Download the sources
 def clone_repo(name, url):
