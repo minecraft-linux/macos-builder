@@ -1,5 +1,6 @@
 from os import makedirs, path, cpu_count
 from subprocess import check_call as call
+import subprocess
 from shutil import rmtree, copyfile
 from jinja2 import Template
 
@@ -57,6 +58,7 @@ clone_repo('mcpelauncher-ui', 'https://github.com/minecraft-linux/mcpelauncher-u
 
 # Build
 CMAKE_INSTALL_PREFIX = path.abspath(path.join(APP_OUTPUT_DIR, 'Contents', 'MacOS'))
+CMAKE_QT_EXTRA_OPTIONS = ["-DCMAKE_PREFIX_PATH=" + subprocess.check_output(['brew', '--prefix', 'qt']).decode('utf-8').strip()]
 
 def build_component(name, cmake_opts):
   display_stage("Building: " + name)
@@ -68,9 +70,9 @@ def build_component(name, cmake_opts):
   call(['make', '-j' + str(cpu_count()), 'install'], cwd=build_dir)
 
 display_stage("Building")
-build_component("msa", ['-DENABLE_MSA_QT_UI=ON', '-DMSA_UI_PATH_DEV=OFF'])
-build_component("mcpelauncher", ['-DMSA_DAEMON_PATH=.', '-DUSE_OWN_CURL=ON', '-DENABLE_DEV_PATHS=OFF'])
-build_component("mcpelauncher-ui", ['-DGAME_LAUNCHER_PATH=.'])
+build_component("msa", ['-DENABLE_MSA_QT_UI=ON', '-DMSA_UI_PATH_DEV=OFF'] + CMAKE_QT_EXTRA_OPTIONS)
+build_component("mcpelauncher", ['-DMSA_DAEMON_PATH=.', '-DENABLE_DEV_PATHS=OFF'])
+build_component("mcpelauncher-ui", ['-DGAME_LAUNCHER_PATH=.'] + CMAKE_QT_EXTRA_OPTIONS)
 
 display_stage("Building Info.plist file")
 with open(path.join(TEMPLATES_DIR, 'Info.plist.tmpl'), 'r') as raw:
