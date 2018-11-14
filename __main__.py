@@ -12,23 +12,37 @@ SOURCE_DIR = 'source'
 APP_OUTPUT_NAME = 'Minecraft Bedrock Launcher.app'
 APP_OUTPUT_DIR = path.join(OUTPUT_DIR, APP_OUTPUT_NAME)
 
+ENABLE_COLORS=True
+
+
+def display_stage(name):
+  if ENABLE_COLORS:
+    print("\x1B[1m\x1B[32m=> " + name + "\x1B[0m")
+  else:
+    print(name)
+
+
 if path.exists(path.join(OUTPUT_DIR)):
   print('Removing `{}/`! Click enter to continue, or ^C to exit'.format(OUTPUT_DIR))
   input()
   rmtree(OUTPUT_DIR)
 
+display_stage("Initializing")
 makedirs(path.join(APP_OUTPUT_DIR, 'Contents', 'Resources'))
 makedirs(path.join(APP_OUTPUT_DIR, 'Contents', 'MacOS'))
-makedirs(path.join(SOURCE_DIR))
+if not path.isdir(SOURCE_DIR):
+    makedirs(SOURCE_DIR)
 
 # Download .icns file
 ICON_FILE = path.join(SOURCE_DIR, 'minecraft.icns')
 if not path.exists(ICON_FILE):
-    call(['curl', '-s', '-o', ICON_FILE, 'https://github.com/minecraft-linux/mcpelauncher-proprietary/raw/master/minecraft.icns'])
+  display_stage("Downloading icons file")
+  call(['curl', '-s', '-o', ICON_FILE, 'https://github.com/minecraft-linux/mcpelauncher-proprietary/raw/master/minecraft.icns'])
 copyfile(ICON_FILE, path.join(APP_OUTPUT_DIR, 'Contents', 'Resources', 'minecraft.icns'))
 
 # Download the sources
 def clone_repo(name, url):
+  display_stage("Cloning repository: " + url)
   directory = path.join(SOURCE_DIR, name)
   if not path.isdir(directory):
     call(['git', 'clone', '--recursive', url, directory])
@@ -36,6 +50,7 @@ def clone_repo(name, url):
     call(['git', 'pull'], cwd=directory)
     call(['git', 'submodule', 'update'], cwd=directory)
 
+display_stage("Downloading sources")
 clone_repo('msa', 'https://github.com/minecraft-linux/msa-manifest.git')
 clone_repo('mcpelauncher', 'https://github.com/minecraft-linux/mcpelauncher-manifest.git')
 clone_repo('mcpelauncher-ui', 'https://github.com/minecraft-linux/mcpelauncher-ui-manifest.git')
@@ -44,17 +59,20 @@ clone_repo('mcpelauncher-ui', 'https://github.com/minecraft-linux/mcpelauncher-u
 CMAKE_INSTALL_PREFIX = path.abspath(path.join(APP_OUTPUT_DIR, 'Contents', 'MacOS'))
 
 def build_component(name, cmake_opts):
-    source_dir = path.abspath(path.join(SOURCE_DIR, name))
-    build_dir = path.join(SOURCE_DIR, "build", name)
-    if not path.isdir(build_dir):
-        makedirs(build_dir)
-    call(['cmake', source_dir, '-DCMAKE_INSTALL_PREFIX=' + CMAKE_INSTALL_PREFIX] + cmake_opts, cwd=build_dir)
-    call(['make', '-j' + str(cpu_count()), 'install'], cwd=build_dir)
+  display_stage("Building: " + name)
+  source_dir = path.abspath(path.join(SOURCE_DIR, name))
+  build_dir = path.join(SOURCE_DIR, "build", name)
+  if not path.isdir(build_dir):
+    makedirs(build_dir)
+  call(['cmake', source_dir, '-DCMAKE_INSTALL_PREFIX=' + CMAKE_INSTALL_PREFIX] + cmake_opts, cwd=build_dir)
+  call(['make', '-j' + str(cpu_count()), 'install'], cwd=build_dir)
 
+display_stage("Building")
 build_component("msa", ['-DENABLE_MSA_QT_UI=ON', '-DMSA_UI_PATH_DEV=OFF'])
 build_component("mcpelauncher", ['-DMSA_DAEMON_PATH=.', '-DUSE_OWN_CURL=ON', '-DENABLE_DEV_PATHS=OFF'])
 build_component("mcpelauncher-ui", ['-DGAME_LAUNCHER_PATH=.'])
 
+display_stage("Building Info.plist file")
 with open(path.join(TEMPLATES_DIR, 'Info.plist.tmpl'), 'r') as raw:
   info = Template(raw.read())
   output = info.render(
@@ -69,4 +87,4 @@ with open(path.join(TEMPLATES_DIR, 'Info.plist.tmpl'), 'r') as raw:
   f.write(output)
   f.close()
 
-print('App bundle has been built at {}!'.format(path.join(OUTPUT_DIR, APP_OUTPUT_NAME)))
+display_stage('App bundle has been built at {}!'.format(path.join(OUTPUT_DIR, APP_OUTPUT_NAME)))
