@@ -69,7 +69,7 @@ def copy_file_and_dependencies(file, path_prefix, dst_dir):
 
 
 def _copy_dependencies(dst_file, path_prefix, dst_dir, set_id=None):
-    print('Copying deps: ' + dst_file)
+    print('Copying dependencies: ' + dst_file)
     name_tool_opt = ['install_name_tool']
     if set_id is not None:
         name_tool_opt.extend(['-id', set_id])
