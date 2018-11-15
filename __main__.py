@@ -4,7 +4,6 @@ import subprocess
 from shutil import rmtree, copyfile, copytree
 import shutil
 from jinja2 import Template
-import dependency_copier
 
 # Change for each release
 VERSION = '0.0.1'
@@ -113,11 +112,5 @@ QT_DEPLOY_OPTIONS = [path.join(QT_INSTALL_PATH, 'bin', 'macdeployqt'),  APP_OUTP
 QT_DEPLOY_OPTIONS.append('-qmldir=' + path.join(SOURCE_DIR, 'mcpelauncher-ui', 'mcpelauncher-ui-qt'))
 QT_DEPLOY_OPTIONS.append('-executable=' + path.abspath(path.join(APP_OUTPUT_DIR, 'Contents', 'MacOS', 'msa-ui-qt')))
 call(QT_DEPLOY_OPTIONS)
-
-# display_stage("Copying dependencies")
-# bin_dir = path.join(APP_OUTPUT_DIR, 'Contents', 'MacOS', 'bin')
-# for f in listdir(bin_dir):
-#     display_stage("Copying dependencies: " + f)
-#     dependency_copier.copy_dependencies(path.join(bin_dir, f), path.join(APP_OUTPUT_DIR, 'Contents', 'Frameworks'))
 
 display_stage('App bundle has been built at {}!'.format(path.join(OUTPUT_DIR, APP_OUTPUT_NAME)))
