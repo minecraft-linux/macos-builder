@@ -3,6 +3,7 @@ from subprocess import check_call as call
 import subprocess
 from shutil import rmtree, copyfile, copytree
 import shutil
+import argparse
 from jinja2 import Template
 
 # Change for each release
@@ -23,6 +24,10 @@ def display_stage(name):
     else:
         print(name)
 
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--qt-path', help='Specify the Qt installation path', required=True)
+args = parser.parse_args()
 
 if path.exists(path.join(OUTPUT_DIR)):
     print('Removing `{}/`! Click enter to continue, or ^C to exit'.format(OUTPUT_DIR))
@@ -59,9 +64,10 @@ clone_repo('mcpelauncher', 'https://github.com/minecraft-linux/mcpelauncher-mani
 clone_repo('mcpelauncher-ui', 'https://github.com/minecraft-linux/mcpelauncher-ui-manifest.git')
 
 # Build
-QT_INSTALL_PATH = subprocess.check_output(['brew', '--prefix', 'qt']).decode('utf-8').strip()
+# QT_INSTALL_PATH = subprocess.check_output(['brew', '--prefix', 'qt']).decode('utf-8').strip()
+QT_INSTALL_PATH = path.abspath(args.qt_path)
 CMAKE_INSTALL_PREFIX = path.abspath(path.join(SOURCE_DIR, "install"))
-CMAKE_QT_EXTRA_OPTIONS = ["-DCMAKE_PREFIX_PATH=" + QT_INSTALL_PATH]
+CMAKE_QT_EXTRA_OPTIONS = ["-DCMAKE_PREFIX_PATH=" + QT_INSTALL_PATH, '-DCMAKE_INSTALL_RPATH_USE_LINK_PATH=ON']
 
 if not path.isdir(CMAKE_INSTALL_PREFIX):
     makedirs(CMAKE_INSTALL_PREFIX)
@@ -110,6 +116,7 @@ with open(path.join(TEMPLATES_DIR, 'Info.plist.tmpl'), 'r') as raw:
 display_stage("Copying Qt libraries")
 QT_DEPLOY_OPTIONS = [path.join(QT_INSTALL_PATH, 'bin', 'macdeployqt'),  APP_OUTPUT_DIR]
 QT_DEPLOY_OPTIONS.append('-qmldir=' + path.join(SOURCE_DIR, 'mcpelauncher-ui', 'mcpelauncher-ui-qt'))
+QT_DEPLOY_OPTIONS.append('-executable=' + path.abspath(path.join(APP_OUTPUT_DIR, 'Contents', 'MacOS', 'mcpelauncher-ui-qt')))
 QT_DEPLOY_OPTIONS.append('-executable=' + path.abspath(path.join(APP_OUTPUT_DIR, 'Contents', 'MacOS', 'msa-ui-qt')))
 call(QT_DEPLOY_OPTIONS)
 
