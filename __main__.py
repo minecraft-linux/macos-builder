@@ -27,11 +27,14 @@ def display_stage(name):
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--qt-path', help='Specify the Qt installation path', required=True)
+parser.add_argument('--dmg', help='Build a dmg', action='store_true')
+parser.add_argument('--force', help='Always remove the output directory', action='store_true')
 args = parser.parse_args()
 
 if path.exists(path.join(OUTPUT_DIR)):
-    print('Removing `{}/`! Click enter to continue, or ^C to exit'.format(OUTPUT_DIR))
-    input()
+    if not args.force:
+        print('Removing `{}/`! Click enter to continue, or ^C to exit'.format(OUTPUT_DIR))
+        input()
     rmtree(OUTPUT_DIR)
 
 display_stage("Initializing")
@@ -118,6 +121,8 @@ QT_DEPLOY_OPTIONS = [path.join(QT_INSTALL_PATH, 'bin', 'macdeployqt'),  APP_OUTP
 QT_DEPLOY_OPTIONS.append('-qmldir=' + path.join(SOURCE_DIR, 'mcpelauncher-ui', 'mcpelauncher-ui-qt'))
 QT_DEPLOY_OPTIONS.append('-executable=' + path.abspath(path.join(APP_OUTPUT_DIR, 'Contents', 'MacOS', 'mcpelauncher-ui-qt')))
 QT_DEPLOY_OPTIONS.append('-executable=' + path.abspath(path.join(APP_OUTPUT_DIR, 'Contents', 'MacOS', 'msa-ui-qt')))
+if args.dmg:
+    QT_DEPLOY_OPTIONS.append('-dmg')
 call(QT_DEPLOY_OPTIONS)
 
 display_stage('App bundle has been built at {}!'.format(path.join(OUTPUT_DIR, APP_OUTPUT_NAME)))

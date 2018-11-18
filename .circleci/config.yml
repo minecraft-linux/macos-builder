@@ -20,6 +20,10 @@ jobs:
           command: ./download_qt.sh
       - run:
           name: Build
-          command: python3 __main__.py --qt-path qt/*/*/
+          command: python3 __main__.py --qt-path qt/*/*/ --dmg
+      - store_artifacts:
+          path: output/Minecraft Bedrock Launcher.dmg
+          destination: /Minecraft Bedrock Launcher.dmg
+
 
 
