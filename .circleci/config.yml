@@ -1,0 +1,25 @@
+version: 2
+jobs:
+  build:
+    macos:
+      xcode: "9.0.1"
+    working_directory: /Users/distiller/project
+    steps:
+      - checkout
+      - run:
+          name: Update brew
+          command: brew update && brew upgrade python
+      - run:
+          name: Install brew dependencies
+          command: brew install cmake p7zip libzip libuv protobuf
+      - run:
+          name: Install python dependencies
+          command: pip3 install jinja2
+      - run:
+          name: Download Qt
+          command: ./download_qt.sh
+      - run:
+          name: Build
+          command: python3 __main__.py --qt-path qt/*/*/
+
+
