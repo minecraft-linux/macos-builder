@@ -24,6 +24,6 @@ jobs:
       - store_artifacts:
           path: output/Minecraft Bedrock Launcher.dmg
           destination: /Minecraft Bedrock Launcher.dmg
-
-
-
+      - run:
+          name: Upload the .dmg to website
+          command: curl -F token=$WEBSITE_UPLOAD_TOKEN -F "file=@output/Minecraft Bedrock Launcher.dmg;filename=mcpelauncher-osx.dmg" https://mrarm.io/api/mcpelauncher/upload/
