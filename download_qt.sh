@@ -1,6 +1,7 @@
 #!/bin/bash
 
 QT_BASE_URL=http://download.qt.io/online/qtsdkrepository/mac_x64/desktop/qt5_5112/
+QT_VERSION_SHORT=5.11.2
 QT_VERSION=5.11.2-0-201809141947
 QT_PACKAGE_PREFIX=qt.qt5.5112.
 QT_PACKAGE_SUFFIX=clang_64
@@ -42,3 +43,7 @@ install_module_main qtwebchannel
 install_module_main qttools
 install_module_main qtlocation
 install_module_extra qtwebengine qtwebengine
+
+echo "${COLOR_STATUS}Patching$2${COLOR_RESET}"
+cd qt/$QT_VERSION_SHORT/clang_64/
+../../../patch_qt.sh
