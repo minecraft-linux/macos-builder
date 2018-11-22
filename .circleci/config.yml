@@ -26,4 +26,4 @@ jobs:
           destination: /Minecraft Bedrock Launcher.dmg
       - run:
           name: Upload the .dmg to website
-          command: curl -X POST -u "ci:$WEBSITE_CI_UPLOAD_PASS" --data-binary "@output/Minecraft Bedrock Launcher.dmg" -H "X-Type: osx-dmg" https://mcpelauncher.mrarm.io/api/v1/upload
+          command: 'curl -X POST -u "ci:$WEBSITE_CI_UPLOAD_PASS" --data-binary "@output/Minecraft Bedrock Launcher.dmg" -H "X-Type: osx-dmg" https://mcpelauncher.mrarm.io/api/v1/upload'
