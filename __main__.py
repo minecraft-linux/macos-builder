@@ -105,6 +105,7 @@ display_stage("Building Info.plist file")
 with open(path.join(TEMPLATES_DIR, 'Info.plist.tmpl'), 'r') as raw:
     info = Template(raw.read())
     output = info.render(
+        cf_bundle_identifier = 'io.mrarm.mcpelauncher.ui',
         cf_bundle_executable = 'mcpelauncher-ui-qt',
         cf_bundle_get_info_string = 'Minecraft Bedrock Launcher',
         cf_bundle_icon_file = 'minecraft',
