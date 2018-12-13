@@ -19,6 +19,10 @@ VOL_NAME = 'Minecraft Bedrock Launcher'
 if path.exists(DMG_OUTPUT_PATH):
 	remove(DMG_OUTPUT_PATH)
 
+BG_FILE = path.join(SOURCE_DIR, 'dmg-background.png')
+if not path.exists(BG_FILE):
+    call(['curl', '-sL', '-o', BG_FILE, 'https://mrarm.io/u/dmg-background.png'])
+
 # we assume here that sectors are 512B
 IMAGE_SECTOR_SIZE = 512
 def calc_size(p):
@@ -39,7 +43,7 @@ call(['hdiutil', 'attach', '-noautoopen', '-mountpoint', DMG_MOUNT_PATH, '-quiet
 
 symlink("/Applications", path.join(DMG_MOUNT_PATH, "Applications"))
 copytree(APP_OUTPUT_DIR, path.join(DMG_MOUNT_PATH, APP_OUTPUT_NAME))
-copyfile(path.join(SOURCE_DIR, "dmg-background.png"), path.join(DMG_MOUNT_PATH, ".background.png"))
+copyfile(BG_FILE, path.join(DMG_MOUNT_PATH, ".background.png"))
 
 with DSStore.open(path.join(DMG_MOUNT_PATH, '.DS_Store'), 'w+') as d:
   d['Minecraft Bedrock Launcher.app']['Iloc'] = (152, 220-15)
