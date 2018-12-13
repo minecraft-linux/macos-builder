@@ -1,5 +1,7 @@
 output/
 source/
+qt/
+qt_tmp/
 .vscode/
 .idea/
 __pycache__/
