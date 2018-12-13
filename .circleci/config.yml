@@ -14,13 +14,16 @@ jobs:
           command: brew install cmake p7zip libzip libuv protobuf
       - run:
           name: Install python dependencies
-          command: pip3 install jinja2
+          command: pip3 install jinja2 ds_store
       - run:
           name: Download Qt
           command: ./download_qt.sh
       - run:
           name: Build
-          command: python3 __main__.py --qt-path qt/*/*/ --dmg
+          command: python3 __main__.py --qt-path qt/*/*/
+      - run:
+          name: Build .dmg
+          command: python3 build_dmg.py
       - store_artifacts:
           path: output/Minecraft Bedrock Launcher.dmg
           destination: /Minecraft Bedrock Launcher.dmg
