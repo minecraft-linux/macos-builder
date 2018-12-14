@@ -20,7 +20,7 @@ jobs:
           command: ./download_qt.sh
       - run:
           name: Build
-          command: python3 __main__.py --qt-path qt/*/*/
+          command: python3 __main__.py --qt-path qt/*/*/ --update-url https://mcpelauncher.mrarm.io/ver/osx --build-id $CIRCLE_BUILD_NUM
       - run:
           name: Build .dmg
           command: python3 build_dmg.py
@@ -30,3 +30,6 @@ jobs:
       - run:
           name: Upload the .dmg to website
           command: 'curl -X POST -u "ci:$WEBSITE_CI_UPLOAD_PASS" --data-binary "@output/Minecraft Bedrock Launcher.dmg" -H "X-Type: osx-dmg" https://mcpelauncher.mrarm.io/api/v1/upload'
+      - run:
+          name: Update version number
+          command: 'curl -X POST -u "ci:$WEBSITE_CI_UPLOAD_PASS" -F "channel=osx" -F "build_id=$CIRCLE_BUILD_NUM" https://mcpelauncher.mrarm.io/api/v1/version'
