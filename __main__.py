@@ -27,6 +27,8 @@ def display_stage(name):
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--qt-path', help='Specify the Qt installation path', required=True)
+parser.add_argument('--update-url', help='Enable checking updates in the metalauncher from the specified URL')
+parser.add_argument('--build-id', help='Specify the build ID for update checking purposes')
 parser.add_argument('--force', help='Always remove the output directory', action='store_true')
 args = parser.parse_args()
 
@@ -83,10 +85,14 @@ def build_component(name, cmake_opts):
     call(['cmake', source_dir, '-DCMAKE_INSTALL_PREFIX=' + CMAKE_INSTALL_PREFIX] + cmake_opts, cwd=build_dir)
     call(['make', '-j' + str(cpu_count()), 'install'], cwd=build_dir)
 
+VERSION_OPTS = []
+if args.update_url and args.build_id:
+    VERSION_OPTS = ["-DENABLE_UPDATE_CHECK=ON", "-DUPDATE_CHECK_URL=" + args.update_url, "-DUPDATE_CHECK_BUILD_ID=" + args.build_id]
+
 display_stage("Building")
 build_component("msa", ['-DENABLE_MSA_QT_UI=ON', '-DMSA_UI_PATH_DEV=OFF'] + CMAKE_QT_EXTRA_OPTIONS)
 build_component("mcpelauncher", ['-DMSA_DAEMON_PATH=.', '-DENABLE_DEV_PATHS=OFF'])
-build_component("mcpelauncher-ui", ['-DGAME_LAUNCHER_PATH=.'] + CMAKE_QT_EXTRA_OPTIONS)
+build_component("mcpelauncher-ui", ['-DGAME_LAUNCHER_PATH=.'] + VERSION_OPTS + CMAKE_QT_EXTRA_OPTIONS)
 
 display_stage("Copying files")
 def copy_installed_files(from_path, to_path):
