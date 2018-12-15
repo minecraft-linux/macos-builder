@@ -54,7 +54,7 @@ with DSStore.open(path.join(DMG_MOUNT_PATH, '.DS_Store'), 'w+') as d:
   	'ShowToolbar': False,
   	'ShowTabView': False,
   	'ContainerShowSidebar': False,
-  	'WindowBounds': '{{100, 350}, {640, 423}}',
+  	'WindowBounds': '{{100, 350}, {640, 422}}',
   	'ShowSidebar': False
   }
   d['.']['icvp'] = {
