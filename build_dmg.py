@@ -30,7 +30,8 @@ IMAGE_SECTOR_SIZE = 512
 def calc_size(p):
     ret = 0
     for entry in os.scandir(p):
-        ret += (entry.stat().st_size + IMAGE_SECTOR_SIZE - 1) // IMAGE_SECTOR_SIZE
+        if not entry.is_symlink():
+            ret += (entry.stat().st_size + IMAGE_SECTOR_SIZE - 1) // IMAGE_SECTOR_SIZE
         ret += 16 + 4 * 8
         if entry.is_dir():
             ret += calc_size(entry.path)
@@ -46,7 +47,7 @@ finally:
 call(['hdiutil', 'attach', '-noautoopen', '-mountpoint', DMG_MOUNT_PATH, '-quiet', DMG_OUTPUT_PATH])
 
 symlink("/Applications", path.join(DMG_MOUNT_PATH, "Applications"))
-copytree(APP_OUTPUT_DIR, path.join(DMG_MOUNT_PATH, APP_OUTPUT_NAME))
+copytree(APP_OUTPUT_DIR, path.join(DMG_MOUNT_PATH, APP_OUTPUT_NAME), symlinks=True)
 copyfile(BG_FILE, path.join(DMG_MOUNT_PATH, ".background.tif"))
 
 with DSStore.open(path.join(DMG_MOUNT_PATH, '.DS_Store'), 'w+') as d:
