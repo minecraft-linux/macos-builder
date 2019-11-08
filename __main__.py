@@ -80,11 +80,11 @@ if not path.isdir(CMAKE_INSTALL_PREFIX):
 
 if not path.isdir(CMAKE_INSTALL_FRAMEWORK_DIR):
     makedirs(CMAKE_INSTALL_FRAMEWORK_DIR)
-    latest = json.loads(check_output(['curl', '-L', 'https://api.github.com/repos/minecraft-linux/osx-angle-ci/releases/latest']))
-    for asset in latest['assets']:
-        if asset['name'] == 'libEGL.dylib' or asset['name'] == 'libGLESv2.dylib':
-            print('Downloading ' + asset['name'])
-            call(['curl', '-L', asset['browser_download_url'], '--output', path.join(CMAKE_INSTALL_FRAMEWORK_DIR, asset['name'])])
+    #latest = json.loads(check_output(['curl', '-L', 'https://api.github.com/repos/minecraft-linux/osx-angle-ci/releases/latest']))
+    #for asset in latest['assets']:
+    #    if asset['name'] == 'libEGL.dylib' or asset['name'] == 'libGLESv2.dylib':
+    #        print('Downloading ' + asset['name'])
+    #        call(['curl', '-L', asset['browser_download_url'], '--output', path.join(CMAKE_INSTALL_FRAMEWORK_DIR, asset['name'])])
 
 def build_component(name, cmake_opts):
     display_stage("Building: " + name)
