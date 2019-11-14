@@ -64,7 +64,8 @@ def clone_repo(name, url):
         call(['git', 'submodule', 'update'], cwd=directory)
 
 display_stage("Downloading sources")
-# clone_repo('msa', 'https://github.com/minecraft-linux/msa-manifest.git')
+clone_repo('msa', 'https://github.com/minecraft-linux/msa-manifest.git')
+call(['git', 'checkout', 'update_json_lib'], cwd=path.abspath(path.join(SOURCE_DIR, 'msa')))
 clone_repo('mcpelauncher', 'https://github.com/christopherhx/mcpelauncher-manifest.git')
 clone_repo('mcpelauncher-ui', 'https://github.com/minecraft-linux/mcpelauncher-ui-manifest.git')
 
@@ -90,7 +91,7 @@ if not path.isdir(CMAKE_INSTALL_FRAMEWORK_DIR):
                     call(['curl', '-L', asset['browser_download_url'], '--output', path.join(CMAKE_INSTALL_FRAMEWORK_DIR, asset['name'])])
             break
         else:
-            print('Error Response "' + latestrelease + '"')
+            print('Error Retry osx-angle-ci')
 
 def build_component(name, cmake_opts):
     display_stage("Building: " + name)
@@ -106,7 +107,7 @@ if args.update_url and args.build_id:
     VERSION_OPTS = ["-DENABLE_UPDATE_CHECK=ON", "-DUPDATE_CHECK_URL=" + args.update_url, "-DUPDATE_CHECK_BUILD_ID=" + args.build_id]
 
 display_stage("Building")
-# build_component("msa", ['-DENABLE_MSA_QT_UI=ON', '-DMSA_UI_PATH_DEV=OFF'] + CMAKE_QT_EXTRA_OPTIONS)
+build_component("msa", ['-DENABLE_MSA_QT_UI=ON', '-DMSA_UI_PATH_DEV=OFF'] + CMAKE_QT_EXTRA_OPTIONS)
 build_component("mcpelauncher", ['-DMSA_DAEMON_PATH=.', '-DENABLE_DEV_PATHS=OFF'])
 build_component("mcpelauncher-ui", ['-DGAME_LAUNCHER_PATH=.'] + VERSION_OPTS + CMAKE_QT_EXTRA_OPTIONS)
 
@@ -143,7 +144,7 @@ display_stage("Copying Qt libraries")
 QT_DEPLOY_OPTIONS = [path.join(QT_INSTALL_PATH, 'bin', 'macdeployqt'),  APP_OUTPUT_DIR]
 QT_DEPLOY_OPTIONS.append('-qmldir=' + path.join(SOURCE_DIR, 'mcpelauncher-ui', 'mcpelauncher-ui-qt'))
 QT_DEPLOY_OPTIONS.append('-executable=' + path.abspath(path.join(APP_OUTPUT_DIR, 'Contents', 'MacOS', 'mcpelauncher-ui-qt')))
-# QT_DEPLOY_OPTIONS.append('-executable=' + path.abspath(path.join(APP_OUTPUT_DIR, 'Contents', 'MacOS', 'msa-ui-qt')))
+QT_DEPLOY_OPTIONS.append('-executable=' + path.abspath(path.join(APP_OUTPUT_DIR, 'Contents', 'MacOS', 'msa-ui-qt')))
 call(QT_DEPLOY_OPTIONS)
 
 display_stage('App bundle has been built at {}!'.format(path.join(OUTPUT_DIR, APP_OUTPUT_NAME)))
