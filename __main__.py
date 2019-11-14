@@ -64,7 +64,8 @@ def clone_repo(name, url):
         call(['git', 'submodule', 'update'], cwd=directory)
 
 display_stage("Downloading sources")
-clone_repo('msa', 'https://github.com/minecraft-linux/msa-manifest.git')
+clone_repo('msa', 'https://github.com/mcpe-launcher-cgruber/msa-manifest.git')
+call(['git', 'checkout', 'update_json_lib'], cwd=path.abspath(path.join(SOURCE_DIR, 'msa')))
 clone_repo('mcpelauncher', 'https://github.com/minecraft-linux/mcpelauncher-manifest.git')
 clone_repo('mcpelauncher-ui', 'https://github.com/minecraft-linux/mcpelauncher-ui-manifest.git')
 
