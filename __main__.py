@@ -84,6 +84,7 @@ if not path.isdir(CMAKE_INSTALL_FRAMEWORK_DIR):
     display_stage("Downloading angle")
     call(['curl', '-L', 'https://github.com/minecraft-linux/osx-angle-ci/releases/download/libangle32.12/libEGL.dylib', '--output', path.join(CMAKE_INSTALL_FRAMEWORK_DIR, 'libEGL.dylib')])
     call(['curl', '-L', 'https://github.com/minecraft-linux/osx-angle-ci/releases/download/libangle32.12/libGLESv2.dylib', '--output', path.join(CMAKE_INSTALL_FRAMEWORK_DIR, 'libGLESv2.dylib')])
+    call(['curl', '-L', 'https://github.com/ChristopherHX/osx-packaging-scripts/releases/download/libuv10.13/libuv.1.dylib', '--output', path.join(CMAKE_INSTALL_FRAMEWORK_DIR, 'libuv.1.dylib')])
 
 def build_component(name, cmake_opts):
     display_stage("Building: " + name)
@@ -114,7 +115,6 @@ def copy_installed_files(from_path, to_path):
 
 copy_installed_files(path.join(CMAKE_INSTALL_PREFIX, 'bin'), path.join(APP_OUTPUT_DIR, 'Contents', 'MacOS'))
 copy_installed_files(path.join(CMAKE_INSTALL_PREFIX, 'share'), path.join(APP_OUTPUT_DIR, 'Contents', 'Resources'))
-copy_installed_files(path.join(CMAKE_INSTALL_PREFIX, 'Frameworks'), path.join(APP_OUTPUT_DIR, 'Contents', 'Frameworks'))
 
 display_stage("Building Info.plist file")
 with open(path.join(TEMPLATES_DIR, 'Info.plist.tmpl'), 'r') as raw:
@@ -138,5 +138,6 @@ QT_DEPLOY_OPTIONS.append('-qmldir=' + path.join(SOURCE_DIR, 'mcpelauncher-ui', '
 QT_DEPLOY_OPTIONS.append('-executable=' + path.abspath(path.join(APP_OUTPUT_DIR, 'Contents', 'MacOS', 'mcpelauncher-ui-qt')))
 QT_DEPLOY_OPTIONS.append('-executable=' + path.abspath(path.join(APP_OUTPUT_DIR, 'Contents', 'MacOS', 'msa-ui-qt')))
 call(QT_DEPLOY_OPTIONS)
+copy_installed_files(path.join(CMAKE_INSTALL_PREFIX, 'Frameworks'), path.join(APP_OUTPUT_DIR, 'Contents', 'Frameworks'))
 
 display_stage('App bundle has been built at {}!'.format(path.join(OUTPUT_DIR, APP_OUTPUT_NAME)))
