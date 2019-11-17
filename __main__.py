@@ -102,7 +102,7 @@ if args.update_url and args.build_id:
 
 display_stage("Building")
 build_component("msa", ['-DENABLE_MSA_QT_UI=ON', '-DMSA_UI_PATH_DEV=OFF'] + CMAKE_QT_EXTRA_OPTIONS)
-build_component("mcpelauncher", ['-DMSA_DAEMON_PATH=.', '-DENABLE_DEV_PATHS=OFF', '-DCMAKE_C_FLAGS="-L' + CMAKE_INSTALL_FRAMEWORK_DIR + '"', '-DCMAKE_CXX_FLAGS="-L' + CMAKE_INSTALL_FRAMEWORK_DIR + '"' ])
+build_component("mcpelauncher", ['-DMSA_DAEMON_PATH=.', '-DENABLE_DEV_PATHS=OFF', '-DCMAKE_C_FLAGS="-Wl,-L' + CMAKE_INSTALL_FRAMEWORK_DIR + '"', '-DCMAKE_CXX_FLAGS="-Wl,-L' + CMAKE_INSTALL_FRAMEWORK_DIR + '"' ])
 build_component("mcpelauncher-ui", ['-DGAME_LAUNCHER_PATH=.'] + VERSION_OPTS + CMAKE_QT_EXTRA_OPTIONS)
 
 display_stage("Copying files")
