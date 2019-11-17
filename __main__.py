@@ -88,6 +88,8 @@ if not path.isdir(CMAKE_INSTALL_FRAMEWORK_DIR):
     call(['curl', '-L', 'https://github.com/minecraft-linux/osx-angle-ci/releases/download/libangle32.12/libEGL.dylib', '--output', path.join(CMAKE_INSTALL_FRAMEWORK_DIR, 'libEGL.dylib')])
     call(['curl', '-L', 'https://github.com/minecraft-linux/osx-angle-ci/releases/download/libangle32.12/libGLESv2.dylib', '--output', path.join(CMAKE_INSTALL_FRAMEWORK_DIR, 'libGLESv2.dylib')])
     call(['curl', '-L', 'https://github.com/ChristopherHX/osx-packaging-scripts/releases/download/libuv10.13/libuv.1.dylib', '--output', path.join(CMAKE_INSTALL_FRAMEWORK_DIR, 'libuv.1.dylib')])
+    call(['curl', '-L', 'https://github.com/ChristopherHX/osx-packaging-scripts/releases/download/libuv10.13/libpng16.16.dylib', '--output', '/usr/local/lib/libpng.dylib'])
+    call(['curl', '-L', 'https://github.com/ChristopherHX/osx-packaging-scripts/releases/download/libuv10.13/libpng16.16.dylib', '--output', path.join(CMAKE_INSTALL_FRAMEWORK_DIR, 'libpng16.16.dylib')])
 
 def build_component(name, cmake_opts):
     display_stage("Building: " + name)
@@ -104,7 +106,7 @@ if args.update_url and args.build_id:
 
 display_stage("Building")
 build_component("msa", ['-DENABLE_MSA_QT_UI=ON', '-DMSA_UI_PATH_DEV=OFF'] + CMAKE_QT_EXTRA_OPTIONS)
-build_component("mcpelauncher", ['-DMSA_DAEMON_PATH=.', '-DENABLE_DEV_PATHS=OFF'])
+build_component("mcpelauncher", ['-DMSA_DAEMON_PATH=.', '-DENABLE_DEV_PATHS=OFF', '-DCMAKE_C_FLAGS="-Wl,-L' + CMAKE_INSTALL_FRAMEWORK_DIR + '"', '-DCMAKE_CXX_FLAGS="-Wl,-L' + CMAKE_INSTALL_FRAMEWORK_DIR + '"' ])
 build_component("mcpelauncher-ui", ['-DGAME_LAUNCHER_PATH=.'] + VERSION_OPTS + CMAKE_QT_EXTRA_OPTIONS)
 
 display_stage("Copying files")
