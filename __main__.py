@@ -82,14 +82,20 @@ if not path.isdir(CMAKE_INSTALL_PREFIX):
 
 if not path.isdir(CMAKE_INSTALL_FRAMEWORK_DIR):
     makedirs(CMAKE_INSTALL_FRAMEWORK_DIR)
-    display_stage("Downloading angle")
-    call(['curl', '-L', 'https://github.com/minecraft-linux/osx-angle-ci/releases/download/libangle32.12/libEGL.dylib', '--output', path.join(CMAKE_INSTALL_FRAMEWORK_DIR, 'libEGL.dylib')])
-    call(['curl', '-L', 'https://github.com/minecraft-linux/osx-angle-ci/releases/download/libangle32.12/libGLESv2.dylib', '--output', path.join(CMAKE_INSTALL_FRAMEWORK_DIR, 'libGLESv2.dylib')])
-    call(['curl', '-L', 'https://github.com/ChristopherHX/osx-packaging-scripts/releases/download/libuv10.13/libuv.1.dylib', '--output', path.join(CMAKE_INSTALL_FRAMEWORK_DIR, 'libuv.1.dylib')])
-    call(['curl', '-L', 'https://github.com/ChristopherHX/osx-packaging-scripts/releases/download/libuv10.13/libzip.5.0.dylib', '--output', path.join(CMAKE_INSTALL_FRAMEWORK_DIR, 'libzip.5.dylib')])
-    call(['curl', '-L', 'https://github.com/ChristopherHX/osx-packaging-scripts/releases/download/libuv10.13/libprotobuf.22.dylib', '--output', path.join(CMAKE_INSTALL_FRAMEWORK_DIR, 'libprotobuf.22.dylib')])
-    call(['curl', '-L', 'https://github.com/ChristopherHX/osx-packaging-scripts/releases/download/libuv10.13/libpng16.16.dylib', '--output', '/usr/local/lib/libpng.dylib'])
-    call(['curl', '-L', 'https://github.com/ChristopherHX/osx-packaging-scripts/releases/download/libuv10.13/libpng16.16.dylib', '--output', path.join(CMAKE_INSTALL_FRAMEWORK_DIR, 'libpng16.16.dylib')])
+
+latest = json.loads(check_output(['curl', '-L', 'https://api.github.com/repos/minecraft-linux/osx-angle-ci/releases/latest']))
+for asset in latest['assets']:
+    assetfile = path.join(CMAKE_INSTALL_FRAMEWORK_DIR, asset['name'])
+    if not path.isfile(assetfile)
+        print('Downloading ' + asset['name'])
+        call(['curl', '-L', asset['browser_download_url'], '--output', assetfile])
+
+display_stage("Downloading misc")
+call(['curl', '-L', 'https://github.com/ChristopherHX/osx-packaging-scripts/releases/download/libuv10.13/libuv.1.dylib', '--output', path.join(CMAKE_INSTALL_FRAMEWORK_DIR, 'libuv.1.dylib')])
+call(['curl', '-L', 'https://github.com/ChristopherHX/osx-packaging-scripts/releases/download/libuv10.13/libzip.5.0.dylib', '--output', path.join(CMAKE_INSTALL_FRAMEWORK_DIR, 'libzip.5.dylib')])
+call(['curl', '-L', 'https://github.com/ChristopherHX/osx-packaging-scripts/releases/download/libuv10.13/libprotobuf.22.dylib', '--output', path.join(CMAKE_INSTALL_FRAMEWORK_DIR, 'libprotobuf.22.dylib')])
+call(['curl', '-L', 'https://github.com/ChristopherHX/osx-packaging-scripts/releases/download/libuv10.13/libpng16.16.dylib', '--output', '/usr/local/lib/libpng.dylib'])
+call(['curl', '-L', 'https://github.com/ChristopherHX/osx-packaging-scripts/releases/download/libuv10.13/libpng16.16.dylib', '--output', path.join(CMAKE_INSTALL_FRAMEWORK_DIR, 'libpng16.16.dylib')])
 
 def build_component(name, cmake_opts):
     display_stage("Building: " + name)
