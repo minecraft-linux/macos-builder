@@ -1,9 +1,10 @@
 from os import makedirs, path, cpu_count, listdir
-from subprocess import check_call as call
+from subprocess import check_call as call, check_output
 import subprocess
 from shutil import rmtree, copyfile, copytree
 import shutil
 import argparse
+import json
 from jinja2 import Template
 
 # Change for each release
@@ -71,10 +72,21 @@ clone_repo('mcpelauncher-ui', 'https://github.com/minecraft-linux/mcpelauncher-u
 # QT_INSTALL_PATH = subprocess.check_output(['brew', '--prefix', 'qt']).decode('utf-8').strip()
 QT_INSTALL_PATH = path.abspath(args.qt_path)
 CMAKE_INSTALL_PREFIX = path.abspath(path.join(SOURCE_DIR, "install"))
+CMAKE_INSTALL_FRAMEWORK_DIR = path.join(CMAKE_INSTALL_PREFIX, 'Frameworks')
 CMAKE_QT_EXTRA_OPTIONS = ["-DCMAKE_PREFIX_PATH=" + QT_INSTALL_PATH, '-DCMAKE_INSTALL_RPATH_USE_LINK_PATH=ON']
 
 if not path.isdir(CMAKE_INSTALL_PREFIX):
     makedirs(CMAKE_INSTALL_PREFIX)
+
+if not path.isdir(CMAKE_INSTALL_FRAMEWORK_DIR):
+    makedirs(CMAKE_INSTALL_FRAMEWORK_DIR)
+
+latest = json.loads(check_output(['curl', '-L', 'https://api.github.com/repos/minecraft-linux/osx-angle-ci/releases/latest']))
+for asset in latest['assets']:
+    assetfile = path.join(CMAKE_INSTALL_FRAMEWORK_DIR, asset['name'])
+    if not path.isfile(assetfile):
+        print('Downloading ' + asset['name'])
+        call(['curl', '-L', asset['browser_download_url'], '--output', assetfile])
 
 def build_component(name, cmake_opts):
     display_stage("Building: " + name)
@@ -105,6 +117,7 @@ def copy_installed_files(from_path, to_path):
 
 copy_installed_files(path.join(CMAKE_INSTALL_PREFIX, 'bin'), path.join(APP_OUTPUT_DIR, 'Contents', 'MacOS'))
 copy_installed_files(path.join(CMAKE_INSTALL_PREFIX, 'share'), path.join(APP_OUTPUT_DIR, 'Contents', 'Resources'))
+copy_installed_files(path.join(CMAKE_INSTALL_PREFIX, 'Frameworks'), path.join(APP_OUTPUT_DIR, 'Contents', 'Frameworks'))
 
 display_stage("Building Info.plist file")
 with open(path.join(TEMPLATES_DIR, 'Info.plist.tmpl'), 'r') as raw:
