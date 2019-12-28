@@ -66,6 +66,7 @@ display_stage("Downloading sources")
 clone_repo('msa', 'https://github.com/minecraft-linux/msa-manifest.git')
 clone_repo('mcpelauncher', 'https://github.com/minecraft-linux/mcpelauncher-manifest.git')
 clone_repo('mcpelauncher-ui', 'https://github.com/minecraft-linux/mcpelauncher-ui-manifest.git')
+clone_repo('osx-angle-ci', 'https://github.com/minecraft-linux/osx-angle-ci.git')
 
 # Build
 # QT_INSTALL_PATH = subprocess.check_output(['brew', '--prefix', 'qt']).decode('utf-8').strip()
@@ -93,6 +94,7 @@ display_stage("Building")
 build_component("msa", ['-DENABLE_MSA_QT_UI=ON', '-DMSA_UI_PATH_DEV=OFF'] + CMAKE_QT_EXTRA_OPTIONS)
 build_component("mcpelauncher", ['-DMSA_DAEMON_PATH=.', '-DENABLE_DEV_PATHS=OFF'])
 build_component("mcpelauncher-ui", ['-DGAME_LAUNCHER_PATH=.'] + VERSION_OPTS + CMAKE_QT_EXTRA_OPTIONS)
+call(['bash', '-c', './build.sh'], cwd=path.abspath(path.join(SOURCE_DIR, "osx-angle-ci")))
 
 display_stage("Copying files")
 def copy_installed_files(from_path, to_path):
@@ -105,6 +107,7 @@ def copy_installed_files(from_path, to_path):
 
 copy_installed_files(path.join(CMAKE_INSTALL_PREFIX, 'bin'), path.join(APP_OUTPUT_DIR, 'Contents', 'MacOS'))
 copy_installed_files(path.join(CMAKE_INSTALL_PREFIX, 'share'), path.join(APP_OUTPUT_DIR, 'Contents', 'Resources'))
+copy_installed_files(path.abspath(path.join(SOURCE_DIR, "osx-angle-ci/artifacts")), path.join(APP_OUTPUT_DIR, 'Contents', 'Frameworks'))
 
 display_stage("Building Info.plist file")
 with open(path.join(TEMPLATES_DIR, 'Info.plist.tmpl'), 'r') as raw:
