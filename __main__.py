@@ -86,7 +86,7 @@ if not path.isdir(CMAKE_INSTALL_FRAMEWORK_DIR):
 latest = json.loads(check_output(['curl', '-L', 'https://api.github.com/repos/minecraft-linux/osx-angle-ci/releases/latest']))
 for asset in latest['assets']:
     assetfile = path.join(CMAKE_INSTALL_FRAMEWORK_DIR, asset['name'])
-    if not path.isfile(assetfile)
+    if not path.isfile(assetfile):
         print('Downloading ' + asset['name'])
         call(['curl', '-L', asset['browser_download_url'], '--output', assetfile])
 
