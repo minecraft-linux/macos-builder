@@ -1,10 +1,9 @@
 from os import makedirs, path, cpu_count, listdir
-from subprocess import check_call as call, check_output
+from subprocess import check_call as call
 import subprocess
 from shutil import rmtree, copyfile, copytree
 import shutil
 import argparse
-import json
 from jinja2 import Template
 
 # Change for each release
@@ -64,38 +63,19 @@ def clone_repo(name, url):
         call(['git', 'submodule', 'update'], cwd=directory)
 
 display_stage("Downloading sources")
-clone_repo('msa', 'https://github.com/mcpe-launcher-cgruber/msa-manifest.git')
-call(['git', 'checkout', 'update_json_lib'], cwd=path.abspath(path.join(SOURCE_DIR, 'msa')))
+clone_repo('msa', 'https://github.com/minecraft-linux/msa-manifest.git')
 clone_repo('mcpelauncher', 'https://github.com/christopherhx/mcpelauncher-manifest.git')
-clone_repo('mcpelauncher-ui', 'https://github.com/minecraft-linux/mcpelauncher-ui-manifest.git')
-call(['git', 'checkout', 'master'], cwd=path.abspath(path.join(SOURCE_DIR, 'mcpelauncher-ui/playdl-signin-ui-qt')))
+clone_repo('mcpelauncher-ui', 'https://github.com/christopherhx/mcpelauncher-ui-manifest.git')
+clone_repo('osx-angle-ci', 'https://github.com/christopherhx/osx-angle-ci.git')
 
 # Build
 # QT_INSTALL_PATH = subprocess.check_output(['brew', '--prefix', 'qt']).decode('utf-8').strip()
 QT_INSTALL_PATH = path.abspath(args.qt_path)
 CMAKE_INSTALL_PREFIX = path.abspath(path.join(SOURCE_DIR, "install"))
-CMAKE_INSTALL_FRAMEWORK_DIR = path.join(CMAKE_INSTALL_PREFIX, 'Frameworks')
 CMAKE_QT_EXTRA_OPTIONS = ["-DCMAKE_PREFIX_PATH=" + QT_INSTALL_PATH, '-DCMAKE_INSTALL_RPATH_USE_LINK_PATH=ON']
 
 if not path.isdir(CMAKE_INSTALL_PREFIX):
     makedirs(CMAKE_INSTALL_PREFIX)
-
-if not path.isdir(CMAKE_INSTALL_FRAMEWORK_DIR):
-    makedirs(CMAKE_INSTALL_FRAMEWORK_DIR)
-
-latest = json.loads(check_output(['curl', '-L', 'https://api.github.com/repos/minecraft-linux/osx-angle-ci/releases/latest']))
-for asset in latest['assets']:
-    assetfile = path.join(CMAKE_INSTALL_FRAMEWORK_DIR, asset['name'])
-    if not path.isfile(assetfile):
-        print('Downloading ' + asset['name'])
-        call(['curl', '-L', asset['browser_download_url'], '--output', assetfile])
-
-display_stage("Downloading misc")
-call(['curl', '-L', 'https://github.com/ChristopherHX/osx-packaging-scripts/releases/download/libuv10.13/libuv.1.dylib', '--output', path.join(CMAKE_INSTALL_FRAMEWORK_DIR, 'libuv.1.dylib')])
-call(['curl', '-L', 'https://github.com/ChristopherHX/osx-packaging-scripts/releases/download/libuv10.13/libzip.5.0.dylib', '--output', path.join(CMAKE_INSTALL_FRAMEWORK_DIR, 'libzip.5.dylib')])
-call(['curl', '-L', 'https://github.com/ChristopherHX/osx-packaging-scripts/releases/download/libuv10.13/libprotobuf.22.dylib', '--output', path.join(CMAKE_INSTALL_FRAMEWORK_DIR, 'libprotobuf.22.dylib')])
-call(['curl', '-L', 'https://github.com/ChristopherHX/osx-packaging-scripts/releases/download/libuv10.13/libpng16.16.dylib', '--output', '/usr/local/lib/libpng.dylib'])
-call(['curl', '-L', 'https://github.com/ChristopherHX/osx-packaging-scripts/releases/download/libuv10.13/libpng16.16.dylib', '--output', path.join(CMAKE_INSTALL_FRAMEWORK_DIR, 'libpng16.16.dylib')])
 
 def build_component(name, cmake_opts):
     display_stage("Building: " + name)
@@ -112,8 +92,9 @@ if args.update_url and args.build_id:
 
 display_stage("Building")
 build_component("msa", ['-DENABLE_MSA_QT_UI=ON', '-DMSA_UI_PATH_DEV=OFF'] + CMAKE_QT_EXTRA_OPTIONS)
-build_component("mcpelauncher", ['-DMSA_DAEMON_PATH=.', '-DENABLE_DEV_PATHS=OFF', '-DCMAKE_C_FLAGS="-Wl,-L' + CMAKE_INSTALL_FRAMEWORK_DIR + '"', '-DCMAKE_CXX_FLAGS="-Wl,-L' + CMAKE_INSTALL_FRAMEWORK_DIR + '"' ])
+build_component("mcpelauncher", ['-DMSA_DAEMON_PATH=.', '-DENABLE_DEV_PATHS=OFF'])
 build_component("mcpelauncher-ui", ['-DGAME_LAUNCHER_PATH=.'] + VERSION_OPTS + CMAKE_QT_EXTRA_OPTIONS)
+call(['bash', '-c', './build.sh'], cwd=path.abspath(path.join(SOURCE_DIR, "osx-angle-ci")))
 
 display_stage("Copying files")
 def copy_installed_files(from_path, to_path):
@@ -126,6 +107,7 @@ def copy_installed_files(from_path, to_path):
 
 copy_installed_files(path.join(CMAKE_INSTALL_PREFIX, 'bin'), path.join(APP_OUTPUT_DIR, 'Contents', 'MacOS'))
 copy_installed_files(path.join(CMAKE_INSTALL_PREFIX, 'share'), path.join(APP_OUTPUT_DIR, 'Contents', 'Resources'))
+copy_installed_files(path.abspath(path.join(SOURCE_DIR, "osx-angle-ci/artifacts")), path.join(APP_OUTPUT_DIR, 'Contents', 'Frameworks'))
 
 display_stage("Building Info.plist file")
 with open(path.join(TEMPLATES_DIR, 'Info.plist.tmpl'), 'r') as raw:
@@ -149,6 +131,3 @@ QT_DEPLOY_OPTIONS.append('-qmldir=' + path.join(SOURCE_DIR, 'mcpelauncher-ui', '
 QT_DEPLOY_OPTIONS.append('-executable=' + path.abspath(path.join(APP_OUTPUT_DIR, 'Contents', 'MacOS', 'mcpelauncher-ui-qt')))
 QT_DEPLOY_OPTIONS.append('-executable=' + path.abspath(path.join(APP_OUTPUT_DIR, 'Contents', 'MacOS', 'msa-ui-qt')))
 call(QT_DEPLOY_OPTIONS)
-copy_installed_files(path.join(CMAKE_INSTALL_PREFIX, 'Frameworks'), path.join(APP_OUTPUT_DIR, 'Contents', 'Frameworks'))
-
-display_stage('App bundle has been built at {}!'.format(path.join(OUTPUT_DIR, APP_OUTPUT_NAME)))
