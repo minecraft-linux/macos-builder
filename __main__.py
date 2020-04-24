@@ -53,20 +53,20 @@ if not path.exists(ICON_FILE):
 copyfile(ICON_FILE, path.join(APP_OUTPUT_DIR, 'Contents', 'Resources', 'minecraft.icns'))
 
 # Download the sources
-def clone_repo(name, url):
+def clone_repo(name, url, branch):
     display_stage("Cloning repository: " + url)
     directory = path.join(SOURCE_DIR, name)
     if not path.isdir(directory):
-        call(['git', 'clone', '--recursive', url, directory])
+        call(['git', 'clone', '--recursive', '-b', branch, url, directory])
     else:
         call(['git', 'pull'], cwd=directory)
-        call(['git', 'submodule', 'update'], cwd=directory)
+        call(['git', 'submodule', 'update', '--recursive'], cwd=directory)
 
 display_stage("Downloading sources")
-clone_repo('msa', 'https://github.com/minecraft-linux/msa-manifest.git')
-clone_repo('mcpelauncher', 'https://github.com/christopherhx/mcpelauncher-manifest.git')
-clone_repo('mcpelauncher-ui', 'https://github.com/christopherhx/mcpelauncher-ui-manifest.git')
-clone_repo('osx-angle-ci', 'https://github.com/christopherhx/osx-angle-ci.git')
+clone_repo('msa', 'https://github.com/minecraft-linux/msa-manifest.git', 'master')
+clone_repo('mcpelauncher', 'https://github.com/minecraft-linux/mcpelauncher-manifest.git', 'ng')
+clone_repo('mcpelauncher-ui', 'https://github.com/christopherhx/mcpelauncher-ui-manifest.git', 'ng')
+clone_repo('osx-angle-ci', 'https://github.com/christopherhx/osx-angle-ci.git', 'master')
 
 # Build
 # QT_INSTALL_PATH = subprocess.check_output(['brew', '--prefix', 'qt']).decode('utf-8').strip()
@@ -92,7 +92,7 @@ if args.update_url and args.build_id:
 
 display_stage("Building")
 build_component("msa", ['-DENABLE_MSA_QT_UI=ON', '-DMSA_UI_PATH_DEV=OFF'] + CMAKE_QT_EXTRA_OPTIONS)
-build_component("mcpelauncher", ['-DMSA_DAEMON_PATH=.', '-DENABLE_DEV_PATHS=OFF'])
+build_component("mcpelauncher", ['-DMSA_DAEMON_PATH=.', '-DENABLE_DEV_PATHS=OFF', '-DBUILD_FAKE_JNI_TESTS=OFF', '-DBUILD_FAKE_JNI_EXAMPLES=OFF'])
 build_component("mcpelauncher-ui", ['-DGAME_LAUNCHER_PATH=.'] + VERSION_OPTS + CMAKE_QT_EXTRA_OPTIONS)
 call(['bash', '-c', './build.sh'], cwd=path.abspath(path.join(SOURCE_DIR, "osx-angle-ci")))
 
