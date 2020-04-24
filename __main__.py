@@ -85,6 +85,16 @@ def build_component(name, cmake_opts):
     call(['cmake', source_dir, '-DCMAKE_INSTALL_PREFIX=' + CMAKE_INSTALL_PREFIX] + cmake_opts, cwd=build_dir)
     call(['make', '-j' + str(cpu_count()), 'install'], cwd=build_dir)
 
+def build_component32(name, cmake_opts):
+    display_stage("Building: " + name)
+    source_dir = path.abspath(path.join(SOURCE_DIR, name))
+    build_dir = path.join(SOURCE_DIR, "build", name)
+    if not path.isdir(build_dir):
+        makedirs(build_dir)
+    call(['cmake', source_dir, '-DCMAKE_INSTALL_PREFIX=' + CMAKE_INSTALL_PREFIX] + cmake_opts, cwd=build_dir)
+    call(['make', '-j' + str(cpu_count())], cwd=build_dir)
+    shutil.copy2(path.join(build_dir, 'mcpelauncher-client', 'mcpelauncher-client'), path.join(CMAKE_INSTALL_PREFIX, 'bin', 'mcpelauncher-client32'))
+
 VERSION_OPTS = []
 if args.update_url and args.build_id:
     VERSION_OPTS = ["-DENABLE_UPDATE_CHECK=ON", "-DUPDATE_CHECK_URL=" + args.update_url, "-DUPDATE_CHECK_BUILD_ID=" + args.build_id]
@@ -92,6 +102,7 @@ if args.update_url and args.build_id:
 display_stage("Building")
 build_component("msa", ['-DENABLE_MSA_QT_UI=ON', '-DMSA_UI_PATH_DEV=OFF'] + CMAKE_QT_EXTRA_OPTIONS)
 build_component("mcpelauncher", ['-DMSA_DAEMON_PATH=.', '-DENABLE_DEV_PATHS=OFF', '-DBUILD_FAKE_JNI_TESTS=OFF', '-DBUILD_FAKE_JNI_EXAMPLES=OFF'])
+build_component32("mcpelauncher", ['-DMSA_DAEMON_PATH=.', '-DENABLE_DEV_PATHS=OFF', '-DBUILD_FAKE_JNI_TESTS=OFF', '-DBUILD_FAKE_JNI_EXAMPLES=OFF'])
 build_component("mcpelauncher-ui", ['-DGAME_LAUNCHER_PATH=.'] + VERSION_OPTS + CMAKE_QT_EXTRA_OPTIONS)
 
 display_stage("Copying files")
