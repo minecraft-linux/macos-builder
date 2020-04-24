@@ -13,8 +13,8 @@ jobs:
     - uses: actions/checkout@v1
       with:
         repository: ChristopherHX/MacOSX10.14.sdk
-        ref: ${{ secrets.GITHUB_TOKEN }}
-        token: ${{ secrets.MacOSX1013sdk }}
+        ref: 5d1c9b28f01ef0b01225f92670ee587b430efa8e
+        token: ${{ secrets.GITHUB_TOKEN }}
     - name: Apply custom patch and Update brew
       working-directory: "/usr/local/Homebrew"
       run: |
