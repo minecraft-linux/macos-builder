@@ -14,7 +14,7 @@ jobs:
       with:
         repository: ChristopherHX/MacOSX10.14.sdk
         ref: 5d1c9b28f01ef0b01225f92670ee587b430efa8e
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.MacOSX1014sdk }}
     - name: Apply custom patch and Update brew
       working-directory: "/usr/local/Homebrew"
       run: |
