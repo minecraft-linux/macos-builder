@@ -2,9 +2,9 @@ name: CI
 on:
   push:
     branches:
-      - master
+      - '*'
     tags-ignore:
-      - ng.dmg
+      - '*'
 jobs:
   build:
     runs-on: macos-latest
