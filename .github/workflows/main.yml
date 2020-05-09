@@ -49,9 +49,9 @@ jobs:
       run: |
         export MACOSX_DEPLOYMENT_TARGET=10.12
         export SDKROOT=${{ github.workspace }}/../MacOSX10.14.sdk
-        python3 __main__.py --qt-path qt/*/*/ --update-url https://github.com/ChristopherHX/osx-packaging-scripts/releases/download/ng.dmg/version.osx --build-id ${GITHUB_RUN_NUMBER}
+        python3 __main__.py --qt-path qt/*/*/ --update-url https://github.com/ChristopherHX/osx-packaging-scripts/releases/download/ng_macos_sparkle_updater_test.dmg/version.osx --build-id ${GITHUB_RUN_NUMBER}
     - name: Build .dmg
       working-directory: ${{ github.workspace }}/../osx-packaging-scripts
       run: python3 build_dmg.py
     - name: Upload Latest
-      run: mkdir -p dist && mv "${{ github.workspace }}/../osx-packaging-scripts/output/Minecraft Bedrock Launcher.dmg" dist/Minecraft_Bedrock_Launcher.dmg && echo build_id=${GITHUB_RUN_NUMBER}$'\n'download_url=https://github.com/ChristopherHX/osx-packaging-scripts/releases/download/ng.dmg/Minecraft_Bedrock_Launcher.dmg > dist/version.osx && curl -L https://github.com/tcnksm/ghr/releases/download/v0.13.0/ghr_v0.13.0_darwin_amd64.zip --output ghr.zip && unzip ghr.zip && ./ghr*/ghr -t ${{ secrets.GITHUB_TOKEN }} -u ChristopherHX -r osx-packaging-scripts -recreate -b "# THIS IS A TEST RELEASE OF THE NG BRANCH CURRENTLY NO SUPPORT FOR THIS DMG" ng.dmg dist/
+      run: mkdir -p dist && mv "${{ github.workspace }}/../osx-packaging-scripts/output/Minecraft Bedrock Launcher.dmg" dist/Minecraft_Bedrock_Launcher.dmg && echo build_id=${GITHUB_RUN_NUMBER}$'\n'download_url=https://github.com/ChristopherHX/osx-packaging-scripts/releases/download/ng_macos_sparkle_updater_test.dmg/Minecraft_Bedrock_Launcher.dmg > dist/version.osx && curl -L https://github.com/tcnksm/ghr/releases/download/v0.13.0/ghr_v0.13.0_darwin_amd64.zip --output ghr.zip && unzip ghr.zip && ./ghr*/ghr -t ${{ secrets.GITHUB_TOKEN }} -u ChristopherHX -r osx-packaging-scripts -recreate -b "# THIS IS A TEST RELEASE OF THE NG BRANCH CURRENTLY NO SUPPORT FOR THIS DMG" ng_macos_sparkle_updater_test.dmg dist/

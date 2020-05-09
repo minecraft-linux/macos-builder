@@ -47,3 +47,7 @@ install_module_extra qtwebengine qtwebengine
 echo "${COLOR_STATUS}Patching$2${COLOR_RESET}"
 cd qt/$QT_VERSION_SHORT/clang_64/
 ../../../patch_qt.sh
+
+curl -L -C - -o sparkle.tar.bz2 https://github.com/sparkle-project/Sparkle/releases/download/1.23.0/Sparkle-1.23.0.tar.bz2
+tar -xf ./sparkle.tar.bz2
+mv Sparkle.framework lib/
