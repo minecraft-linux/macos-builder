@@ -25,9 +25,8 @@ jobs:
         git checkout fork/master
     - name: Install brew dependencies
       run: |
-        export HOMEBREW_MACOSX_DEPLOYMENT_TARGET=10.12.0
+        export HOMEBREW_MACOSX_DEPLOYMENT_TARGET=10.14.0
         export HOMEBREW_SDKROOT=${{ github.workspace }}/../MacOSX10.14.sdk
-        HOMEBREW_NO_AUTO_UPDATE=1 brew reinstall python libzip
         HOMEBREW_NO_AUTO_UPDATE=1 brew install p7zip libuv protobuf
     - uses: actions/setup-python@v1
       with:
@@ -47,7 +46,7 @@ jobs:
     - name: Build
       working-directory: ${{ github.workspace }}/../osx-packaging-scripts
       run: |
-        export MACOSX_DEPLOYMENT_TARGET=10.12
+        export MACOSX_DEPLOYMENT_TARGET=10.14
         export SDKROOT=${{ github.workspace }}/../MacOSX10.14.sdk
         python3 __main__.py --qt-path qt/*/*/ --update-url https://github.com/ChristopherHX/osx-packaging-scripts/releases/download/ng_macos_sparkle_updater_test.dmg/version.osx --build-id ${GITHUB_RUN_NUMBER}
     - name: Build .dmg
