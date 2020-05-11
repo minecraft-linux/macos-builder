@@ -136,7 +136,7 @@ with open(path.join(TEMPLATES_DIR, 'Info.plist.tmpl'), 'r') as raw:
         cf_bundle_get_info_string = 'Minecraft Bedrock Launcher',
         cf_bundle_icon_file = 'minecraft',
         cf_bundle_name = 'Minecraft Bedrock Launcher',
-        cf_bundle_version = VERSION
+        cf_bundle_version = VERSION,
         cf_sparkle_public_ed_key = args.update_sparkle_ed_public_key
     )
 
