@@ -35,9 +35,8 @@ parser.add_argument('--version', help='App version')
 parser.add_argument('--force', help='Always remove the output directory', action='store_true')
 args = parser.parse_args()
 
-if(args.version) {
+if(args.version):
     VERSION = args.version
-}
 
 if path.exists(path.join(OUTPUT_DIR)):
     if not args.force:
