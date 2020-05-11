@@ -29,8 +29,15 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--qt-path', help='Specify the Qt installation path', required=True)
 parser.add_argument('--update-url', help='Enable checking updates in the metalauncher from the specified URL')
 parser.add_argument('--build-id', help='Specify the build ID for update checking purposes')
+parser.add_argument('--update-sparkle-appcast', help='Sparkle appcast URL')
+parser.add_argument('--update-sparkle-ed-public-key', help='Enable checking updates in the metalauncher from the specified URL')
+parser.add_argument('--version', help='App version')
 parser.add_argument('--force', help='Always remove the output directory', action='store_true')
 args = parser.parse_args()
+
+if(args.version) {
+    VERSION = args.version
+}
 
 if path.exists(path.join(OUTPUT_DIR)):
     if not args.force:
@@ -99,11 +106,15 @@ VERSION_OPTS = []
 if args.update_url and args.build_id:
     VERSION_OPTS = ["-DENABLE_UPDATE_CHECK=ON", "-DUPDATE_CHECK_URL=" + args.update_url, "-DUPDATE_CHECK_BUILD_ID=" + args.build_id]
 
+SPARKLE_OPTS = []
+if args.update_sparkle_appcast:
+    SPARKLE_OPTS = [ "-DSPARKLE_FEED=" + args.update_sparkle_appcast]
+
 display_stage("Building")
 build_component("msa", ['-DENABLE_MSA_QT_UI=ON', '-DMSA_UI_PATH_DEV=OFF', '-DCMAKE_CXX_FLAGS=-DNDEBUG'] + CMAKE_QT_EXTRA_OPTIONS)
 build_component("mcpelauncher", ['-DMSA_DAEMON_PATH=.', '-DENABLE_DEV_PATHS=OFF', '-DBUILD_FAKE_JNI_TESTS=OFF', '-DBUILD_FAKE_JNI_EXAMPLES=OFF', '-DCMAKE_CXX_FLAGS=-DNDEBUG'])
 build_component32("mcpelauncher", ['-DMSA_DAEMON_PATH=.', '-DENABLE_DEV_PATHS=OFF', '-DBUILD_FAKE_JNI_TESTS=OFF', '-DBUILD_FAKE_JNI_EXAMPLES=OFF', '-DCMAKE_ASM_FLAGS=-m32', '-DCMAKE_C_FLAGS=-m32', '-DCMAKE_CXX_FLAGS=-m32 -DNDEBUG', '-DCMAKE_CXX_COMPILER_TARGET=i386-apple-darwin', '-DCMAKE_LIBRARY_ARCHITECTURE=i386-apple-darwin'])
-build_component("mcpelauncher-ui", ['-DGAME_LAUNCHER_PATH=.', '-DCMAKE_CXX_FLAGS=-DNDEBUG -Wl,-F'+ QT_INSTALL_PATH + '/lib/', '-DSPARKLE_FEED=https://github.com/ChristopherHX/osx-packaging-scripts/releases/download/ng_macos_sparkle_updater_test.dmg/appcast.xml'] + VERSION_OPTS + CMAKE_QT_EXTRA_OPTIONS)
+build_component("mcpelauncher-ui", ['-DGAME_LAUNCHER_PATH=.', '-DCMAKE_CXX_FLAGS=-DNDEBUG -Wl,-F'+ QT_INSTALL_PATH + '/lib/'] + VERSION_OPTS + SPARKLE_OPTS + CMAKE_QT_EXTRA_OPTIONS)
 
 display_stage("Copying files")
 def copy_installed_files(from_path, to_path):
@@ -127,6 +138,7 @@ with open(path.join(TEMPLATES_DIR, 'Info.plist.tmpl'), 'r') as raw:
         cf_bundle_icon_file = 'minecraft',
         cf_bundle_name = 'Minecraft Bedrock Launcher',
         cf_bundle_version = VERSION
+        cf_sparkle_public_ed_key = args.update_sparkle_ed_public_key
     )
 
     f = open(path.join(APP_OUTPUT_DIR, 'Contents', 'Info.plist'), 'w')
