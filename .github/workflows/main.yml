@@ -61,7 +61,7 @@ jobs:
         npm install -g github-release-downloader
         mkdir -p dist/
         mv "${{ github.workspace }}/../osx-packaging-scripts/output/Minecraft Bedrock Launcher.dmg" dist/Minecraft_Bedrock_Launcher.dmg
-        grd --token ${{ secrets.GITHUB_TOKEN }} --owner ChristopherHX --repository osx-packaging-scripts --filter-asset '^*\.dmg$' --match-version '^ng_macos_sparkle_updater_test\.dmg$' --output dist/
+        grd --token ${{ secrets.GITHUB_TOKEN }} --owner ChristopherHX --repository osx-packaging-scripts --filter-asset '^.*\.dmg$' --match-version '^ng_macos_sparkle_updater_test\.dmg$' --output dist/
         qt/*/*/bin/generate_appcast -s ${{ secrets.SPARKLE_ECDSA }} dist/
         echo build_id=${GITHUB_RUN_NUMBER}$'\n'download_url=https://github.com/ChristopherHX/osx-packaging-scripts/releases/download/ng_macos_sparkle_updater_test.dmg/Minecraft_Bedrock_Launcher.dmg > dist/version.osx
     - name: Upload Latest
