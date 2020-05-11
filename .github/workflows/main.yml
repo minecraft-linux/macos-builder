@@ -67,7 +67,7 @@ jobs:
       run: python3 build_dmg.py
     - name: Generate Dist
       run: |
-        mv "${{ github.workspace }}/../osx-packaging-scripts/output/Minecraft Bedrock Launcher.dmg" dist/Minecraft_Bedrock_Launcher.dmg
+        mv "${{ github.workspace }}/../osx-packaging-scripts/output/Minecraft Bedrock Launcher.dmg" "dist/Minecraft_Bedrock_Launcher.0.0.${GITHUB_RUN_NUMBER}.dmg"
         qt/*/*/bin/generate_appcast -s ${{ secrets.SPARKLE_ECDSA }} dist/
         echo build_id=${GITHUB_RUN_NUMBER}$'\n'download_url=https://github.com/ChristopherHX/osx-packaging-scripts/releases/download/ng_macos_sparkle_updater_test.dmg/Minecraft_Bedrock_Launcher.dmg > dist/version.osx
     - name: Upload Latest
