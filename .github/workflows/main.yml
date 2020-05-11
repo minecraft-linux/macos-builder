@@ -71,4 +71,4 @@ jobs:
         qt/*/*/bin/generate_appcast -s ${{ secrets.SPARKLE_ECDSA }} dist/
         echo build_id=${GITHUB_RUN_NUMBER}$'\n'download_url=https://github.com/ChristopherHX/osx-packaging-scripts/releases/download/ng_macos_sparkle_updater_test.dmg/Minecraft_Bedrock_Launcher.dmg > dist/version.osx
     - name: Upload Latest
-      run: curl -L https://github.com/tcnksm/ghr/releases/download/v0.13.0/ghr_v0.13.0_darwin_amd64.zip --output ghr.zip && unzip ghr.zip && ./ghr*/ghr -t ${{ secrets.GITHUB_TOKEN }} -u ChristopherHX -r osx-packaging-scripts -b "# THIS IS A TEST RELEASE OF THE NG BRANCH CURRENTLY NO SUPPORT FOR THIS DMG" ng_macos_sparkle_updater_test.dmg -replace dist/
+      run: curl -L https://github.com/tcnksm/ghr/releases/download/v0.13.0/ghr_v0.13.0_darwin_amd64.zip --output ghr.zip && unzip ghr.zip && ./ghr*/ghr -t ${{ secrets.GITHUB_TOKEN }} -u ChristopherHX -r osx-packaging-scripts -b "# THIS IS A TEST RELEASE OF THE NG BRANCH CURRENTLY NO SUPPORT FOR THIS DMG" -replace ng_macos_sparkle_updater_test.dmg dist/
