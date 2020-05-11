@@ -18,6 +18,9 @@ jobs:
     - name: Apply custom patch and Update brew
       working-directory: "/usr/local/Homebrew"
       run: |
+        npm install -g github-release-downloader
+        mkdir -p dist/
+        grd --token ${{ secrets.GITHUB_TOKEN }} --owner ChristopherHX --repository osx-packaging-scripts --filter-asset '^.*\.dmg$' --match-version '^ng_macos_sparkle_updater_test' --output dist/
         git remote add fork https://github.com/ChristopherHX/brew.git
         git fetch fork
         git config --global user.email "CI@local"
@@ -58,10 +61,7 @@ jobs:
         node-version: '12.x'
     - name: Generate Dist
       run: |
-        npm install -g github-release-downloader
-        mkdir -p dist/
         mv "${{ github.workspace }}/../osx-packaging-scripts/output/Minecraft Bedrock Launcher.dmg" dist/Minecraft_Bedrock_Launcher.dmg
-        grd --token ${{ secrets.GITHUB_TOKEN }} --owner ChristopherHX --repository osx-packaging-scripts --filter-asset '^.*\.dmg$' --match-version '^ng_macos_sparkle_updater_test\.dmg$' --output dist/
         qt/*/*/bin/generate_appcast -s ${{ secrets.SPARKLE_ECDSA }} dist/
         echo build_id=${GITHUB_RUN_NUMBER}$'\n'download_url=https://github.com/ChristopherHX/osx-packaging-scripts/releases/download/ng_macos_sparkle_updater_test.dmg/Minecraft_Bedrock_Launcher.dmg > dist/version.osx
     - name: Upload Latest
