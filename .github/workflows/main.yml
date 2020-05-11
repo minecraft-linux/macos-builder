@@ -28,6 +28,7 @@ jobs:
         npm run-script build
         cd ..
         grd/bin/grd --token ${{ secrets.GITHUB_TOKEN }} --owner ChristopherHX --repository osx-packaging-scripts --filter-asset '^.*\.dmg$' --match-version 'ng_macos_sparkle_updater_test\.dmg' --output dist/
+        mv dist/*/*.dmg dist/
     - name: Apply custom patch and Update brew
       working-directory: "/usr/local/Homebrew"
       run: |
@@ -68,7 +69,7 @@ jobs:
     - name: Generate Dist
       run: |
         mv "${{ github.workspace }}/../osx-packaging-scripts/output/Minecraft Bedrock Launcher.dmg" "dist/Minecraft_Bedrock_Launcher.0.0.${GITHUB_RUN_NUMBER}.dmg"
-        qt/*/*/bin/generate_appcast -s ${{ secrets.SPARKLE_ECDSA }} dist/
+        qt/*/*/bin/generate_appcast -s ${{ secrets.SPARKLE_ECDSA }} --download-url-prefix https://github.com/ChristopherHX/osx-packaging-scripts/releases/download/ng_macos_sparkle_updater_test.dmg/ dist/
         echo build_id=${GITHUB_RUN_NUMBER}$'\n'download_url=https://github.com/ChristopherHX/osx-packaging-scripts/releases/download/ng_macos_sparkle_updater_test.dmg/Minecraft_Bedrock_Launcher.dmg > dist/version.osx
     - name: Upload Latest
       run: curl -L https://github.com/tcnksm/ghr/releases/download/v0.13.0/ghr_v0.13.0_darwin_amd64.zip --output ghr.zip && unzip ghr.zip && ./ghr*/ghr -t ${{ secrets.GITHUB_TOKEN }} -u ChristopherHX -r osx-packaging-scripts -b "# THIS IS A TEST RELEASE OF THE NG BRANCH CURRENTLY NO SUPPORT FOR THIS DMG" -replace ng_macos_sparkle_updater_test.dmg dist/
