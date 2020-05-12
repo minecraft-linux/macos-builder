@@ -71,7 +71,7 @@ def clone_repo(name, url, branch):
 display_stage("Downloading sources")
 clone_repo('msa', 'https://github.com/minecraft-linux/msa-manifest.git', 'master')
 clone_repo('mcpelauncher', 'https://github.com/minecraft-linux/mcpelauncher-manifest.git', 'ng')
-clone_repo('mcpelauncher-ui', 'https://github.com/minecraft-linux/mcpelauncher-ui-manifest.git', 'ng_macos_sparkle_updater_test')
+clone_repo('mcpelauncher-ui', 'https://github.com/minecraft-linux/mcpelauncher-ui-manifest.git', 'ng')
 
 # Build
 # QT_INSTALL_PATH = subprocess.check_output(['brew', '--prefix', 'qt']).decode('utf-8').strip()
@@ -107,7 +107,7 @@ if args.update_url and args.build_id:
 
 SPARKLE_OPTS = []
 if args.update_sparkle_appcast:
-    SPARKLE_OPTS = [ "-DSPARKLE_FEED=" + args.update_sparkle_appcast]
+    SPARKLE_OPTS = [ "-DENABLE_SPARKLE_UPDATE_CHECK=1" ]
 
 display_stage("Building")
 build_component("msa", ['-DENABLE_MSA_QT_UI=ON', '-DMSA_UI_PATH_DEV=OFF', '-DCMAKE_CXX_FLAGS=-DNDEBUG'] + CMAKE_QT_EXTRA_OPTIONS)

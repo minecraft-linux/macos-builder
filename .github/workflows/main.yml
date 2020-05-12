@@ -9,6 +9,13 @@ jobs:
   build:
     runs-on: macos-latest
     steps:
+    - name: Set Environment Variables
+      run: |
+        IFS='/' read -ra REPO <<< "${GITHUB_REPOSITORY}"
+        echo "::set-env REPO_USER=${REPO[0]}"
+        echo "::set-env REPO_NAME=${REPO[1]}"
+        IFS='/' read -ra REF <<< "${GITHUB_REF}"
+        echo "::set-env BRANCH_NAME=${REF[2]}"
     - uses: actions/checkout@v1
     - uses: actions/checkout@v1
       with:
@@ -21,14 +28,14 @@ jobs:
         node-version: '12.x'
     - name: Download old dmg's
       run: |
-        mkdir -p dist/
+        mkdir -p sparcle/
         git clone https://github.com/ChristopherHX/github-release-downloader.git grd
         cd grd
         npm install
         npm run-script build
         cd ..
-        grd/bin/grd --token ${{ secrets.GITHUB_TOKEN }} --owner ChristopherHX --repository osx-packaging-scripts --filter-asset '^.*\.dmg$' --match-version 'ng_macos_sparkle_updater_test\.dmg' --output dist/
-        mv dist/${GITHUB_REPOSITORY}/ng_macos_sparkle_updater_test.dmg/*.dmg dist/
+        grd/bin/grd --token ${{ secrets.GITHUB_TOKEN }} --owner ChristopherHX --repository osx-packaging-scripts --filter-asset '^.*\.dmg$' --match-version 'ng\.dmg' --output sparcle/
+        mv sparcle/${GITHUB_REPOSITORY}/ng.dmg/*.dmg sparcle/
     - name: Apply custom patch and Update brew
       working-directory: "/usr/local/Homebrew"
       run: |
@@ -37,11 +44,19 @@ jobs:
         git config --global user.email "CI@local"
         git config --global user.name "CI Bot"
         git checkout fork/master
-    - name: Install brew dependencies
+    - name: Install brew dependencies / Download QT
+      working-directory: ${{ github.workspace }}/../osx-packaging-scripts
       run: |
-        export HOMEBREW_MACOSX_DEPLOYMENT_TARGET=10.14.0
+        HOMEBREW_NO_AUTO_UPDATE=1 brew install p7zip
+        # Start Qt download parallel to save time
+        ./download_qt.sh &
+        PID=$!
+        export HOMEBREW_MACOSX_DEPLOYMENT_TARGET=10.12.0
         export HOMEBREW_SDKROOT=${{ github.workspace }}/../MacOSX10.14.sdk
-        HOMEBREW_NO_AUTO_UPDATE=1 brew install p7zip libuv protobuf autoconf automake
+        HOMEBREW_NO_AUTO_UPDATE=1 brew reinstall python libzip
+        HOMEBREW_NO_AUTO_UPDATE=1 brew install libuv protobuf
+        # Wait for QT Download, it is faster than brew
+        wait $PID
     - uses: actions/setup-python@v1
       with:
         python-version: '3.x' # Version range or exact version of a Python version to use, using semvers version range syntax.
@@ -50,28 +65,28 @@ jobs:
       with:
         python-version: '2.x' # Version range or exact version of a Python version to use, using semvers version range syntax.
         architecture: 'x64' # optional x64 or x86. Defaults to x64 if not specified  
-    - name: Show python versions
-      run: python --version && python2 --version && python3 --version
     - name: Install python dependencies
       run: python3 -m pip install --upgrade pip && pip3 install jinja2 ds_store
-    - name: Download Qt
-      working-directory: ${{ github.workspace }}/../osx-packaging-scripts
-      run: ./download_qt.sh
     - name: Build
       working-directory: ${{ github.workspace }}/../osx-packaging-scripts
       run: |
-        export MACOSX_DEPLOYMENT_TARGET=10.14
+        export MACOSX_DEPLOYMENT_TARGET=10.12
         export SDKROOT=${{ github.workspace }}/../MacOSX10.14.sdk
-        python3 __main__.py --qt-path qt/*/*/ --update-url https://github.com/ChristopherHX/osx-packaging-scripts/releases/download/ng_macos_sparkle_updater_test.dmg/version.osx --build-id ${GITHUB_RUN_NUMBER} --update-sparkle-appcast https://github.com/ChristopherHX/osx-packaging-scripts/releases/download/ng_macos_sparkle_updater_test.dmg/appcast.xml --update-sparkle-ed-public-key ${{ secrets.SPARKLE_ECDSA_PUB }} --version "0.0.${GITHUB_RUN_NUMBER}"
+        python3 __main__.py --qt-path qt/*/* --update-sparkle-appcast https://github.com/${GITHUB_REPOSITORY}/releases/download/ng.dmg/appcast.xml --update-sparkle-ed-public-key ${{ secrets.SPARKLE_ECDSA_PUB }} --version "0.0.${GITHUB_RUN_NUMBER}"
     - name: Build .dmg
       working-directory: ${{ github.workspace }}/../osx-packaging-scripts
       run: python3 build_dmg.py
     - name: Generate Dist
       run: |
-        mv "${{ github.workspace }}/../osx-packaging-scripts/output/Minecraft Bedrock Launcher.dmg" "dist/Minecraft_Bedrock_Launcher.0.0.${GITHUB_RUN_NUMBER}.dmg"
-        qt/*/*/bin/generate_appcast -s ${{ secrets.SPARKLE_ECDSA }} dist/
-        sed -i.bac 's/\%20/./g' dist/appcast.xml
-        rm dist/*.bac
-        echo build_id=${GITHUB_RUN_NUMBER}$'\n'download_url=https://github.com/ChristopherHX/osx-packaging-scripts/releases/download/ng_macos_sparkle_updater_test.dmg/Minecraft_Bedrock_Launcher.dmg > dist/version.osx
+        DMG_FILENAME="sparcle/Minecraft_Bedrock_Launcher.0.0.${GITHUB_RUN_NUMBER}.dmg"
+        mv "${{ github.workspace }}/../osx-packaging-scripts/output/Minecraft Bedrock Launcher.dmg" "${DMG_FILENAME}"
+        qt/*/*/bin/generate_appcast -s ${{ secrets.SPARKLE_ECDSA }} sparcle/
+        mkdir -p dist
+        sed 's/\%20/./g' sparcle/appcast.xml > dist/appcast.xml
+        mv sparcle/*.delta "${DMG_FILENAME}" dist/
+        echo build_id=${GITHUB_RUN_NUMBER}$'\n'download_url=https://github.com/${GITHUB_REPOSITORY}/releases/download/ng.dmg/Minecraft_Bedrock_Launcher.dmg > dist/version.osx
     - name: Upload Latest
-      run: curl -L https://github.com/tcnksm/ghr/releases/download/v0.13.0/ghr_v0.13.0_darwin_amd64.zip --output ghr.zip && unzip ghr.zip && ./ghr*/ghr -t ${{ secrets.GITHUB_TOKEN }} -u ChristopherHX -r osx-packaging-scripts -b "# THIS IS A TEST RELEASE OF THE NG BRANCH CURRENTLY NO SUPPORT FOR THIS DMG" -replace ng_macos_sparkle_updater_test.dmg dist/
+      run: |
+        curl -L https://github.com/tcnksm/ghr/releases/download/v0.13.0/ghr_v0.13.0_darwin_amd64.zip --output ghr.zip
+        unzip ghr.zip
+        ./ghr*/ghr -t ${{ secrets.GITHUB_TOKEN }} -u ${REPO_USER} -r ${REPO_NAME} -recreate -prerelease -b "# NO SUPPORT THIS IS A TEST RELEASE" "${BRANCH_NAME:-UNKNOWN}".dmg dist/
