@@ -107,7 +107,7 @@ if args.update_url and args.build_id:
 
 SPARKLE_OPTS = []
 if args.update_sparkle_appcast:
-    SPARKLE_OPTS = [ "-DENABLE_SPARKLE_UPDATE_CHECK=1" ]
+    SPARKLE_OPTS = [ "-DENABLE_SPARKLE_UPDATE_CHECK=1", "-DSPARKLE_UPDATE_CHECK_URL=" + args.update_sparkle_appcast]
 
 display_stage("Building")
 build_component("msa", ['-DENABLE_MSA_QT_UI=ON', '-DMSA_UI_PATH_DEV=OFF', '-DCMAKE_CXX_FLAGS=-DNDEBUG'] + CMAKE_QT_EXTRA_OPTIONS)
