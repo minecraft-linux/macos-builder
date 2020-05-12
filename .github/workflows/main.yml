@@ -28,7 +28,7 @@ jobs:
         npm run-script build
         cd ..
         grd/bin/grd --token ${{ secrets.GITHUB_TOKEN }} --owner ChristopherHX --repository osx-packaging-scripts --filter-asset '^.*\.dmg$' --match-version 'ng_macos_sparkle_updater_test\.dmg' --output dist/
-        mv dist/*/*.dmg dist/
+        mv dist/${GITHUB_REPOSITORY}/ng_macos_sparkle_updater_test.dmg/*.dmg dist/
     - name: Apply custom patch and Update brew
       working-directory: "/usr/local/Homebrew"
       run: |
