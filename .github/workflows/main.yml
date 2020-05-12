@@ -83,7 +83,8 @@ jobs:
         qt/*/*/bin/generate_appcast -s ${{ secrets.SPARKLE_ECDSA }} sparcle/
         mkdir -p dist
         sed 's/\%20/./g' sparcle/appcast.xml > dist/appcast.xml
-        mv sparcle/*.delta "${DMG_FILENAME}" dist/
+        mv sparcle/*.delta dist/|| :
+        mv "${DMG_FILENAME}" dist/
         echo build_id=${GITHUB_RUN_NUMBER}$'\n'download_url=https://github.com/${GITHUB_REPOSITORY}/releases/download/ng.dmg/Minecraft_Bedrock_Launcher.dmg > dist/version.osx
     - name: Upload Latest
       run: |
