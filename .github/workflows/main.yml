@@ -15,20 +15,6 @@ jobs:
         repository: ChristopherHX/MacOSX10.14.sdk
         ref: 5d1c9b28f01ef0b01225f92670ee587b430efa8e
         token: ${{ secrets.MacOSX1014sdk }}
-    - name: Use Node.js
-      uses: actions/setup-node@v1
-      with:
-        node-version: '12.x'
-    - name: Download old dmg's
-      run: |
-        mkdir -p dist/
-        git clone https://github.com/ChristopherHX/github-release-downloader.git grd
-        cd grd
-        npm install
-        npm run-script build
-        cd ..
-        grd/bin/grd --token ${{ secrets.GITHUB_TOKEN }} --owner ChristopherHX --repository osx-packaging-scripts --filter-asset '^.*\.dmg$' --match-version 'ng_macos_sparkle_updater_test\.dmg' --output dist/
-        mv dist/${GITHUB_REPOSITORY}/ng_macos_sparkle_updater_test.dmg/*.dmg dist/
     - name: Apply custom patch and Update brew
       working-directory: "/usr/local/Homebrew"
       run: |
@@ -66,6 +52,20 @@ jobs:
     - name: Build .dmg
       working-directory: ${{ github.workspace }}/../osx-packaging-scripts
       run: python3 build_dmg.py
+    - name: Use Node.js
+      uses: actions/setup-node@v1
+      with:
+        node-version: '12.x'
+    - name: Download old dmg's
+      run: |
+        mkdir -p dist/
+        git clone https://github.com/ChristopherHX/github-release-downloader.git grd
+        cd grd
+        npm install
+        npm run-script build
+        cd ..
+        grd/bin/grd --token ${{ secrets.GITHUB_TOKEN }} --owner ChristopherHX --repository osx-packaging-scripts --filter-asset '^.*\.dmg$' --match-version 'ng_macos_sparkle_updater_test\.dmg' --output dist/
+        mv dist/${GITHUB_REPOSITORY}/ng_macos_sparkle_updater_test.dmg/*.dmg dist/
     - name: Generate Dist
       run: |
         mv "${{ github.workspace }}/../osx-packaging-scripts/output/Minecraft Bedrock Launcher.dmg" "dist/Minecraft_Bedrock_Launcher.0.0.${GITHUB_RUN_NUMBER}.dmg"
