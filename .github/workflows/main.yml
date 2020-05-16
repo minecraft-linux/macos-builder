@@ -200,17 +200,6 @@ jobs:
       with:
         path: libcxx-build
         key: ${{ runner.os }}-build-${{ env.cache-name }}
-    - name: Cache qt
-      id: cache-qt
-      uses: actions/cache@v1
-      env:
-        cache-name: cache-qt-macos-10-10
-      with:
-        path: qt
-        key: ${{ runner.os }}-build-${{ env.cache-name }}
-    - name: Download Qt
-      if: steps.cache-qt.outputs.cache-hit != 'true'
-      run: ./download_qt.sh  
     - name: Install python dependencies
       run: python3 -m pip install --upgrade pip && pip3 install jinja2 ds_store
     - name: Cache brew Cellar
@@ -221,6 +210,17 @@ jobs:
       with:
         path: /usr/local/Cellar/
         key: ${{ runner.os }}-build-${{ env.cache-name }}
+    - name: Cache qt
+      id: cache-qt
+      uses: actions/cache@v1
+      env:
+        cache-name: cache-qt-macos-10-10
+      with:
+        path: qt
+        key: ${{ runner.os }}-build-${{ env.cache-name }}
+    - name: Download Qt
+      if: steps.cache-qt.outputs.cache-hit != 'true'
+      run: ./download_qt.sh
     - name: Build
       working-directory: ${{ github.workspace }}/../osx-packaging-scripts
       run: |
