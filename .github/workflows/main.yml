@@ -129,9 +129,9 @@ jobs:
       if: steps.cache-brew-cellar.outputs.cache-hit != 'true'
       working-directory: ${{ github.workspace }}/../osx-packaging-scripts
       run: |
-        HOMEBREW_NO_AUTO_UPDATE=1 brew unlink libzip
+        HOMEBREW_NO_AUTO_UPDATE=1 brew unlink libzip cmake
         sudo rm -rf /usr/local/Cellar/*
-        HOMEBREW_NO_AUTO_UPDATE=1 brew install p7zip automake sphinx-doc
+        HOMEBREW_NO_AUTO_UPDATE=1 brew install p7zip automake cmake sphinx-doc
         export HOMEBREW_MACOSX_DEPLOYMENT_TARGET=10.10.0
         export HOMEBREW_SDKROOT=${{ github.workspace }}/../MacOSX10.14.sdk
         HOMEBREW_NO_AUTO_UPDATE=1 brew install python libzip libuv protobuf
@@ -202,8 +202,8 @@ jobs:
         key: ${{ runner.os }}-build-${{ env.cache-name }}
     - name: brew link
       run: |
-        HOMEBREW_NO_AUTO_UPDATE=1 brew unlink libzip
-        HOMEBREW_NO_AUTO_UPDATE=1 brew link libuv protobuf libzip p7zip automake
+        HOMEBREW_NO_AUTO_UPDATE=1 brew unlink libzip cmake
+        HOMEBREW_NO_AUTO_UPDATE=1 brew link libuv protobuf libzip p7zip automake cmake
     - name: Cache qt
       id: cache-qt
       uses: actions/cache@v1
