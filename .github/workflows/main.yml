@@ -97,14 +97,6 @@ jobs:
   brew-deps:
     runs-on: macos-latest
     steps:
-    - name: Cache brew Cellar
-      id: cache-brew-cellar
-      uses: actions/cache@v1
-      env:
-        cache-name: cache-brew-macos-cellar-10-10
-      with:
-        path: /usr/local/Cellar/
-        key: ${{ runner.os }}-build-${{ env.cache-name }}
     - name: Cache brew opt
       id: cache-brew-opt
       uses: actions/cache@v1
@@ -112,6 +104,15 @@ jobs:
         cache-name: cache-brew-macos-opt-10-10
       with:
         path: /usr/local/opt/
+        key: ${{ runner.os }}-build-${{ env.cache-name }}
+    - name: Cache brew Cellar
+      id: cache-brew-cellar
+      if: steps.cache-brew-opt.outputs.cache-hit != 'true'
+      uses: actions/cache@v1
+      env:
+        cache-name: cache-brew-macos-cellar-10-10
+      with:
+        path: /usr/local/Cellar/
         key: ${{ runner.os }}-build-${{ env.cache-name }}
     - uses: actions/checkout@v1
       if: steps.cache-brew-opt.outputs.cache-hit != 'true'
