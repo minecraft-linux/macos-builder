@@ -194,6 +194,8 @@ jobs:
       with:
         path: /usr/local/Cellar/
         key: ${{ runner.os }}-build-${{ env.cache-name }}
+    - name: brew link
+      run: HOMEBREW_NO_AUTO_UPDATE=1 brew link libuv protobuf libzip p7zip
     - name: Cache qt
       id: cache-qt
       uses: actions/cache@v1
