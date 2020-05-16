@@ -48,15 +48,11 @@ jobs:
       working-directory: ${{ github.workspace }}/../osx-packaging-scripts
       run: |
         HOMEBREW_NO_AUTO_UPDATE=1 brew install p7zip
-        # Start Qt download parallel to save time
-        ./download_qt.sh &
-        PID=$!
+        ./download_qt.sh
         export HOMEBREW_MACOSX_DEPLOYMENT_TARGET=10.10.0
         export HOMEBREW_SDKROOT=${{ github.workspace }}/../MacOSX10.14.sdk
         HOMEBREW_NO_AUTO_UPDATE=1 brew reinstall python libzip
         HOMEBREW_NO_AUTO_UPDATE=1 brew install libuv protobuf
-        # Wait for QT Download, it is faster than brew
-        wait $PID
     - uses: actions/setup-python@v1
       with:
         python-version: '3.x' # Version range or exact version of a Python version to use, using semvers version range syntax.
