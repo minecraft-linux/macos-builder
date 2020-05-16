@@ -106,7 +106,7 @@ jobs:
       id: cache-brew-cellar
       uses: actions/cache@v1
       env:
-        cache-name: cache-brew-macos-cellar-1-10-10
+        cache-name: cache-brew-macos-cellar-10-10
       with:
         path: /usr/local/Cellar/
         key: ${{ runner.os }}-build-${{ env.cache-name }}
@@ -195,7 +195,7 @@ jobs:
       id: cache-brew-cellar
       uses: actions/cache@v1
       env:
-        cache-name: cache-brew-macos-cellar-1-10-10
+        cache-name: cache-brew-macos-cellar-10-10
       with:
         path: /usr/local/Cellar/
         key: ${{ runner.os }}-build-${{ env.cache-name }}
