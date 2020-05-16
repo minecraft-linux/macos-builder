@@ -51,7 +51,7 @@ jobs:
         # Start Qt download parallel to save time
         ./download_qt.sh &
         PID=$!
-        export HOMEBREW_MACOSX_DEPLOYMENT_TARGET=10.12.0
+        export HOMEBREW_MACOSX_DEPLOYMENT_TARGET=10.10.0
         export HOMEBREW_SDKROOT=${{ github.workspace }}/../MacOSX10.14.sdk
         HOMEBREW_NO_AUTO_UPDATE=1 brew reinstall python libzip
         HOMEBREW_NO_AUTO_UPDATE=1 brew install libuv protobuf
@@ -70,7 +70,7 @@ jobs:
     - name: Build
       working-directory: ${{ github.workspace }}/../osx-packaging-scripts
       run: |
-        export MACOSX_DEPLOYMENT_TARGET=10.12
+        export MACOSX_DEPLOYMENT_TARGET=10.10.0
         export SDKROOT=${{ github.workspace }}/../MacOSX10.14.sdk
         python3 __main__.py --qt-path qt/*/* --update-sparkle-appcast https://github.com/${GITHUB_REPOSITORY}/releases/download/ng.dmg/appcast.xml --update-sparkle-ed-public-key ${{ secrets.SPARKLE_ECDSA_PUB }} --version "0.0.${GITHUB_RUN_NUMBER}"
     - name: Build .dmg

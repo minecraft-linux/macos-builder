@@ -1,11 +1,11 @@
 #!/bin/bash
 
-QT_BASE_URL=http://download.qt.io/online/qtsdkrepository/mac_x64/desktop/qt5_5112/
-QT_VERSION_SHORT=5.11.2
-QT_VERSION=5.11.2-0-201809141947
-QT_PACKAGE_PREFIX=qt.qt5.5112.
+QT_BASE_URL=http://download.qt.io/online/qtsdkrepository/mac_x64/desktop/qt5_592/
+QT_VERSION_SHORT=5.9.2
+QT_VERSION=5.9.2-0-201710050729
+QT_PACKAGE_PREFIX=qt.qt5.592.
 QT_PACKAGE_SUFFIX=clang_64
-QT_PREBUILT_SUFFIX=-MacOS-MacOS_10_12-Clang-MacOS-MacOS_10_12-X86_64
+QT_PREBUILT_SUFFIX=-MacOS-OSX_10_10-Clang-MacOS-OSX_10_10-X86_64
 
 COLOR_STATUS=$'\033[1m\033[32m'
 COLOR_RESET=$'\033[0m'
