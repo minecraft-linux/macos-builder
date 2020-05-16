@@ -82,7 +82,7 @@ jobs:
       id: libcxx-llvm
       uses: actions/cache@v1
       env:
-        cache-name: cache-libcxx-macos-10-10
+        cache-name: cache-libcxx-1-macos-10-10
       with:
         path: libcxx-build
         key: ${{ runner.os }}-build-${{ env.cache-name }}
@@ -92,36 +92,9 @@ jobs:
         lipo -create libcxx32-build/lib/libc++.dylib libcxx64-build/lib/libc++.dylib -output libcxx-build/libc++.dylib
         lipo -create libcxx32-build/lib/libc++abi.dylib libcxx64-build/lib/libc++abi.dylib -output libcxx-build/libc++abi.dylib
         lipo -create libcxx32-build/lib/libunwind.dylib libcxx64-build/lib/libunwind.dylib -output libcxx-build/libunwind.dylib
-  build:
+  brew-deps:
     runs-on: macos-latest
     steps:
-    - name: Set Environment Variables
-      run: |
-        IFS='/' read -ra REPO <<< "${GITHUB_REPOSITORY}"
-        echo "::set-env REPO_USER=${REPO[0]}"
-        echo "::set-env REPO_NAME=${REPO[1]}"
-        IFS='/' read -ra REF <<< "${GITHUB_REF}"
-        echo "::set-env BRANCH_NAME=${REF[2]}"
-    - uses: actions/checkout@v1
-    - uses: actions/checkout@v1
-      with:
-        repository: ChristopherHX/MacOSX10.14.sdk
-        ref: 5d1c9b28f01ef0b01225f92670ee587b430efa8e
-        token: ${{ secrets.MacOSX1014sdk }}
-    - name: Use Node.js
-      uses: actions/setup-node@v1
-      with:
-        node-version: '12.x'
-    - name: Download old dmg's
-      run: |
-        mkdir -p sparcle/
-        git clone https://github.com/ChristopherHX/github-release-downloader.git grd
-        cd grd
-        npm install
-        npm run-script build
-        cd ..
-        grd/bin/grd --token ${{ secrets.GITHUB_TOKEN }} --owner ChristopherHX --repository osx-packaging-scripts --filter-asset '^.*\.dmg$' --match-version 'ng_10.10\.dmg' --output sparcle/
-        mv sparcle/${GITHUB_REPOSITORY}/ng_10.10.dmg/*.dmg sparcle/ || :
     - name: Apply custom patch and Update brew
       working-directory: "/usr/local/Homebrew"
       run: |
@@ -153,8 +126,39 @@ jobs:
         HOMEBREW_NO_AUTO_UPDATE=1 brew install p7zip automake sphinx-doc
         export HOMEBREW_MACOSX_DEPLOYMENT_TARGET=10.10.0
         export HOMEBREW_SDKROOT=${{ github.workspace }}/../MacOSX10.14.sdk
-        HOMEBREW_NO_AUTO_UPDATE=1 brew reinstall libzip
+        HOMEBREW_NO_AUTO_UPDATE=1 brew reinstall python libzip
         HOMEBREW_NO_AUTO_UPDATE=1 brew install libuv protobuf
+  build:
+    runs-on: macos-latest
+    needs: [brew-deps, build-libcxx]
+    steps:
+    - name: Set Environment Variables
+      run: |
+        IFS='/' read -ra REPO <<< "${GITHUB_REPOSITORY}"
+        echo "::set-env REPO_USER=${REPO[0]}"
+        echo "::set-env REPO_NAME=${REPO[1]}"
+        IFS='/' read -ra REF <<< "${GITHUB_REF}"
+        echo "::set-env BRANCH_NAME=${REF[2]}"
+    - uses: actions/checkout@v1
+    - uses: actions/checkout@v1
+      with:
+        repository: ChristopherHX/MacOSX10.14.sdk
+        ref: 5d1c9b28f01ef0b01225f92670ee587b430efa8e
+        token: ${{ secrets.MacOSX1014sdk }}
+    - name: Use Node.js
+      uses: actions/setup-node@v1
+      with:
+        node-version: '12.x'
+    - name: Download old dmg's
+      run: |
+        mkdir -p sparcle/
+        git clone https://github.com/ChristopherHX/github-release-downloader.git grd
+        cd grd
+        npm install
+        npm run-script build
+        cd ..
+        grd/bin/grd --token ${{ secrets.GITHUB_TOKEN }} --owner ChristopherHX --repository osx-packaging-scripts --filter-asset '^.*\.dmg$' --match-version 'ng_10.10\.dmg' --output sparcle/
+        mv sparcle/${GITHUB_REPOSITORY}/ng_10.10.dmg/*.dmg sparcle/ || :
     - name: Cache qt
       id: cache-qt
       uses: actions/cache@v1
@@ -165,17 +169,49 @@ jobs:
         key: ${{ runner.os }}-build-${{ env.cache-name }}
     - name: Download Qt
       if: steps.cache-qt.outputs.cache-hit != 'true'
-      run: ./download_qt.sh
-    - uses: actions/setup-python@v1
-      with:
-        python-version: '3.x' # Version range or exact version of a Python version to use, using semvers version range syntax.
-        architecture: 'x64' # optional x64 or x86. Defaults to x64 if not specified
-    - uses: actions/setup-python@v1
-      with:
-        python-version: '2.x' # Version range or exact version of a Python version to use, using semvers version range syntax.
-        architecture: 'x64' # optional x64 or x86. Defaults to x64 if not specified  
+      run: ./download_qt.sh  
     - name: Install python dependencies
       run: python3 -m pip install --upgrade pip && pip3 install jinja2 ds_store
+    - name: Cache brew Cellar
+      id: cache-brew-cellar
+      uses: actions/cache@v1
+      env:
+        cache-name: cache-brew-macos-cellar-10-10
+      with:
+        path: /usr/local/Cellar/
+        key: ${{ runner.os }}-build-${{ env.cache-name }}
+    - name: Cache brew opt
+      id: cache-brew-opt
+      uses: actions/cache@v1
+      env:
+        cache-name: cache-brew-macos-opt-10-10
+      with:
+        path: /usr/local/opt/
+        key: ${{ runner.os }}-build-${{ env.cache-name }}
+    - name: Cache libcxx32
+      id: libcxx32-llvm
+      uses: actions/cache@v1
+      env:
+        cache-name: cache-libcxx32-macos-10-10
+      with:
+        path: libcxx32-build
+        key: ${{ runner.os }}-build-${{ env.cache-name }}
+    - name: Cache libcxx64
+      id: libcxx64-llvm
+      uses: actions/cache@v1
+      env:
+        cache-name: cache-libcxx64-macos-10-10
+      with:
+        path: libcxx64-build
+        key: ${{ runner.os }}-build-${{ env.cache-name }}
+    - name: Cache libcxx
+      id: libcxx-llvm
+      uses: actions/cache@v1
+      env:
+        cache-name: cache-libcxx-1-macos-10-10
+      with:
+        path: libcxx-build
+        key: ${{ runner.os }}-build-${{ env.cache-name }}
     - name: Build
       working-directory: ${{ github.workspace }}/../osx-packaging-scripts
       run: |
