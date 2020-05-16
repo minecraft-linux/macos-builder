@@ -168,27 +168,6 @@ jobs:
         cd ..
         grd/bin/grd --token ${{ secrets.GITHUB_TOKEN }} --owner ChristopherHX --repository osx-packaging-scripts --filter-asset '^.*\.dmg$' --match-version 'ng_10.10\.dmg' --output sparcle/
         mv sparcle/${GITHUB_REPOSITORY}/ng_10.10.dmg/*.dmg sparcle/ || :
-    - name: Cache qt
-      id: cache-qt
-      uses: actions/cache@v1
-      env:
-        cache-name: cache-qt-macos-10-10
-      with:
-        path: qt
-        key: ${{ runner.os }}-build-${{ env.cache-name }}
-    - name: Download Qt
-      if: steps.cache-qt.outputs.cache-hit != 'true'
-      run: ./download_qt.sh  
-    - name: Install python dependencies
-      run: python3 -m pip install --upgrade pip && pip3 install jinja2 ds_store
-    - name: Cache brew Cellar
-      id: cache-brew-cellar
-      uses: actions/cache@v1
-      env:
-        cache-name: cache-brew-macos-cellar-10-10
-      with:
-        path: /usr/local/Cellar/
-        key: ${{ runner.os }}-build-${{ env.cache-name }}
     - name: Cache brew opt
       id: cache-brew-opt
       uses: actions/cache@v1
@@ -220,6 +199,27 @@ jobs:
         cache-name: cache-libcxx-1-macos-10-10
       with:
         path: libcxx-build
+        key: ${{ runner.os }}-build-${{ env.cache-name }}
+    - name: Cache qt
+      id: cache-qt
+      uses: actions/cache@v1
+      env:
+        cache-name: cache-qt-macos-10-10
+      with:
+        path: qt
+        key: ${{ runner.os }}-build-${{ env.cache-name }}
+    - name: Download Qt
+      if: steps.cache-qt.outputs.cache-hit != 'true'
+      run: ./download_qt.sh  
+    - name: Install python dependencies
+      run: python3 -m pip install --upgrade pip && pip3 install jinja2 ds_store
+    - name: Cache brew Cellar
+      id: cache-brew-cellar
+      uses: actions/cache@v1
+      env:
+        cache-name: cache-brew-macos-cellar-10-10
+      with:
+        path: /usr/local/Cellar/
         key: ${{ runner.os }}-build-${{ env.cache-name }}
     - name: Build
       working-directory: ${{ github.workspace }}/../osx-packaging-scripts
