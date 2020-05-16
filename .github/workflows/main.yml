@@ -22,6 +22,34 @@ jobs:
         repository: ChristopherHX/MacOSX10.14.sdk
         ref: 5d1c9b28f01ef0b01225f92670ee587b430efa8e
         token: ${{ secrets.MacOSX1014sdk }}
+    - name: Cache llvm
+      id: cache-llvm
+      uses: actions/cache@v1
+      env:
+        cache-name: cache-llvm-macos-10-10
+      with:
+        path: llvm-build
+        key: ${{ runner.os }}-build-${{ env.cache-name }}
+    - name: Build libcxx, libcxxabi, libunwind
+      if: steps.cache-llvm.outputs.cache-hit != 'true'
+      run: |
+        export MACOSX_DEPLOYMENT_TARGET=10.10.0
+        export SDKROOT=${{ github.workspace }}/../MacOSX10.14.sdk
+        git clone https://github.com/llvm/llvm-project.git llvm
+        mkdir -p llvm-build/x86
+        cd llvm-build/x86
+        cmake ../llvm/llvm -DLLVM_ENABLE_PROJECTS="libcxx;libcxxabi;libunwind" -DLIBCXX_CXX_ABI=libcxxabi -DLIBCXXABI_USE_LLVM_UNWINDER=ON -DCMAKE_BUILD_TYPE=Release -DLIBCXX_BUILD_32_BITS=ON -DLIBCXXABI_BUILD_32_BITS=ON -DLIBUNWIND_BUILD_32_BITS=ON -DLLVM_BUILD_32_BITS=ON
+        make -j4 cxx cxxabi unwind
+        cd ../..
+        mkdir -p llvm-build/x86_64
+        cd llvm-build/x86_64
+        cmake ../llvm/llvm -DLLVM_ENABLE_PROJECTS="libcxx;libcxxabi;libunwind" -DLIBCXX_CXX_ABI=libcxxabi -DLIBCXXABI_USE_LLVM_UNWINDER=ON -DCMAKE_BUILD_TYPE=Release
+        make -j4 cxx cxxabi unwind
+        cd ../..
+        mkdir -p lib/
+        lipo -create llvm-build/x86/lib/libc++.dylib llvm-build/x86_64/lib/libc++.dylib -output lib/libc++.dylib
+        lipo -create llvm-build/x86/lib/libc++abi.dylib llvm-build/x86_64/lib/libc++abi.dylib -output lib/libc++abi.dylib
+        lipo -create llvm-build/x86/lib/libunwind.dylib llvm-build/x86_64/lib/libunwind.dylib -output lib/libunwind.dylib
     - name: Use Node.js
       uses: actions/setup-node@v1
       with:
@@ -64,10 +92,10 @@ jobs:
       if: steps.cache-brew-opt.outputs.cache-hit != 'true'
       working-directory: ${{ github.workspace }}/../osx-packaging-scripts
       run: |
-        HOMEBREW_NO_AUTO_UPDATE=1 brew install p7zip
+        HOMEBREW_NO_AUTO_UPDATE=1 brew install p7zip automake
         export HOMEBREW_MACOSX_DEPLOYMENT_TARGET=10.10.0
         export HOMEBREW_SDKROOT=${{ github.workspace }}/../MacOSX10.14.sdk
-        HOMEBREW_NO_AUTO_UPDATE=1 brew reinstall python libzip
+        HOMEBREW_NO_AUTO_UPDATE=1 brew reinstall libzip
         HOMEBREW_NO_AUTO_UPDATE=1 brew install libuv protobuf
     - name: Cache qt
       id: cache-qt
@@ -80,34 +108,6 @@ jobs:
     - name: Download Qt
       if: steps.cache-qt.outputs.cache-hit != 'true'
       run: ./download_qt.sh
-    - name: Cache llvm
-      id: cache-llvm
-      uses: actions/cache@v1
-      env:
-        cache-name: cache-llvm-macos-10-10
-      with:
-        path: llvm-build
-        key: ${{ runner.os }}-build-${{ env.cache-name }}
-    - name: Build libcxx, libcxxabi, libunwind
-      if: steps.cache-llvm.outputs.cache-hit != 'true'
-      run: |
-        export MACOSX_DEPLOYMENT_TARGET=10.10.0
-        export SDKROOT=${{ github.workspace }}/../MacOSX10.14.sdk
-        git clone https://github.com/llvm/llvm-project.git llvm
-        mkdir -p llvm-build/x86
-        cd llvm-build/x86
-        cmake ../llvm/llvm -DLLVM_ENABLE_PROJECTS="libcxx;libcxxabi;libunwind" -DLIBCXX_CXX_ABI=libcxxabi -DLIBCXXABI_USE_LLVM_UNWINDER=ON -DCMAKE_BUILD_TYPE=Release -DLIBCXX_BUILD_32_BITS=ON -DLIBCXXABI_BUILD_32_BITS=ON -DLIBUNWIND_BUILD_32_BITS=ON -DLLVM_BUILD_32_BITS=ON
-        make -j4 cxx cxxabi unwind
-        cd ../..
-        mkdir -p llvm-build/x86_64
-        cd llvm-build/x86_64
-        cmake ../llvm/llvm -DLLVM_ENABLE_PROJECTS="libcxx;libcxxabi;libunwind" -DLIBCXX_CXX_ABI=libcxxabi -DLIBCXXABI_USE_LLVM_UNWINDER=ON -DCMAKE_BUILD_TYPE=Release
-        make -j4 cxx cxxabi unwind
-        cd ../..
-        mkdir -p lib/
-        lipo -create llvm-build/x86/lib/libc++.dylib llvm-build/x86_64/lib/libc++.dylib -output lib/libc++.dylib
-        lipo -create llvm-build/x86/lib/libc++abi.dylib llvm-build/x86_64/lib/libc++abi.dylib -output lib/libc++abi.dylib
-        lipo -create llvm-build/x86/lib/libunwind.dylib llvm-build/x86_64/lib/libunwind.dylib -output lib/libunwind.dylib
     - uses: actions/setup-python@v1
       with:
         python-version: '3.x' # Version range or exact version of a Python version to use, using semvers version range syntax.
