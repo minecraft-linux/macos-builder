@@ -6,6 +6,92 @@ on:
     tags-ignore:
       - '*'
 jobs:
+  build-libcxx32:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v1
+      with:
+        repository: ChristopherHX/MacOSX10.14.sdk
+        ref: 5d1c9b28f01ef0b01225f92670ee587b430efa8e
+        token: ${{ secrets.MacOSX1014sdk }}
+    - name: Cache libcxx32
+      id: libcxx32-llvm
+      uses: actions/cache@v1
+      env:
+        cache-name: cache-libcxx32-macos-10-10
+      with:
+        path: libcxx32-build
+        key: ${{ runner.os }}-build-${{ env.cache-name }}
+    - name: Build libcxx, libcxxabi, libunwind
+      if: steps.libcxx32-llvm.outputs.cache-hit != 'true'
+      run: |
+        export MACOSX_DEPLOYMENT_TARGET=10.10.0
+        export SDKROOT=${{ github.workspace }}/../MacOSX10.14.sdk
+        git clone https://github.com/llvm/llvm-project.git llvm
+        mkdir -p libcxx32-build
+        cd libcxx32-build
+        cmake ../llvm/llvm -DLLVM_ENABLE_PROJECTS="libcxx;libcxxabi;libunwind" -DLIBCXX_CXX_ABI=libcxxabi -DLIBCXXABI_USE_LLVM_UNWINDER=ON -DCMAKE_BUILD_TYPE=Release -DLIBCXX_BUILD_32_BITS=ON -DLIBCXXABI_BUILD_32_BITS=ON -DLIBUNWIND_BUILD_32_BITS=ON -DLLVM_BUILD_32_BITS=ON
+        make -j4 cxx cxxabi unwind
+  build-libcxx64:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v1
+      with:
+        repository: ChristopherHX/MacOSX10.14.sdk
+        ref: 5d1c9b28f01ef0b01225f92670ee587b430efa8e
+        token: ${{ secrets.MacOSX1014sdk }}
+    - name: Cache libcxx64
+      id: libcxx64-llvm
+      uses: actions/cache@v1
+      env:
+        cache-name: cache-libcxx64-macos-10-10
+      with:
+        path: libcxx64-build
+        key: ${{ runner.os }}-build-${{ env.cache-name }}
+    - name: Build libcxx, libcxxabi, libunwind
+      if: steps.libcxx64-llvm.outputs.cache-hit != 'true'
+      run: |
+        export MACOSX_DEPLOYMENT_TARGET=10.10.0
+        export SDKROOT=${{ github.workspace }}/../MacOSX10.14.sdk
+        git clone https://github.com/llvm/llvm-project.git llvm
+        mkdir -p libcxx64-build
+        cd libcxx64-build
+        cmake ../llvm/llvm -DLLVM_ENABLE_PROJECTS="libcxx;libcxxabi;libunwind" -DLIBCXX_CXX_ABI=libcxxabi -DLIBCXXABI_USE_LLVM_UNWINDER=ON -DCMAKE_BUILD_TYPE=Release
+        make -j4 cxx cxxabi unwind
+  build-libcxx:
+    runs-on: macos-latest
+    needs: [build-libcxx32,build-libcxx64]
+    steps:
+    - name: Cache libcxx32
+      id: libcxx32-llvm
+      uses: actions/cache@v1
+      env:
+        cache-name: cache-libcxx32-macos-10-10
+      with:
+        path: libcxx32-build
+        key: ${{ runner.os }}-build-${{ env.cache-name }}
+    - name: Cache libcxx64
+      id: libcxx64-llvm
+      uses: actions/cache@v1
+      env:
+        cache-name: cache-libcxx64-macos-10-10
+      with:
+        path: libcxx64-build
+        key: ${{ runner.os }}-build-${{ env.cache-name }}
+    - name: Cache libcxx
+      id: libcxx-llvm
+      uses: actions/cache@v1
+      env:
+        cache-name: cache-libcxx-macos-10-10
+      with:
+        path: libcxx-build
+        key: ${{ runner.os }}-build-${{ env.cache-name }}
+    - name: Build universal lib
+      run: |
+        mkdir -p lib/
+        lipo -create libcxx32-build/lib/libc++.dylib libcxx64-build/lib/libc++.dylib -output lib/libc++.dylib
+        lipo -create libcxx32-build/lib/libc++abi.dylib libcxx64-build/lib/libc++abi.dylib -output lib/libc++abi.dylib
+        lipo -create libcxx32-build/lib/libunwind.dylib libcxx64-build/lib/libunwind.dylib -output lib/libunwind.dylib
   build:
     runs-on: macos-latest
     steps:
@@ -22,34 +108,6 @@ jobs:
         repository: ChristopherHX/MacOSX10.14.sdk
         ref: 5d1c9b28f01ef0b01225f92670ee587b430efa8e
         token: ${{ secrets.MacOSX1014sdk }}
-    - name: Cache llvm
-      id: cache-llvm
-      uses: actions/cache@v1
-      env:
-        cache-name: cache-llvm-macos-10-10
-      with:
-        path: llvm-build
-        key: ${{ runner.os }}-build-${{ env.cache-name }}
-    - name: Build libcxx, libcxxabi, libunwind
-      if: steps.cache-llvm.outputs.cache-hit != 'true'
-      run: |
-        export MACOSX_DEPLOYMENT_TARGET=10.10.0
-        export SDKROOT=${{ github.workspace }}/../MacOSX10.14.sdk
-        git clone https://github.com/llvm/llvm-project.git llvm
-        mkdir -p llvm-build/x86
-        cd llvm-build/x86
-        cmake ../../llvm/llvm -DLLVM_ENABLE_PROJECTS="libcxx;libcxxabi;libunwind" -DLIBCXX_CXX_ABI=libcxxabi -DLIBCXXABI_USE_LLVM_UNWINDER=ON -DCMAKE_BUILD_TYPE=Release -DLIBCXX_BUILD_32_BITS=ON -DLIBCXXABI_BUILD_32_BITS=ON -DLIBUNWIND_BUILD_32_BITS=ON -DLLVM_BUILD_32_BITS=ON
-        make -j4 cxx cxxabi unwind
-        cd ../..
-        mkdir -p llvm-build/x86_64
-        cd llvm-build/x86_64
-        cmake ../../llvm/llvm -DLLVM_ENABLE_PROJECTS="libcxx;libcxxabi;libunwind" -DLIBCXX_CXX_ABI=libcxxabi -DLIBCXXABI_USE_LLVM_UNWINDER=ON -DCMAKE_BUILD_TYPE=Release
-        make -j4 cxx cxxabi unwind
-        cd ../..
-        mkdir -p lib/
-        lipo -create llvm-build/x86/lib/libc++.dylib llvm-build/x86_64/lib/libc++.dylib -output lib/libc++.dylib
-        lipo -create llvm-build/x86/lib/libc++abi.dylib llvm-build/x86_64/lib/libc++abi.dylib -output lib/libc++abi.dylib
-        lipo -create llvm-build/x86/lib/libunwind.dylib llvm-build/x86_64/lib/libunwind.dylib -output lib/libunwind.dylib
     - name: Use Node.js
       uses: actions/setup-node@v1
       with:
