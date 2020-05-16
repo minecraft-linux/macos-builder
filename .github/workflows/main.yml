@@ -88,10 +88,10 @@ jobs:
         key: ${{ runner.os }}-build-${{ env.cache-name }}
     - name: Build universal lib
       run: |
-        mkdir -p lib/
-        lipo -create libcxx32-build/lib/libc++.dylib libcxx64-build/lib/libc++.dylib -output lib/libc++.dylib
-        lipo -create libcxx32-build/lib/libc++abi.dylib libcxx64-build/lib/libc++abi.dylib -output lib/libc++abi.dylib
-        lipo -create libcxx32-build/lib/libunwind.dylib libcxx64-build/lib/libunwind.dylib -output lib/libunwind.dylib
+        mkdir -p libcxx-build/
+        lipo -create libcxx32-build/lib/libc++.dylib libcxx64-build/lib/libc++.dylib -output libcxx-build/libc++.dylib
+        lipo -create libcxx32-build/lib/libc++abi.dylib libcxx64-build/lib/libc++abi.dylib -output libcxx-build/libc++abi.dylib
+        lipo -create libcxx32-build/lib/libunwind.dylib libcxx64-build/lib/libunwind.dylib -output libcxx-build/libunwind.dylib
   build:
     runs-on: macos-latest
     steps:
