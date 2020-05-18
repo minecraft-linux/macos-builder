@@ -84,7 +84,7 @@ jobs:
       id: libcxx-llvm
       uses: actions/cache@v1
       env:
-        cache-name: cache-libcxx-2-macos-10-10
+        cache-name: cache-libcxx-3-macos-10-10
       with:
         path: libcxx-build
         key: ${{ runner.os }}-build-${{ env.cache-name }}
@@ -99,6 +99,9 @@ jobs:
         ln -s libc++.1.dylib libc++.dylib
         ln -s libc++abi.1.dylib libc++abi.dylib
         ln -s libunwind.1.dylib libunwind.dylib
+        install_name_tool -rpath @loader_path/../lib @loader_path/../Frameworks libc++.dylib
+        install_name_tool -rpath @loader_path/../lib @loader_path/../Frameworks libc++abi.dylib
+        install_name_tool -rpath @loader_path/../lib @loader_path/../Frameworks libunwind.dylib
   brew-deps:
     runs-on: macos-latest
     steps:
@@ -185,7 +188,7 @@ jobs:
       id: libcxx-llvm
       uses: actions/cache@v1
       env:
-        cache-name: cache-libcxx-2-macos-10-10
+        cache-name: cache-libcxx-3-macos-10-10
       with:
         path: libcxx-build
         key: ${{ runner.os }}-build-${{ env.cache-name }}
