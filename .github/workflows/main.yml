@@ -188,20 +188,6 @@ jobs:
         repository: ChristopherHX/MacOSX10.14.sdk
         ref: 5d1c9b28f01ef0b01225f92670ee587b430efa8e
         token: ${{ secrets.MacOSX1014sdk }}
-    - name: Use Node.js
-      uses: actions/setup-node@v1
-      with:
-        node-version: '12.x'
-    - name: Download old dmg's
-      run: |
-        mkdir -p sparcle/
-        git clone https://github.com/ChristopherHX/github-release-downloader.git grd
-        cd grd
-        npm install
-        npm run-script build
-        cd ..
-        grd/bin/grd --token ${{ secrets.GITHUB_TOKEN }} --owner ChristopherHX --repository osx-packaging-scripts --filter-asset '^.*\.dmg$' --match-version 'ng_10.10\.dmg' --output sparcle/
-        mv sparcle/${GITHUB_REPOSITORY}/ng_10.10.dmg/*.dmg sparcle/ || :
     - name: Cache libcxx32
       id: libcxx32-llvm
       uses: actions/cache@v1
@@ -260,6 +246,20 @@ jobs:
     - name: Build .dmg
       working-directory: ${{ github.workspace }}/../osx-packaging-scripts
       run: python3 build_dmg.py
+    - name: Use Node.js
+      uses: actions/setup-node@v1
+      with:
+        node-version: '12.x'
+    - name: Download old dmg's
+      run: |
+        mkdir -p sparcle/
+        git clone https://github.com/ChristopherHX/github-release-downloader.git grd
+        cd grd
+        npm install
+        npm run-script build
+        cd ..
+        grd/bin/grd --token ${{ secrets.GITHUB_TOKEN }} --owner ChristopherHX --repository osx-packaging-scripts --filter-asset '^.*\.dmg$' --match-version 'ng_10.10\.dmg' --output sparcle/
+        mv sparcle/${GITHUB_REPOSITORY}/ng_10.10.dmg/*.dmg sparcle/ || :
     - name: Generate Dist
       run: |
         DMG_FILENAME="Minecraft_Bedrock_Launcher.0.0.${GITHUB_RUN_NUMBER}.dmg"
