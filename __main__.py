@@ -127,6 +127,9 @@ def copy_installed_files(from_path, to_path):
 copy_installed_files(path.join(CMAKE_INSTALL_PREFIX, 'bin'), path.join(APP_OUTPUT_DIR, 'Contents', 'MacOS'))
 copy_installed_files(path.join(CMAKE_INSTALL_PREFIX, 'share'), path.join(APP_OUTPUT_DIR, 'Contents', 'Resources'))
 copy_installed_files('libcxx-build', path.join(APP_OUTPUT_DIR, 'Contents', 'Frameworks'))
+# Workaround Qt 5.9.2
+copy_installed_files(path.join(QT_INSTALL_PATH, 'qml', 'QtQuick'), path.join(APP_OUTPUT_DIR, 'Contents', 'Resources', 'qml', 'QtQuick'))
+copy_installed_files(path.join(QT_INSTALL_PATH, 'qml', 'QtQuick.2'), path.join(APP_OUTPUT_DIR, 'Contents', 'Resources', 'qml', 'QtQuick.2'))
 
 display_stage("Building Info.plist file")
 with open(path.join(TEMPLATES_DIR, 'Info.plist.tmpl'), 'r') as raw:
