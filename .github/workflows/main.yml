@@ -9,8 +9,16 @@ jobs:
   build-libcxx32:
     runs-on: macos-latest
     steps:
-    - name: Cache libcxx32
+    - name: Check Cache libcxx32
       id: libcxx32-llvm
+      uses: Mystraht/cache@master
+      env:
+        cache-name: cache-libcxx32-macos-10-10
+      with:
+        path: libcxx32-build
+        key: ${{ runner.os }}-build-${{ env.cache-name }}
+    - name: Cache libcxx32
+      if: steps.libcxx32-llvm.outputs.cache-hit != 'true'
       uses: actions/cache@v1
       env:
         cache-name: cache-libcxx32-macos-10-10
@@ -36,8 +44,16 @@ jobs:
   build-libcxx64:
     runs-on: macos-latest
     steps:
-    - name: Cache libcxx64
+    - name: Check Cache libcxx64
       id: libcxx64-llvm
+      uses: Mystraht/cache@master
+      env:
+        cache-name: cache-libcxx64-macos-10-10
+      with:
+        path: libcxx64-build
+        key: ${{ runner.os }}-build-${{ env.cache-name }}
+    - name: Cache libcxx64
+      if: steps.libcxx64-llvm.outputs.cache-hit != 'true'
       uses: actions/cache@v1
       env:
         cache-name: cache-libcxx64-macos-10-10
@@ -64,7 +80,16 @@ jobs:
     runs-on: macos-latest
     needs: [build-libcxx32,build-libcxx64]
     steps:
+    - name: Check libcxx
+      id: libcxx-llvm
+      uses: Mystraht/cache@master
+      env:
+        cache-name: cache-libcxx-3-macos-10-10
+      with:
+        path: libcxx-build
+        key: ${{ runner.os }}-build-${{ env.cache-name }}
     - name: Cache libcxx32
+      if: steps.libcxx-llvm.outputs.cache-hit != 'true'
       id: libcxx32-llvm
       uses: actions/cache@v1
       env:
@@ -73,6 +98,7 @@ jobs:
         path: libcxx32-build
         key: ${{ runner.os }}-build-${{ env.cache-name }}
     - name: Cache libcxx64
+      if: steps.libcxx-llvm.outputs.cache-hit != 'true'
       id: libcxx64-llvm
       uses: actions/cache@v1
       env:
@@ -81,7 +107,7 @@ jobs:
         path: libcxx64-build
         key: ${{ runner.os }}-build-${{ env.cache-name }}
     - name: Cache libcxx
-      id: libcxx-llvm
+      if: steps.libcxx-llvm.outputs.cache-hit != 'true'
       uses: actions/cache@v1
       env:
         cache-name: cache-libcxx-3-macos-10-10
@@ -105,8 +131,16 @@ jobs:
   brew-deps:
     runs-on: macos-latest
     steps:
-    - name: Cache brew Cellar
+    - name: Check brew Cellar
       id: cache-brew-cellar
+      uses: Mystraht/cache@master
+      env:
+        cache-name: cache-brew-macos-cellar-10-10
+      with:
+        path: /usr/local/Cellar/
+        key: ${{ runner.os }}-build-${{ env.cache-name }}
+    - name: Cache brew Cellar
+      if: steps.cache-brew-cellar.outputs.cache-hit != 'true'
       uses: actions/cache@v1
       env:
         cache-name: cache-brew-macos-cellar-10-10
