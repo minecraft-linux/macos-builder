@@ -128,6 +128,132 @@ jobs:
         install_name_tool -rpath @loader_path/../lib @loader_path/../Frameworks libc++.dylib
         install_name_tool -rpath @loader_path/../lib @loader_path/../Frameworks libc++abi.dylib
         install_name_tool -rpath @loader_path/../lib @loader_path/../Frameworks libunwind.dylib
+  brew-libzip:
+    runs-on: macos-latest
+    steps:
+    - name: Check for libzip
+      id: cache-brew-libzip
+      uses: Mystraht/cache@master
+      env:
+        cache-name: cache-brew-libzip-macos-10-10
+      with:
+        path: /usr/local/Cellar/libzip
+        key: ${{ runner.os }}-build-${{ env.cache-name }
+    - name: Cache libzip
+      if: steps.cache-brew-libzip.outputs.cache-hit != 'true'
+      uses: actions/cache@v1
+      env:
+        cache-name: cache-brew-libzip-macos-10-10
+      with:
+        path: /usr/local/Cellar/libzip
+        key: ${{ runner.os }}-build-${{ env.cache-name }
+    - uses: actions/checkout@v1
+      if: steps.cache-brew-libzip.outputs.cache-hit != 'true'
+      with:
+        repository: ChristopherHX/MacOSX10.14.sdk
+        ref: 5d1c9b28f01ef0b01225f92670ee587b430efa8e
+        token: ${{ secrets.MacOSX1014sdk }}
+      - name: Apply custom patch and Update brew
+      if: steps.cache-brew-libzip.outputs.cache-hit != 'true'
+      working-directory: "/usr/local/Homebrew"
+      run: |
+        git remote add fork https://github.com/ChristopherHX/brew.git
+        git fetch fork
+        git config --global user.email "CI@local"
+        git config --global user.name "CI Bot"
+        git checkout fork/master
+    - name: Install brew dependencies
+      if: steps.cache-brew-libzip.outputs.cache-hit != 'true'
+      working-directory: ${{ github.workspace }}/../osx-packaging-scripts
+      run: |
+        export HOMEBREW_MACOSX_DEPLOYMENT_TARGET=10.10.0
+        export HOMEBREW_SDKROOT=${{ github.workspace }}/../MacOSX10.14.sdk
+        HOMEBREW_NO_AUTO_UPDATE=1 brew reinstall libzip
+  brew-protobuf:
+    runs-on: macos-latest
+    steps:
+    - name: Check for protobuf
+      id: cache-brew-protobuf
+      uses: Mystraht/cache@master
+      env:
+        cache-name: cache-brew-protobuf-macos-10-10
+      with:
+        path: /usr/local/Cellar/protobuf
+        key: ${{ runner.os }}-build-${{ env.cache-name }
+    - name: Cache protobuf
+      if: steps.cache-brew-protobuf.outputs.cache-hit != 'true'
+      uses: actions/cache@v1
+      env:
+        cache-name: cache-brew-protobuf-macos-10-10
+      with:
+        path: /usr/local/Cellar/protobuf
+        key: ${{ runner.os }}-build-${{ env.cache-name }
+    - uses: actions/checkout@v1
+      if: steps.cache-brew-protobuf.outputs.cache-hit != 'true'
+      with:
+        repository: ChristopherHX/MacOSX10.14.sdk
+        ref: 5d1c9b28f01ef0b01225f92670ee587b430efa8e
+        token: ${{ secrets.MacOSX1014sdk }}
+      - name: Apply custom patch and Update brew
+      if: steps.cache-brew-protobuf.outputs.cache-hit != 'true'
+      working-directory: "/usr/local/Homebrew"
+      run: |
+        git remote add fork https://github.com/ChristopherHX/brew.git
+        git fetch fork
+        git config --global user.email "CI@local"
+        git config --global user.name "CI Bot"
+        git checkout fork/master
+    - name: Install brew dependencies
+      if: steps.cache-brew-protobuf.outputs.cache-hit != 'true'
+      working-directory: ${{ github.workspace }}/../osx-packaging-scripts
+      run: |
+        HOMEBREW_NO_AUTO_UPDATE=1 brew install automake
+        export HOMEBREW_MACOSX_DEPLOYMENT_TARGET=10.10.0
+        export HOMEBREW_SDKROOT=${{ github.workspace }}/../MacOSX10.14.sdk
+        HOMEBREW_NO_AUTO_UPDATE=1 brew reinstall python
+        HOMEBREW_NO_AUTO_UPDATE=1 brew install protobuf
+  brew-libuv:
+    runs-on: macos-latest
+    steps:
+    - name: Check for libuv
+      id: cache-brew-libuv
+      uses: Mystraht/cache@master
+      env:
+        cache-name: cache-brew-libuv-macos-10-10
+      with:
+        path: /usr/local/Cellar/libuv
+        key: ${{ runner.os }}-build-${{ env.cache-name }
+    - name: Cache libuv
+      if: steps.cache-brew-libuv.outputs.cache-hit != 'true'
+      uses: actions/cache@v1
+      env:
+        cache-name: cache-brew-libuv-macos-10-10
+      with:
+        path: /usr/local/Cellar/libuv
+        key: ${{ runner.os }}-build-${{ env.cache-name }
+    - uses: actions/checkout@v1
+      if: steps.cache-brew-libuv.outputs.cache-hit != 'true'
+      with:
+        repository: ChristopherHX/MacOSX10.14.sdk
+        ref: 5d1c9b28f01ef0b01225f92670ee587b430efa8e
+        token: ${{ secrets.MacOSX1014sdk }}
+      - name: Apply custom patch and Update brew
+      if: steps.cache-brew-libuv.outputs.cache-hit != 'true'
+      working-directory: "/usr/local/Homebrew"
+      run: |
+        git remote add fork https://github.com/ChristopherHX/brew.git
+        git fetch fork
+        git config --global user.email "CI@local"
+        git config --global user.name "CI Bot"
+        git checkout fork/master
+    - name: Install brew dependencies
+      if: steps.cache-brew-libuv.outputs.cache-hit != 'true'
+      working-directory: ${{ github.workspace }}/../osx-packaging-scripts
+      run: |
+        HOMEBREW_NO_AUTO_UPDATE=1 brew install automake sphinx-doc
+        export HOMEBREW_MACOSX_DEPLOYMENT_TARGET=10.10.0
+        export HOMEBREW_SDKROOT=${{ github.workspace }}/../MacOSX10.14.sdk
+        HOMEBREW_NO_AUTO_UPDATE=1 brew install libuv
   brew-deps:
     runs-on: macos-latest
     steps:
@@ -213,19 +339,33 @@ jobs:
         path: libcxx-build
         key: ${{ runner.os }}-build-${{ env.cache-name }}
     - name: Install python dependencies
-      run: python3 -m pip install --upgrade pip && pip3 install jinja2 ds_store
-    - name: Cache brew Cellar
-      id: cache-brew-cellar
+      run: pip3 install jinja2 ds_store
+    - name: Restore libzip
       uses: actions/cache@v1
       env:
-        cache-name: cache-brew-macos-cellar-10-10
+        cache-name: cache-brew-libzip-macos-10-10
       with:
-        path: /usr/local/Cellar/
-        key: ${{ runner.os }}-build-${{ env.cache-name }}
-    - name: brew link
+        path: /usr/local/Cellar/libzip
+        key: ${{ runner.os }}-build-${{ env.cache-name }
+    - name: Restore protobuf
+      uses: actions/cache@v1
+      env:
+        cache-name: cache-brew-protobuf-macos-10-10
+      with:
+        path: /usr/local/Cellar/protobuf
+        key: ${{ runner.os }}-build-${{ env.cache-name }
+    - name: Restore libuv
+      uses: actions/cache@v1
+      env:
+        cache-name: cache-brew-libuv-macos-10-10
+      with:
+        path: /usr/local/Cellar/libuv
+        key: ${{ runner.os }}-build-${{ env.cache-name }
+    - name: brew install / link
       run: |
+        brew install p7zip automake
         HOMEBREW_NO_AUTO_UPDATE=1 brew unlink libzip
-        HOMEBREW_NO_AUTO_UPDATE=1 brew link libuv protobuf libzip p7zip automake cmake
+        HOMEBREW_NO_AUTO_UPDATE=1 brew link libuv protobuf libzip
     - name: Cache qt
       id: cache-qt
       uses: actions/cache@v1
