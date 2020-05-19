@@ -254,52 +254,9 @@ jobs:
         export HOMEBREW_MACOSX_DEPLOYMENT_TARGET=10.10.0
         export HOMEBREW_SDKROOT=${{ github.workspace }}/../MacOSX10.14.sdk
         HOMEBREW_NO_AUTO_UPDATE=1 brew install libuv
-  brew-deps:
-    runs-on: macos-latest
-    steps:
-    - name: Check brew Cellar
-      id: cache-brew-cellar
-      uses: Mystraht/cache@master
-      env:
-        cache-name: cache-brew-macos-cellar-10-10
-      with:
-        path: /usr/local/Cellar/
-        key: ${{ runner.os }}-build-${{ env.cache-name }}
-    - name: Cache brew Cellar
-      if: steps.cache-brew-cellar.outputs.cache-hit != 'true'
-      uses: actions/cache@v1
-      env:
-        cache-name: cache-brew-macos-cellar-10-10
-      with:
-        path: /usr/local/Cellar/
-        key: ${{ runner.os }}-build-${{ env.cache-name }}
-    - uses: actions/checkout@v1
-      if: steps.cache-brew-cellar.outputs.cache-hit != 'true'
-      with:
-        repository: ChristopherHX/MacOSX10.14.sdk
-        ref: 5d1c9b28f01ef0b01225f92670ee587b430efa8e
-        token: ${{ secrets.MacOSX1014sdk }}
-    - name: Apply custom patch and Update brew
-      if: steps.cache-brew-cellar.outputs.cache-hit != 'true'
-      working-directory: "/usr/local/Homebrew"
-      run: |
-        git remote add fork https://github.com/ChristopherHX/brew.git
-        git fetch fork
-        git config --global user.email "CI@local"
-        git config --global user.name "CI Bot"
-        git checkout fork/master
-    - name: Install brew dependencies
-      if: steps.cache-brew-cellar.outputs.cache-hit != 'true'
-      working-directory: ${{ github.workspace }}/../osx-packaging-scripts
-      run: |
-        HOMEBREW_NO_AUTO_UPDATE=1 brew install p7zip automake sphinx-doc
-        export HOMEBREW_MACOSX_DEPLOYMENT_TARGET=10.10.0
-        export HOMEBREW_SDKROOT=${{ github.workspace }}/../MacOSX10.14.sdk
-        HOMEBREW_NO_AUTO_UPDATE=1 brew reinstall python libzip
-        HOMEBREW_NO_AUTO_UPDATE=1 brew install libuv protobuf
   build:
     runs-on: macos-latest
-    needs: [brew-deps, build-libcxx]
+    needs: [brew-libzip, brew-protobuf, brew-libuv, build-libcxx]
     steps:
     - name: Set Environment Variables
       run: |
