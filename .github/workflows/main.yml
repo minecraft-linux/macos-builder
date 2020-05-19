@@ -138,7 +138,7 @@ jobs:
         cache-name: cache-brew-libzip-macos-10-10
       with:
         path: /usr/local/Cellar/libzip
-        key: ${{ runner.os }}-build-${{ env.cache-name }
+        key: ${{ runner.os }}-build-${{ env.cache-name }}
     - name: Cache libzip
       if: steps.cache-brew-libzip.outputs.cache-hit != 'true'
       uses: actions/cache@v1
@@ -146,7 +146,7 @@ jobs:
         cache-name: cache-brew-libzip-macos-10-10
       with:
         path: /usr/local/Cellar/libzip
-        key: ${{ runner.os }}-build-${{ env.cache-name }
+        key: ${{ runner.os }}-build-${{ env.cache-name }}
     - uses: actions/checkout@v1
       if: steps.cache-brew-libzip.outputs.cache-hit != 'true'
       with:
@@ -179,7 +179,7 @@ jobs:
         cache-name: cache-brew-protobuf-macos-10-10
       with:
         path: /usr/local/Cellar/protobuf
-        key: ${{ runner.os }}-build-${{ env.cache-name }
+        key: ${{ runner.os }}-build-${{ env.cache-name }}
     - name: Cache protobuf
       if: steps.cache-brew-protobuf.outputs.cache-hit != 'true'
       uses: actions/cache@v1
@@ -187,7 +187,7 @@ jobs:
         cache-name: cache-brew-protobuf-macos-10-10
       with:
         path: /usr/local/Cellar/protobuf
-        key: ${{ runner.os }}-build-${{ env.cache-name }
+        key: ${{ runner.os }}-build-${{ env.cache-name }}
     - uses: actions/checkout@v1
       if: steps.cache-brew-protobuf.outputs.cache-hit != 'true'
       with:
@@ -222,7 +222,7 @@ jobs:
         cache-name: cache-brew-libuv-macos-10-10
       with:
         path: /usr/local/Cellar/libuv
-        key: ${{ runner.os }}-build-${{ env.cache-name }
+        key: ${{ runner.os }}-build-${{ env.cache-name }}
     - name: Cache libuv
       if: steps.cache-brew-libuv.outputs.cache-hit != 'true'
       uses: actions/cache@v1
@@ -230,7 +230,7 @@ jobs:
         cache-name: cache-brew-libuv-macos-10-10
       with:
         path: /usr/local/Cellar/libuv
-        key: ${{ runner.os }}-build-${{ env.cache-name }
+        key: ${{ runner.os }}-build-${{ env.cache-name }}
     - uses: actions/checkout@v1
       if: steps.cache-brew-libuv.outputs.cache-hit != 'true'
       with:
@@ -346,21 +346,21 @@ jobs:
         cache-name: cache-brew-libzip-macos-10-10
       with:
         path: /usr/local/Cellar/libzip
-        key: ${{ runner.os }}-build-${{ env.cache-name }
+        key: ${{ runner.os }}-build-${{ env.cache-name }}
     - name: Restore protobuf
       uses: actions/cache@v1
       env:
         cache-name: cache-brew-protobuf-macos-10-10
       with:
         path: /usr/local/Cellar/protobuf
-        key: ${{ runner.os }}-build-${{ env.cache-name }
+        key: ${{ runner.os }}-build-${{ env.cache-name }}
     - name: Restore libuv
       uses: actions/cache@v1
       env:
         cache-name: cache-brew-libuv-macos-10-10
       with:
         path: /usr/local/Cellar/libuv
-        key: ${{ runner.os }}-build-${{ env.cache-name }
+        key: ${{ runner.os }}-build-${{ env.cache-name }}
     - name: brew install / link
       run: |
         brew install p7zip automake
