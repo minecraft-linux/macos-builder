@@ -153,7 +153,7 @@ jobs:
         repository: ChristopherHX/MacOSX10.14.sdk
         ref: 5d1c9b28f01ef0b01225f92670ee587b430efa8e
         token: ${{ secrets.MacOSX1014sdk }}
-      - name: Apply custom patch and Update brew
+    - name: Apply custom patch and Update brew
       if: steps.cache-brew-libzip.outputs.cache-hit != 'true'
       working-directory: "/usr/local/Homebrew"
       run: |
@@ -194,7 +194,7 @@ jobs:
         repository: ChristopherHX/MacOSX10.14.sdk
         ref: 5d1c9b28f01ef0b01225f92670ee587b430efa8e
         token: ${{ secrets.MacOSX1014sdk }}
-      - name: Apply custom patch and Update brew
+    - name: Apply custom patch and Update brew
       if: steps.cache-brew-protobuf.outputs.cache-hit != 'true'
       working-directory: "/usr/local/Homebrew"
       run: |
@@ -237,7 +237,7 @@ jobs:
         repository: ChristopherHX/MacOSX10.14.sdk
         ref: 5d1c9b28f01ef0b01225f92670ee587b430efa8e
         token: ${{ secrets.MacOSX1014sdk }}
-      - name: Apply custom patch and Update brew
+    - name: Apply custom patch and Update brew
       if: steps.cache-brew-libuv.outputs.cache-hit != 'true'
       working-directory: "/usr/local/Homebrew"
       run: |
