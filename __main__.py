@@ -120,9 +120,9 @@ def copy_installed_files(from_path, to_path):
     for f in listdir(from_path):
         print("Copying file: " + f)
         if path.isdir(path.join(from_path, f)):
-            copytree(path.join(from_path, f), path.join(to_path, f))
+            copytree(path.join(from_path, f), path.join(to_path, f), True)
         else:
-            shutil.copy2(path.join(from_path, f), path.join(to_path, f))
+            shutil.copy2(path.join(from_path, f), path.join(to_path, f), follow_symlinks = False)
 
 copy_installed_files(path.join(CMAKE_INSTALL_PREFIX, 'bin'), path.join(APP_OUTPUT_DIR, 'Contents', 'MacOS'))
 copy_installed_files(path.join(CMAKE_INSTALL_PREFIX, 'share'), path.join(APP_OUTPUT_DIR, 'Contents', 'Resources'))
