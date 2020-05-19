@@ -258,7 +258,7 @@ jobs:
         npm install
         npm run-script build
         cd ..
-        grd/bin/grd --token ${{ secrets.GITHUB_TOKEN }} --owner ChristopherHX --repository osx-packaging-scripts --filter-asset '^.*\.dmg$' --match-version 'ng.10\.10\.dmg' --output sparcle/
+        grd/bin/grd --token ${{ secrets.GITHUB_TOKEN }} --owner ChristopherHX --repository osx-packaging-scripts --filter-asset '^.*\.dmg$' --match-version 'ng_10\.10\.dmg' --output sparcle/
         mv sparcle/${GITHUB_REPOSITORY}/ng_10.10.dmg/*.dmg sparcle/ || :
     - name: Generate Dist
       run: |
