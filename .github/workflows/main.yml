@@ -339,7 +339,7 @@ jobs:
       run: |
         export MACOSX_DEPLOYMENT_TARGET=10.10.0
         export SDKROOT=${{ github.workspace }}/../MacOSX10.14.sdk
-        python3 __main__.py --qt-path qt/*/* --update-sparkle-appcast https://github.com/${GITHUB_REPOSITORY}/releases/download/ng.dmg/appcast.xml --update-sparkle-ed-public-key ${{ secrets.SPARKLE_ECDSA_PUB }} --version "0.0.${GITHUB_RUN_NUMBER}"
+        python3 __main__.py --qt-path qt/*/* --update-sparkle-appcast https://github.com/${GITHUB_REPOSITORY}/releases/download/stable/appcast.xml --update-sparkle-ed-public-key ${{ secrets.SPARKLE_ECDSA_PUB }} --version "0.0.${GITHUB_RUN_NUMBER}"
     - name: Build .dmg
       working-directory: ${{ github.workspace }}/../osx-packaging-scripts
       run: python3 build_dmg.py
@@ -355,8 +355,8 @@ jobs:
         npm install
         npm run-script build
         cd ..
-        grd/bin/grd --token ${{ secrets.GITHUB_TOKEN }} --owner ChristopherHX --repository osx-packaging-scripts --filter-asset '^.*\.dmg$' --match-version 'ng\.dmg' --output sparcle/
-        mv sparcle/${GITHUB_REPOSITORY}/ng.dmg/*.dmg sparcle/ || :
+        grd/bin/grd --token ${{ secrets.GITHUB_TOKEN }} --owner ChristopherHX --repository osx-packaging-scripts --filter-asset '^.*\.dmg$' --match-version 'stable' --output sparcle/
+        mv sparcle/${GITHUB_REPOSITORY}/stable/*.dmg sparcle/ || :
     - name: Generate Dist
       run: |
         DMG_FILENAME="Minecraft_Bedrock_Launcher.0.0.${GITHUB_RUN_NUMBER}.dmg"
@@ -366,9 +366,9 @@ jobs:
         sed 's/\%20/./g' sparcle/appcast.xml > dist/appcast.xml
         mv sparcle/*.delta dist/|| :
         mv "sparcle/${DMG_FILENAME}" dist/
-        echo build_id=${GITHUB_RUN_NUMBER}$'\n'download_url=https://github.com/${GITHUB_REPOSITORY}/releases/download/ng.dmg/${DMG_FILENAME} > dist/version.osx
+        echo build_id=${GITHUB_RUN_NUMBER}$'\n'download_url=https://github.com/${GITHUB_REPOSITORY}/releases/download/stable/${DMG_FILENAME} > dist/version.osx
     - name: Upload Latest
       run: |
         curl -L https://github.com/tcnksm/ghr/releases/download/v0.13.0/ghr_v0.13.0_darwin_amd64.zip --output ghr.zip
         unzip ghr.zip
-        ./ghr*/ghr -t ${{ secrets.GITHUB_TOKEN }} -u ChristopherHX -r osx-packaging-scripts -replace -prerelease -b "# NO SUPPORT THIS IS A TEST RELEASE" ng.dmg dist/
+        ./ghr*/ghr -t ${{ secrets.GITHUB_TOKEN }} -u ChristopherHX -r osx-packaging-scripts -replace -prerelease -b "# NO SUPPORT THIS IS A TEST RELEASE" stable dist/
