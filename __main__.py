@@ -70,7 +70,7 @@ def clone_repo(name, url, branch):
 
 display_stage("Downloading sources")
 clone_repo('msa', 'https://github.com/minecraft-linux/msa-manifest.git', 'master')
-clone_repo('mcpelauncher', 'https://github.com/minecraft-linux/mcpelauncher-manifest.git', 'ng')
+clone_repo('mcpelauncher', 'https://github.com/ChristopherHX/mcpelauncher-manifest.git', 'master')
 clone_repo('mcpelauncher-ui', 'https://github.com/minecraft-linux/mcpelauncher-ui-manifest.git', 'ng')
 
 # Build
