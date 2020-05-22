@@ -33,7 +33,7 @@ parser.add_argument('--update-sparkle-appcast', help='Sparkle appcast URL')
 parser.add_argument('--update-sparkle-ed-public-key', help='Enable checking updates in the metalauncher from the specified URL')
 parser.add_argument('--version', help='App version')
 parser.add_argument('--force', help='Always remove the output directory', action='store_true')
-parser.add_argument('--buildangle', help='Always remove the output directory')
+parser.add_argument('--buildangle', help='Always remove the output directory', action='store_true')
 args = parser.parse_args()
 
 if(args.version):
