@@ -211,8 +211,8 @@ jobs:
         brew install automake
         export HOMEBREW_MACOSX_DEPLOYMENT_TARGET=10.10.0
         export HOMEBREW_SDKROOT=${{ github.workspace }}/../MacOSX10.14.sdk
-        brew install python@3.8 || brew reinstall python@3.8
-        brew install protobuf || brew reinstall protobuf
+        brew reinstall python@3.8 || brew install python@3.8
+        brew reinstall protobuf || brew install protobuf
   brew-libuv:
     runs-on: macos-latest
     steps:
