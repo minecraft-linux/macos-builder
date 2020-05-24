@@ -389,7 +389,7 @@ jobs:
         ./ghr*/ghr -t ${{ secrets.GITHUB_TOKEN }} -u ChristopherHX -r osx-packaging-scripts -replace -prerelease -b "# NO SUPPORT THIS IS A TEST RELEASE" stable dist/
   upload:
     runs-on: macos-latest
-    needs: [build]
+    needs: build
     - name: Use Node.js
       uses: actions/setup-node@v1
       with:
