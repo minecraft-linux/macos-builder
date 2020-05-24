@@ -260,7 +260,7 @@ jobs:
     needs: [brew-libzip, brew-protobuf, brew-libuv, build-libcxx]
     strategy:
       matrix:
-        target: [ "10.10.0", "10.12.0", "10.13.0" ]
+        target: [ "10.10.0", "10.12.0"]
         include:
           - target: "10.10.0"
             QT_BASE_URL: http://download.qt.io/online/qtsdkrepository/mac_x64/desktop/qt5_592/
