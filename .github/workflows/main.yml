@@ -390,6 +390,7 @@ jobs:
   upload:
     runs-on: macos-latest
     needs: build
+    steps:
     - name: Use Node.js
       uses: actions/setup-node@v1
       with:
