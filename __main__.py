@@ -1,4 +1,4 @@
-from os import makedirs, path, cpu_count, listdir
+from os import makedirs, path, cpu_count, listdir, getenv
 from subprocess import check_call as call
 import subprocess
 from shutil import rmtree, copyfile, copytree
@@ -150,7 +150,7 @@ with open(path.join(TEMPLATES_DIR, 'Info.plist.tmpl'), 'r') as raw:
         cf_bundle_version = VERSION,
         cf_sparkle_feed = args.update_sparkle_appcast,
         cf_sparkle_public_ed_key = args.update_sparkle_ed_public_key,
-        cf_bundle_macos_min = os.getenv("MACOSX_DEPLOYMENT_TARGET", "10.7")
+        cf_bundle_macos_min = getenv("MACOSX_DEPLOYMENT_TARGET", "10.7")
     )
 
     f = open(path.join(APP_OUTPUT_DIR, 'Contents', 'Info.plist'), 'w')
