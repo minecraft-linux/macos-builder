@@ -13,7 +13,7 @@ jobs:
       id: libcxx32-llvm
       uses: Mystraht/cache@master
       env:
-        cache-name: cache-libcxx32-macos-10-10
+        cache-name: cache-libcxx32-macos-10-10-2
       with:
         path: libcxx32-build
         key: ${{ runner.os }}-build-${{ env.cache-name }}
@@ -21,7 +21,7 @@ jobs:
       if: steps.libcxx32-llvm.outputs.cache-hit != 'true'
       uses: actions/cache@v1
       env:
-        cache-name: cache-libcxx32-macos-10-10
+        cache-name: cache-libcxx32-macos-10-10-2
       with:
         path: libcxx32-build
         key: ${{ runner.os }}-build-${{ env.cache-name }}
@@ -31,7 +31,7 @@ jobs:
         repository: ChristopherHX/MacOSX10.14.sdk
         ref: 5d1c9b28f01ef0b01225f92670ee587b430efa8e
         token: ${{ secrets.MacOSX1014sdk }}
-    - name: Build libcxx, libcxxabi, libunwind
+    - name: Build libcxx, libcxxabi
       if: steps.libcxx32-llvm.outputs.cache-hit != 'true'
       run: |
         export MACOSX_DEPLOYMENT_TARGET=10.10.0
@@ -39,7 +39,7 @@ jobs:
         git clone https://github.com/llvm/llvm-project.git llvm
         mkdir -p libcxx32-build
         cd libcxx32-build
-        cmake ../llvm/llvm -DLLVM_ENABLE_PROJECTS="libcxx;libcxxabi;libunwind" -DLIBCXX_CXX_ABI=libcxxabi -DLIBCXXABI_USE_LLVM_UNWINDER=ON -DCMAKE_BUILD_TYPE=Release -DLIBCXX_BUILD_32_BITS=ON -DLIBCXXABI_BUILD_32_BITS=ON -DLIBUNWIND_BUILD_32_BITS=ON -DLLVM_BUILD_32_BITS=ON
+        cmake ../llvm/llvm -DLLVM_ENABLE_PROJECTS="libcxx;libcxxabi" -DCMAKE_BUILD_TYPE=Release -DLIBCXX_BUILD_32_BITS=ON -DLIBCXXABI_BUILD_32_BITS=ON -DLLVM_BUILD_32_BITS=ON
         make -j4 cxx cxxabi unwind
   build-libcxx64:
     runs-on: macos-latest
@@ -48,7 +48,7 @@ jobs:
       id: libcxx64-llvm
       uses: Mystraht/cache@master
       env:
-        cache-name: cache-libcxx64-macos-10-10
+        cache-name: cache-libcxx64-macos-10-10-2
       with:
         path: libcxx64-build
         key: ${{ runner.os }}-build-${{ env.cache-name }}
@@ -56,7 +56,7 @@ jobs:
       if: steps.libcxx64-llvm.outputs.cache-hit != 'true'
       uses: actions/cache@v1
       env:
-        cache-name: cache-libcxx64-macos-10-10
+        cache-name: cache-libcxx64-macos-10-10-2
       with:
         path: libcxx64-build
         key: ${{ runner.os }}-build-${{ env.cache-name }}
@@ -66,7 +66,7 @@ jobs:
         repository: ChristopherHX/MacOSX10.14.sdk
         ref: 5d1c9b28f01ef0b01225f92670ee587b430efa8e
         token: ${{ secrets.MacOSX1014sdk }}
-    - name: Build libcxx, libcxxabi, libunwind
+    - name: Build libcxx, libcxxabi
       if: steps.libcxx64-llvm.outputs.cache-hit != 'true'
       run: |
         export MACOSX_DEPLOYMENT_TARGET=10.10.0
@@ -74,7 +74,7 @@ jobs:
         git clone https://github.com/llvm/llvm-project.git llvm
         mkdir -p libcxx64-build
         cd libcxx64-build
-        cmake ../llvm/llvm -DLLVM_ENABLE_PROJECTS="libcxx;libcxxabi;libunwind" -DLIBCXX_CXX_ABI=libcxxabi -DLIBCXXABI_USE_LLVM_UNWINDER=ON -DCMAKE_BUILD_TYPE=Release
+        cmake ../llvm/llvm -DLLVM_ENABLE_PROJECTS="libcxx;libcxxabi" -DCMAKE_BUILD_TYPE=Release
         make -j4 cxx cxxabi unwind
   build-libcxx:
     runs-on: macos-latest
@@ -84,7 +84,7 @@ jobs:
       id: libcxx-llvm
       uses: Mystraht/cache@master
       env:
-        cache-name: cache-libcxx-3-macos-10-10
+        cache-name: cache-libcxx-macos-10-10-2
       with:
         path: libcxx-build
         key: ${{ runner.os }}-build-${{ env.cache-name }}
@@ -93,7 +93,7 @@ jobs:
       id: libcxx32-llvm
       uses: actions/cache@v1
       env:
-        cache-name: cache-libcxx32-macos-10-10
+        cache-name: cache-libcxx32-macos-10-10-2
       with:
         path: libcxx32-build
         key: ${{ runner.os }}-build-${{ env.cache-name }}
@@ -102,7 +102,7 @@ jobs:
       id: libcxx64-llvm
       uses: actions/cache@v1
       env:
-        cache-name: cache-libcxx64-macos-10-10
+        cache-name: cache-libcxx64-macos-10-10-2
       with:
         path: libcxx64-build
         key: ${{ runner.os }}-build-${{ env.cache-name }}
@@ -110,7 +110,7 @@ jobs:
       if: steps.libcxx-llvm.outputs.cache-hit != 'true'
       uses: actions/cache@v1
       env:
-        cache-name: cache-libcxx-3-macos-10-10
+        cache-name: cache-libcxx-macos-10-10-2
       with:
         path: libcxx-build
         key: ${{ runner.os }}-build-${{ env.cache-name }}
@@ -120,14 +120,11 @@ jobs:
         mkdir -p libcxx-build/
         lipo -create libcxx32-build/lib/libc++.dylib libcxx64-build/lib/libc++.dylib -output libcxx-build/libc++.1.dylib
         lipo -create libcxx32-build/lib/libc++abi.dylib libcxx64-build/lib/libc++abi.dylib -output libcxx-build/libc++abi.1.dylib
-        lipo -create libcxx32-build/lib/libunwind.dylib libcxx64-build/lib/libunwind.dylib -output libcxx-build/libunwind.1.dylib
         cd libcxx-build
         ln -s libc++.1.dylib libc++.dylib
         ln -s libc++abi.1.dylib libc++abi.dylib
-        ln -s libunwind.1.dylib libunwind.dylib
         install_name_tool -rpath @loader_path/../lib @loader_path/../Frameworks libc++.dylib
         install_name_tool -rpath @loader_path/../lib @loader_path/../Frameworks libc++abi.dylib
-        install_name_tool -rpath @loader_path/../lib @loader_path/../Frameworks libunwind.dylib
   brew-libzip:
     runs-on: macos-latest
     steps:
@@ -276,7 +273,7 @@ jobs:
       id: libcxx32-llvm
       uses: actions/cache@v1
       env:
-        cache-name: cache-libcxx32-macos-10-10
+        cache-name: cache-libcxx32-macos-10-10-2
       with:
         path: libcxx32-build
         key: ${{ runner.os }}-build-${{ env.cache-name }}
@@ -284,7 +281,7 @@ jobs:
       id: libcxx64-llvm
       uses: actions/cache@v1
       env:
-        cache-name: cache-libcxx64-macos-10-10
+        cache-name: cache-libcxx64-macos-10-10-2
       with:
         path: libcxx64-build
         key: ${{ runner.os }}-build-${{ env.cache-name }}
@@ -292,7 +289,7 @@ jobs:
       id: libcxx-llvm
       uses: actions/cache@v1
       env:
-        cache-name: cache-libcxx-3-macos-10-10
+        cache-name: cache-libcxx-macos-10-10-2
       with:
         path: libcxx-build
         key: ${{ runner.os }}-build-${{ env.cache-name }}
