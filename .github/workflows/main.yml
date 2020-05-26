@@ -255,6 +255,26 @@ jobs:
   build:
     runs-on: macos-latest
     needs: [brew-libzip, brew-protobuf, brew-libuv, build-libcxx]
+    strategy:
+      matrix:
+        target: [ "10.10.0", "10.12.0"]
+        include:
+          - target: "10.10.0"
+            micro: 0
+            QT_BASE_URL: http://download.qt.io/online/qtsdkrepository/mac_x64/desktop/qt5_592/
+            QT_VERSION_SHORT: 5.9.2
+            QT_VERSION: 5.9.2-0-201710050729
+            QT_PACKAGE_PREFIX: qt.592.
+            QT_PACKAGE_SUFFIX: clang_64
+            QT_PREBUILT_SUFFIX: -MacOS-OSX_10_10-Clang-MacOS-OSX_10_10-X86_64
+          - target: "10.12.0"
+            micro: 1
+            QT_BASE_URL: http://download.qt.io/online/qtsdkrepository/mac_x64/desktop/qt5_5113/
+            QT_VERSION_SHORT: 5.11.3
+            QT_VERSION: 5.11.3-0-201811291904
+            QT_PACKAGE_PREFIX: qt.qt5.5113.
+            QT_PACKAGE_SUFFIX: clang_64
+            QT_PREBUILT_SUFFIX: -MacOS-MacOS_10_12-Clang-MacOS-MacOS_10_12-X86_64
     steps:
     - name: Set Environment Variables
       run: |
@@ -325,46 +345,65 @@ jobs:
       id: cache-qt
       uses: actions/cache@v1
       env:
-        cache-name: cache-qt-macos-10-10
+        cache-name: cache-qt-macos-${{ matrix.target }}
       with:
         path: qt
         key: ${{ runner.os }}-build-${{ env.cache-name }}
     - name: Download Qt
       if: steps.cache-qt.outputs.cache-hit != 'true'
-      run: ./download_qt.sh
+      run: |
+        export QT_BASE_URL=${{ matrix.QT_BASE_URL }}
+        export QT_VERSION_SHORT=${{ matrix.QT_VERSION_SHORT }}
+        export QT_VERSION=${{ matrix.QT_VERSION }}
+        export QT_PACKAGE_PREFIX=${{ matrix.QT_PACKAGE_PREFIX }}
+        export QT_PACKAGE_SUFFIX=${{ matrix.QT_PACKAGE_SUFFIX }}
+        export QT_PREBUILT_SUFFIX=${{ matrix.QT_PREBUILT_SUFFIX }}
+        ./download_qt.sh
     - name: Build
       working-directory: ${{ github.workspace }}/../osx-packaging-scripts
       run: |
-        export MACOSX_DEPLOYMENT_TARGET=10.10.0
+        export MACOSX_DEPLOYMENT_TARGET=${{ matrix.target }}
         export SDKROOT=${{ github.workspace }}/../MacOSX10.14.sdk
-        python3 __main__.py --qt-path qt/*/* --update-sparkle-appcast https://github.com/${GITHUB_REPOSITORY}/releases/download/stable/appcast.xml --update-sparkle-ed-public-key ${{ secrets.SPARKLE_ECDSA_PUB }} --version "0.0.${GITHUB_RUN_NUMBER}" --buildangle
+        python3 __main__.py --qt-path qt/*/* --update-sparkle-appcast https://github.com/${GITHUB_REPOSITORY}/releases/download/stable/appcast.xml --update-sparkle-ed-public-key ${{ secrets.SPARKLE_ECDSA_PUB }} --version "0.${{ matrix.micro }}.${GITHUB_RUN_NUMBER}" --buildangle
     - name: Build .dmg
       working-directory: ${{ github.workspace }}/../osx-packaging-scripts
       run: python3 build_dmg.py
+    - name: Generate Dist
+      run: |
+        DMG_FILENAME="Minecraft_Bedrock_Launcher_0.0.${GITHUB_RUN_NUMBER}_macOS_${{ matrix.target }}.dmg"
+        mkdir -p dist
+        mv "${{ github.workspace }}/../osx-packaging-scripts/output/Minecraft Bedrock Launcher.dmg" "dist/${DMG_FILENAME}"
+    - name: Upload Latest
+      run: |
+        curl -L https://github.com/tcnksm/ghr/releases/download/v0.13.0/ghr_v0.13.0_darwin_amd64.zip --output ghr.zip
+        unzip ghr.zip
+        ./ghr*/ghr -t ${{ secrets.GITHUB_TOKEN }} -u ChristopherHX -r osx-packaging-scripts -replace -prerelease -b "# NO SUPPORT THIS IS A TEST RELEASE" stable dist/
+  upload:
+    runs-on: macos-latest
+    needs: build
+    steps:
     - name: Use Node.js
       uses: actions/setup-node@v1
       with:
         node-version: '12.x'
     - name: Download old dmg's
       run: |
-        mkdir -p sparcle/
+        mkdir -p sparkle/
         git clone https://github.com/ChristopherHX/github-release-downloader.git grd
         cd grd
         npm install
         npm run-script build
         cd ..
-        grd/bin/grd --token ${{ secrets.GITHUB_TOKEN }} --owner ChristopherHX --repository osx-packaging-scripts --filter-asset '^.*\.dmg$' --match-version 'stable' --output sparcle/
-        mv sparcle/${GITHUB_REPOSITORY}/stable/*.dmg sparcle/ || :
+        grd/bin/grd --token ${{ secrets.GITHUB_TOKEN }} --owner ChristopherHX --repository osx-packaging-scripts --filter-asset '^.*\.dmg$' --match-version 'stable' --output sparkle/
+        mv sparkle/${GITHUB_REPOSITORY}/stable/*.dmg sparkle/ || :
     - name: Generate Dist
       run: |
-        DMG_FILENAME="Minecraft_Bedrock_Launcher.0.0.${GITHUB_RUN_NUMBER}.dmg"
-        mv "${{ github.workspace }}/../osx-packaging-scripts/output/Minecraft Bedrock Launcher.dmg" "sparcle/${DMG_FILENAME}"
-        qt/*/*/bin/generate_appcast -s ${{ secrets.SPARKLE_ECDSA }} sparcle/
+        curl -L -C - -o sparkle.tar.bz2 https://github.com/sparkle-project/Sparkle/releases/download/1.23.0/Sparkle-1.23.0.tar.bz2
+        tar -xf ./sparkle.tar.bz2
+        ./bin/generate_appcast -s ${{ secrets.SPARKLE_ECDSA }} sparkle/
         mkdir -p dist
-        sed 's/\%20/./g' sparcle/appcast.xml > dist/appcast.xml
-        mv sparcle/*.delta dist/|| :
-        mv "sparcle/${DMG_FILENAME}" dist/
-        echo build_id=${GITHUB_RUN_NUMBER}$'\n'download_url=https://github.com/${GITHUB_REPOSITORY}/releases/download/stable/${DMG_FILENAME} > dist/version.osx
+        sed 's/\%20/./g' sparkle/appcast.xml > dist/appcast.xml
+        mv sparkle/*.delta dist/|| :
     - name: Upload Latest
       run: |
         curl -L https://github.com/tcnksm/ghr/releases/download/v0.13.0/ghr_v0.13.0_darwin_amd64.zip --output ghr.zip
