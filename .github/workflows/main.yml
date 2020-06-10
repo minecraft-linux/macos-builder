@@ -286,12 +286,12 @@ jobs:
     - uses: actions/checkout@v1
     - uses: actions/checkout@v1
       with:
+        repository: phracker/MacOSX-SDKs
+    - uses: actions/checkout@v1
+      with:
         repository: ChristopherHX/MacOSX10.14.sdk
         ref: 5d1c9b28f01ef0b01225f92670ee587b430efa8e
         token: ${{ secrets.MacOSX1014sdk }}
-    - uses: actions/checkout@v1
-      with:
-        repository: phracker/MacOSX-SDKs
     - name: Cache libcxx32
       id: libcxx32-llvm
       uses: actions/cache@v1
