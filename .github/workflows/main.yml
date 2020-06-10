@@ -287,6 +287,7 @@ jobs:
     - uses: actions/checkout@v1
       with:
         repository: phracker/MacOSX-SDKs
+        ref: refs/heads/master
     - uses: actions/checkout@v1
       with:
         repository: ChristopherHX/MacOSX10.14.sdk
