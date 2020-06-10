@@ -289,6 +289,9 @@ jobs:
         repository: ChristopherHX/MacOSX10.14.sdk
         ref: 5d1c9b28f01ef0b01225f92670ee587b430efa8e
         token: ${{ secrets.MacOSX1014sdk }}
+    - uses: actions/checkout@v1
+      with:
+        repository: phracker/MacOSX-SDKs
     - name: Cache libcxx32
       id: libcxx32-llvm
       uses: actions/cache@v1
@@ -363,7 +366,7 @@ jobs:
       working-directory: ${{ github.workspace }}/../osx-packaging-scripts
       run: |
         export MACOSX_DEPLOYMENT_TARGET=${{ matrix.target }}
-        export SDKROOT=${{ github.workspace }}/../MacOSX10.14.sdk
+        export SDKROOT=${{ github.workspace }}/../MacOSX-SDKs/MacOSX10.10.sdk
         python3 __main__.py --qt-path qt/*/* --update-sparkle-appcast https://github.com/${GITHUB_REPOSITORY}/releases/download/unstable/appcast.xml --update-sparkle-ed-public-key ${{ secrets.SPARKLE_ECDSA_PUB }} --version "0.${{ matrix.micro }}.${GITHUB_RUN_NUMBER}" --buildangle
     - name: Build .dmg
       working-directory: ${{ github.workspace }}/../osx-packaging-scripts
