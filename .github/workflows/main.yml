@@ -257,7 +257,6 @@ jobs:
     needs: [brew-libzip, brew-protobuf, brew-libuv, build-libcxx]
     strategy:
       matrix:
-        target: [ "10.10.0", "10.12.0"]
         include:
           - target: "10.10.0"
             micro: 0
@@ -275,6 +274,13 @@ jobs:
             QT_PACKAGE_PREFIX: qt.qt5.5113.
             QT_PACKAGE_SUFFIX: clang_64
             QT_PREBUILT_SUFFIX: -MacOS-MacOS_10_12-Clang-MacOS-MacOS_10_12-X86_64
+          - target: "10.13.0"
+            QT_BASE_URL: http://download.qt.io/online/qtsdkrepository/mac_x64/desktop/qt5_5150/
+            QT_VERSION_SHORT: 5.15.0
+            QT_VERSION: 5.15.0-0-202005140805
+            QT_PACKAGE_PREFIX: qt.qt5.5150.
+            QT_PACKAGE_SUFFIX: clang_64
+            QT_PREBUILT_SUFFIX: -MacOS-MacOS_10_13-Clang-MacOS-MacOS_10_13-X86_64
     steps:
     - name: Set Environment Variables
       run: |
