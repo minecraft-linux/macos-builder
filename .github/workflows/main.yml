@@ -275,6 +275,7 @@ jobs:
             QT_PACKAGE_SUFFIX: clang_64
             QT_PREBUILT_SUFFIX: -MacOS-MacOS_10_12-Clang-MacOS-MacOS_10_12-X86_64
           - target: "10.13.0"
+            micro: 2
             QT_BASE_URL: http://download.qt.io/online/qtsdkrepository/mac_x64/desktop/qt5_5150/
             QT_VERSION_SHORT: 5.15.0
             QT_VERSION: 5.15.0-0-202005140805
