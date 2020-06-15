@@ -13,7 +13,7 @@ jobs:
       id: libcxx32-llvm
       uses: Mystraht/cache@master
       env:
-        cache-name: cache-libcxx32--macos-10-10-3
+        cache-name: cache-libcxx32--macos-10-10-4
       with:
         path: libcxx32-build
         key: ${{ runner.os }}-build-${{ env.cache-name }}
@@ -21,7 +21,7 @@ jobs:
       if: steps.libcxx32-llvm.outputs.cache-hit != 'true'
       uses: actions/cache@v1
       env:
-        cache-name: cache-libcxx32--macos-10-10-3
+        cache-name: cache-libcxx32--macos-10-10-4
       with:
         path: libcxx32-build
         key: ${{ runner.os }}-build-${{ env.cache-name }}
@@ -47,7 +47,7 @@ jobs:
       id: libcxx64-llvm
       uses: Mystraht/cache@master
       env:
-        cache-name: cache-libcxx64--macos-10-10-3
+        cache-name: cache-libcxx64--macos-10-10-4
       with:
         path: libcxx64-build
         key: ${{ runner.os }}-build-${{ env.cache-name }}
@@ -55,7 +55,7 @@ jobs:
       if: steps.libcxx64-llvm.outputs.cache-hit != 'true'
       uses: actions/cache@v1
       env:
-        cache-name: cache-libcxx64--macos-10-10-3
+        cache-name: cache-libcxx64--macos-10-10-4
       with:
         path: libcxx64-build
         key: ${{ runner.os }}-build-${{ env.cache-name }}
@@ -82,7 +82,7 @@ jobs:
       id: libcxx-llvm
       uses: Mystraht/cache@master
       env:
-        cache-name: cache-libcxx--macos-10-10-3
+        cache-name: cache-libcxx--macos-10-10-4
       with:
         path: libcxx-build
         key: ${{ runner.os }}-build-${{ env.cache-name }}
@@ -91,7 +91,7 @@ jobs:
       id: libcxx32-llvm
       uses: actions/cache@v1
       env:
-        cache-name: cache-libcxx32--macos-10-10-3
+        cache-name: cache-libcxx32--macos-10-10-4
       with:
         path: libcxx32-build
         key: ${{ runner.os }}-build-${{ env.cache-name }}
@@ -100,7 +100,7 @@ jobs:
       id: libcxx64-llvm
       uses: actions/cache@v1
       env:
-        cache-name: cache-libcxx64--macos-10-10-3
+        cache-name: cache-libcxx64--macos-10-10-4
       with:
         path: libcxx64-build
         key: ${{ runner.os }}-build-${{ env.cache-name }}
@@ -108,7 +108,7 @@ jobs:
       if: steps.libcxx-llvm.outputs.cache-hit != 'true'
       uses: actions/cache@v1
       env:
-        cache-name: cache-libcxx--macos-10-10-3
+        cache-name: cache-libcxx--macos-10-10-4
       with:
         path: libcxx-build
         key: ${{ runner.os }}-build-${{ env.cache-name }}
@@ -291,7 +291,7 @@ jobs:
       id: libcxx32-llvm
       uses: actions/cache@v1
       env:
-        cache-name: cache-libcxx32--macos-10-10-3
+        cache-name: cache-libcxx32--macos-10-10-4
       with:
         path: libcxx32-build
         key: ${{ runner.os }}-build-${{ env.cache-name }}
@@ -299,7 +299,7 @@ jobs:
       id: libcxx64-llvm
       uses: actions/cache@v1
       env:
-        cache-name: cache-libcxx64--macos-10-10-3
+        cache-name: cache-libcxx64--macos-10-10-4
       with:
         path: libcxx64-build
         key: ${{ runner.os }}-build-${{ env.cache-name }}
@@ -307,7 +307,7 @@ jobs:
       id: libcxx-llvm
       uses: actions/cache@v1
       env:
-        cache-name: cache-libcxx--macos-10-10-3
+        cache-name: cache-libcxx--macos-10-10-4
       with:
         path: libcxx-build
         key: ${{ runner.os }}-build-${{ env.cache-name }}
