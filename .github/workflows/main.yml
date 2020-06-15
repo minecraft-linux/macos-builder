@@ -13,7 +13,7 @@ jobs:
       id: libcxx32-llvm
       uses: Mystraht/cache@master
       env:
-        cache-name: cache-libcxx32-macos-10-10-2
+        cache-name: cache-libcxx32--macos-10-10-3
       with:
         path: libcxx32-build
         key: ${{ runner.os }}-build-${{ env.cache-name }}
@@ -21,21 +21,20 @@ jobs:
       if: steps.libcxx32-llvm.outputs.cache-hit != 'true'
       uses: actions/cache@v1
       env:
-        cache-name: cache-libcxx32-macos-10-10-2
+        cache-name: cache-libcxx32--macos-10-10-3
       with:
         path: libcxx32-build
         key: ${{ runner.os }}-build-${{ env.cache-name }}
     - uses: actions/checkout@v1
       if: steps.libcxx32-llvm.outputs.cache-hit != 'true'
       with:
-        repository: ChristopherHX/MacOSX10.14.sdk
-        ref: 5d1c9b28f01ef0b01225f92670ee587b430efa8e
-        token: ${{ secrets.MacOSX1014sdk }}
+        repository: phracker/MacOSX-SDKs
+        ref: refs/heads/master
     - name: Build libcxx, libcxxabi
       if: steps.libcxx32-llvm.outputs.cache-hit != 'true'
       run: |
         export MACOSX_DEPLOYMENT_TARGET=10.10.0
-        export SDKROOT=${{ github.workspace }}/../MacOSX10.14.sdk
+        export SDKROOT=${{ github.workspace }}/../MacOSX-SDKs/MacOSX10.10.sdk
         git clone https://github.com/llvm/llvm-project.git llvm
         mkdir -p libcxx32-build
         cd libcxx32-build
@@ -48,7 +47,7 @@ jobs:
       id: libcxx64-llvm
       uses: Mystraht/cache@master
       env:
-        cache-name: cache-libcxx64-macos-10-10-2
+        cache-name: cache-libcxx64--macos-10-10-3
       with:
         path: libcxx64-build
         key: ${{ runner.os }}-build-${{ env.cache-name }}
@@ -56,21 +55,20 @@ jobs:
       if: steps.libcxx64-llvm.outputs.cache-hit != 'true'
       uses: actions/cache@v1
       env:
-        cache-name: cache-libcxx64-macos-10-10-2
+        cache-name: cache-libcxx64--macos-10-10-3
       with:
         path: libcxx64-build
         key: ${{ runner.os }}-build-${{ env.cache-name }}
     - uses: actions/checkout@v1
       if: steps.libcxx64-llvm.outputs.cache-hit != 'true'
       with:
-        repository: ChristopherHX/MacOSX10.14.sdk
-        ref: 5d1c9b28f01ef0b01225f92670ee587b430efa8e
-        token: ${{ secrets.MacOSX1014sdk }}
+        repository: phracker/MacOSX-SDKs
+        ref: refs/heads/master
     - name: Build libcxx, libcxxabi
       if: steps.libcxx64-llvm.outputs.cache-hit != 'true'
       run: |
         export MACOSX_DEPLOYMENT_TARGET=10.10.0
-        export SDKROOT=${{ github.workspace }}/../MacOSX10.14.sdk
+        export SDKROOT=${{ github.workspace }}/../MacOSX-SDKs/MacOSX10.10.sdk
         git clone https://github.com/llvm/llvm-project.git llvm
         mkdir -p libcxx64-build
         cd libcxx64-build
@@ -84,7 +82,7 @@ jobs:
       id: libcxx-llvm
       uses: Mystraht/cache@master
       env:
-        cache-name: cache-libcxx-macos-10-10-2
+        cache-name: cache-libcxx--macos-10-10-3
       with:
         path: libcxx-build
         key: ${{ runner.os }}-build-${{ env.cache-name }}
@@ -93,7 +91,7 @@ jobs:
       id: libcxx32-llvm
       uses: actions/cache@v1
       env:
-        cache-name: cache-libcxx32-macos-10-10-2
+        cache-name: cache-libcxx32--macos-10-10-3
       with:
         path: libcxx32-build
         key: ${{ runner.os }}-build-${{ env.cache-name }}
@@ -102,7 +100,7 @@ jobs:
       id: libcxx64-llvm
       uses: actions/cache@v1
       env:
-        cache-name: cache-libcxx64-macos-10-10-2
+        cache-name: cache-libcxx64--macos-10-10-3
       with:
         path: libcxx64-build
         key: ${{ runner.os }}-build-${{ env.cache-name }}
@@ -110,7 +108,7 @@ jobs:
       if: steps.libcxx-llvm.outputs.cache-hit != 'true'
       uses: actions/cache@v1
       env:
-        cache-name: cache-libcxx-macos-10-10-2
+        cache-name: cache-libcxx--macos-10-10-3
       with:
         path: libcxx-build
         key: ${{ runner.os }}-build-${{ env.cache-name }}
@@ -293,7 +291,7 @@ jobs:
       id: libcxx32-llvm
       uses: actions/cache@v1
       env:
-        cache-name: cache-libcxx32-macos-10-10-2
+        cache-name: cache-libcxx32--macos-10-10-3
       with:
         path: libcxx32-build
         key: ${{ runner.os }}-build-${{ env.cache-name }}
@@ -301,7 +299,7 @@ jobs:
       id: libcxx64-llvm
       uses: actions/cache@v1
       env:
-        cache-name: cache-libcxx64-macos-10-10-2
+        cache-name: cache-libcxx64--macos-10-10-3
       with:
         path: libcxx64-build
         key: ${{ runner.os }}-build-${{ env.cache-name }}
@@ -309,7 +307,7 @@ jobs:
       id: libcxx-llvm
       uses: actions/cache@v1
       env:
-        cache-name: cache-libcxx-macos-10-10-2
+        cache-name: cache-libcxx--macos-10-10-3
       with:
         path: libcxx-build
         key: ${{ runner.os }}-build-${{ env.cache-name }}
