@@ -38,7 +38,7 @@ jobs:
         git clone https://github.com/llvm/llvm-project.git llvm
         mkdir -p libcxx32-build
         cd libcxx32-build
-        cmake ../llvm/llvm -DLLVM_ENABLE_PROJECTS="libcxx;libcxxabi" -DCMAKE_BUILD_TYPE=Release -DLIBCXX_ENABLE_MONOTONIC_CLOCK=1 -DLIBCXX_BUILD_32_BITS=ON -DLIBCXXABI_BUILD_32_BITS=ON -DLLVM_BUILD_32_BITS=ON
+        cmake ../llvm/llvm -DLLVM_ENABLE_PROJECTS="libcxx;libcxxabi" -DCMAKE_BUILD_TYPE=Release -DLIBCXX_ENABLE_MONOTONIC_CLOCK=0 -DLIBCXX_BUILD_32_BITS=ON -DLIBCXXABI_BUILD_32_BITS=ON -DLLVM_BUILD_32_BITS=ON
         make -j4 cxx cxxabi
   build-libcxx64:
     runs-on: macos-latest
@@ -72,7 +72,7 @@ jobs:
         git clone https://github.com/llvm/llvm-project.git llvm
         mkdir -p libcxx64-build
         cd libcxx64-build
-        cmake ../llvm/llvm -DLLVM_ENABLE_PROJECTS="libcxx;libcxxabi" -DCMAKE_BUILD_TYPE=Release -DLIBCXX_ENABLE_MONOTONIC_CLOCK=1
+        cmake ../llvm/llvm -DLLVM_ENABLE_PROJECTS="libcxx;libcxxabi" -DCMAKE_BUILD_TYPE=Release -DLIBCXX_ENABLE_MONOTONIC_CLOCK=0
         make -j4 cxx cxxabi
   build-libcxx:
     runs-on: macos-latest
