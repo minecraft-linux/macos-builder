@@ -266,6 +266,7 @@ jobs:
             QT_PACKAGE_PREFIX: qt.592.
             QT_PACKAGE_SUFFIX: clang_64
             QT_PREBUILT_SUFFIX: -MacOS-OSX_10_10-Clang-MacOS-OSX_10_10-X86_64
+            extraflags: "--qtworkaround"
           - target: "10.12.0"
             micro: 1
             QT_BASE_URL: http://download.qt.io/online/qtsdkrepository/mac_x64/desktop/qt5_5113/
@@ -371,20 +372,20 @@ jobs:
       run: |
         export MACOSX_DEPLOYMENT_TARGET=${{ matrix.target }}
         export SDKROOT=${{ github.workspace }}/../MacOSX10.14.sdk
-        python3 __main__.py --qt-path qt/*/* --update-sparkle-appcast https://github.com/${GITHUB_REPOSITORY}/releases/download/unstable/appcast.xml --update-sparkle-ed-public-key ${{ secrets.SPARKLE_ECDSA_PUB }} --version "0.${{ matrix.micro }}.${GITHUB_RUN_NUMBER}" --buildangle
+        python3 __main__.py --qt-path qt/*/* --update-sparkle-appcast https://github.com/${GITHUB_REPOSITORY}/releases/download/ng.dmg/appcast.xml --update-sparkle-ed-public-key ${{ secrets.SPARKLE_ECDSA_PUB }} --version "0.${{ matrix.micro }}.${GITHUB_RUN_NUMBER}" ${{ matrix.extraflags }}
     - name: Build .dmg
       working-directory: ${{ github.workspace }}/../osx-packaging-scripts
       run: python3 build_dmg.py
     - name: Generate Dist
       run: |
-        DMG_FILENAME="Minecraft_Bedrock_Launcher_0.0.${GITHUB_RUN_NUMBER}_macOS_${{ matrix.target }}.dmg"
+        DMG_FILENAME="Minecraft_Bedrock_Launcher_0.0.${GITHUB_RUN_NUMBER}_macOS_${{ matrix.target }}_unstable.dmg"
         mkdir -p dist
         mv "${{ github.workspace }}/../osx-packaging-scripts/output/Minecraft Bedrock Launcher.dmg" "dist/${DMG_FILENAME}"
     - name: Upload Latest
       run: |
         curl -L https://github.com/tcnksm/ghr/releases/download/v0.13.0/ghr_v0.13.0_darwin_amd64.zip --output ghr.zip
         unzip ghr.zip
-        ./ghr*/ghr -t ${{ secrets.GITHUB_TOKEN }} -u ChristopherHX -r osx-packaging-scripts -replace -prerelease -b "# NO SUPPORT THIS IS A TEST RELEASE" unstable dist/
+        ./ghr*/ghr -t ${{ secrets.GITHUB_TOKEN }} -u ChristopherHX -r osx-packaging-scripts -replace -prerelease -b "# NO SUPPORT THIS IS A TEST RELEASE" ng.dmg dist/
   upload:
     runs-on: macos-latest
     needs: build
@@ -401,8 +402,8 @@ jobs:
         npm install
         npm run-script build
         cd ..
-        grd/bin/grd --token ${{ secrets.GITHUB_TOKEN }} --owner ChristopherHX --repository osx-packaging-scripts --filter-asset '^.*\.dmg$' --match-version 'unstable' --output sparkle/
-        mv sparkle/${GITHUB_REPOSITORY}/unstable/*.dmg sparkle/ || :
+        grd/bin/grd --token ${{ secrets.GITHUB_TOKEN }} --owner ChristopherHX --repository osx-packaging-scripts --filter-asset '^.*\.dmg$' --match-version 'ng\.dmg' --output sparkle/
+        mv sparkle/${GITHUB_REPOSITORY}/ng.dmg/*.dmg sparkle/ || :
     - name: Generate Dist
       run: |
         curl -L -C - -o sparkle.tar.bz2 https://github.com/sparkle-project/Sparkle/releases/download/1.23.0/Sparkle-1.23.0.tar.bz2
@@ -415,4 +416,4 @@ jobs:
       run: |
         curl -L https://github.com/tcnksm/ghr/releases/download/v0.13.0/ghr_v0.13.0_darwin_amd64.zip --output ghr.zip
         unzip ghr.zip
-        ./ghr*/ghr -t ${{ secrets.GITHUB_TOKEN }} -u ChristopherHX -r osx-packaging-scripts -replace -prerelease -b "# NO SUPPORT THIS IS A TEST RELEASE" unstable dist/
+        ./ghr*/ghr -t ${{ secrets.GITHUB_TOKEN }} -u ChristopherHX -r osx-packaging-scripts -replace -prerelease -b "# NO SUPPORT THIS IS A TEST RELEASE" ng.dmg dist/
