@@ -33,7 +33,8 @@ parser.add_argument('--update-sparkle-appcast', help='Sparkle appcast URL')
 parser.add_argument('--update-sparkle-ed-public-key', help='Enable checking updates in the metalauncher from the specified URL')
 parser.add_argument('--version', help='App version')
 parser.add_argument('--force', help='Always remove the output directory', action='store_true')
-parser.add_argument('--buildangle', help='Always remove the output directory', action='store_true')
+parser.add_argument('--buildangle', help='build the angle graphics lib', action='store_true')
+parser.add_argument('--qtworkaround', help='apply a qt workaround', action='store_true')
 args = parser.parse_args()
 
 if(args.version):
@@ -133,8 +134,9 @@ copy_installed_files(path.join(CMAKE_INSTALL_PREFIX, 'bin'), path.join(APP_OUTPU
 copy_installed_files(path.join(CMAKE_INSTALL_PREFIX, 'share'), path.join(APP_OUTPUT_DIR, 'Contents', 'Resources'))
 copy_installed_files('libcxx-build', path.join(APP_OUTPUT_DIR, 'Contents', 'Frameworks'))
 # Workaround Qt 5.9.2
-copy_installed_files(path.join(QT_INSTALL_PATH, 'qml', 'QtQuick'), path.join(APP_OUTPUT_DIR, 'Contents', 'Resources', 'qml', 'QtQuick'))
-copy_installed_files(path.join(QT_INSTALL_PATH, 'qml', 'QtQuick.2'), path.join(APP_OUTPUT_DIR, 'Contents', 'Resources', 'qml', 'QtQuick.2'))
+if args.qtworkaround:
+    copy_installed_files(path.join(QT_INSTALL_PATH, 'qml', 'QtQuick'), path.join(APP_OUTPUT_DIR, 'Contents', 'Resources', 'qml', 'QtQuick'))
+    copy_installed_files(path.join(QT_INSTALL_PATH, 'qml', 'QtQuick.2'), path.join(APP_OUTPUT_DIR, 'Contents', 'Resources', 'qml', 'QtQuick.2'))
 if args.buildangle:
     copy_installed_files(path.abspath(path.join(SOURCE_DIR, "osx-angle-ci/artifacts")), path.join(APP_OUTPUT_DIR, 'Contents', 'Frameworks'))
 
