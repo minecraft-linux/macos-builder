@@ -265,6 +265,7 @@ jobs:
             QT_PACKAGE_PREFIX: qt.592.
             QT_PACKAGE_SUFFIX: clang_64
             QT_PREBUILT_SUFFIX: -MacOS-OSX_10_10-Clang-MacOS-OSX_10_10-X86_64
+            extraflags: "--qtworkaround"
           - target: "10.12.0"
             micro: 1
             QT_BASE_URL: http://download.qt.io/online/qtsdkrepository/mac_x64/desktop/qt5_5113/
@@ -362,7 +363,7 @@ jobs:
       run: |
         export MACOSX_DEPLOYMENT_TARGET=${{ matrix.target }}
         export SDKROOT=${{ github.workspace }}/../MacOSX10.14.sdk
-        python3 __main__.py --qt-path qt/*/* --update-sparkle-appcast https://github.com/${GITHUB_REPOSITORY}/releases/download/stable/appcast.xml --update-sparkle-ed-public-key ${{ secrets.SPARKLE_ECDSA_PUB }} --version "0.${{ matrix.micro }}.${GITHUB_RUN_NUMBER}" --buildangle
+        python3 __main__.py --qt-path qt/*/* --update-sparkle-appcast https://github.com/${GITHUB_REPOSITORY}/releases/download/stable/appcast.xml --update-sparkle-ed-public-key ${{ secrets.SPARKLE_ECDSA_PUB }} --version "0.${{ matrix.micro }}.${GITHUB_RUN_NUMBER}" --buildangle ${{ matrix.extraflags }}
     - name: Build .dmg
       working-directory: ${{ github.workspace }}/../osx-packaging-scripts
       run: python3 build_dmg.py
