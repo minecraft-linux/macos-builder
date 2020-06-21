@@ -130,7 +130,7 @@ jobs:
       id: cache-brew-libzip
       uses: Mystraht/cache@master
       env:
-        cache-name: cache-brew-libzip-macos-10-10
+        cache-name: cache-brew-libzip-macos-10-10-2
       with:
         path: /usr/local/Cellar/libzip
         key: ${{ runner.os }}-build-${{ env.cache-name }}
@@ -138,16 +138,15 @@ jobs:
       if: steps.cache-brew-libzip.outputs.cache-hit != 'true'
       uses: actions/cache@v1
       env:
-        cache-name: cache-brew-libzip-macos-10-10
+        cache-name: cache-brew-libzip-macos-10-10-2
       with:
         path: /usr/local/Cellar/libzip
         key: ${{ runner.os }}-build-${{ env.cache-name }}
     - uses: actions/checkout@v1
       if: steps.cache-brew-libzip.outputs.cache-hit != 'true'
       with:
-        repository: ChristopherHX/MacOSX10.14.sdk
-        ref: 5d1c9b28f01ef0b01225f92670ee587b430efa8e
-        token: ${{ secrets.MacOSX1014sdk }}
+        repository: phracker/MacOSX-SDKs
+        ref: refs/heads/master
     - name: Apply custom patch and Update brew
       if: steps.cache-brew-libzip.outputs.cache-hit != 'true'
       working-directory: "/usr/local/Homebrew"
@@ -162,7 +161,7 @@ jobs:
       working-directory: ${{ github.workspace }}/../osx-packaging-scripts
       run: |
         export HOMEBREW_MACOSX_DEPLOYMENT_TARGET=10.10.0
-        export HOMEBREW_SDKROOT=${{ github.workspace }}/../MacOSX10.14.sdk
+        export HOMEBREW_SDKROOT=${{ github.workspace }}/../MacOSX-SDKs/MacOSX10.10.sdk
         HOMEBREW_NO_AUTO_UPDATE=1 brew reinstall libzip
   brew-protobuf:
     runs-on: macos-latest
@@ -317,7 +316,7 @@ jobs:
     - name: Restore libzip
       uses: actions/cache@v1
       env:
-        cache-name: cache-brew-libzip-macos-10-10
+        cache-name: cache-brew-libzip-macos-10-10-2
       with:
         path: /usr/local/Cellar/libzip
         key: ${{ runner.os }}-build-${{ env.cache-name }}
