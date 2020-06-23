@@ -35,6 +35,20 @@ parser.add_argument('--version', help='App version')
 parser.add_argument('--force', help='Always remove the output directory', action='store_true')
 parser.add_argument('--buildangle', help='build the angle graphics lib', action='store_true')
 parser.add_argument('--qtworkaround', help='apply a qt workaround', action='store_true')
+parser.add_argument('--buildlegacy', help='build legacy 32bit only launcher', action='store_true')
+parser.add_argument('--msa-repo', help='msa daemon git repo', default='https://github.com/minecraft-linux/msa-manifest.git')
+parser.add_argument('--msa-branch', help='msa daemon branch', default='master')
+parser.add_argument('--msa-cflags', help='msa daemon cflags', default='')
+parser.add_argument('--msa-cxxflags', help='msa daemon cxxflags', default='')
+parser.add_argument('--mcpelauncher-repo', help='mcpelauncher git repo', default='https://github.com/minecraft-linux/mcpelauncher-manifest.git')
+parser.add_argument('--mcpelauncher-branch', help='mcpelauncher branch', default='master')
+parser.add_argument('--mcpelauncher-cflags', help='mcpelauncher cflags', default='')
+parser.add_argument('--mcpelauncher-cxxflags', help='mcpelauncher cxxflags', default='')
+parser.add_argument('--mcpelauncher-ui-repo', help='mcpelauncher git repo', default='https://github.com/minecraft-linux/mcpelauncher-ui-manifest.git')
+parser.add_argument('--mcpelauncher-ui-branch', help='mcpelauncher branch', default='master')
+parser.add_argument('--mcpelauncher-ui-cflags', help='mcpelauncher cflags', default='')
+parser.add_argument('--mcpelauncher-ui-cxxflags', help='mcpelauncher cxxflags', default='')
+
 args = parser.parse_args()
 
 if(args.version):
@@ -71,9 +85,9 @@ def clone_repo(name, url, branch):
         call(['git', 'submodule', 'update', '--recursive'], cwd=directory)
 
 display_stage("Downloading sources")
-clone_repo('msa', 'https://github.com/ChristopherHX/msa-manifest.git', 'master')
-clone_repo('mcpelauncher', 'https://github.com/minecraft-linux/mcpelauncher-manifest.git', 'ng')
-clone_repo('mcpelauncher-ui', 'https://github.com/minecraft-linux/mcpelauncher-ui-manifest.git', 'ng')
+clone_repo('msa', args.msa_repo, args.msa_branch)
+clone_repo('mcpelauncher', args.mcpelauncher_repo, args.mcpelauncher_branch)
+clone_repo('mcpelauncher-ui', args.mcpelauncher_ui_repo, args.mcpelauncher_ui_branch)
 if args.buildangle:
     clone_repo('osx-angle-ci', 'https://github.com/christopherhx/osx-angle-ci.git', 'master')
 
@@ -114,10 +128,14 @@ if args.update_sparkle_appcast:
     SPARKLE_OPTS = [ "-DENABLE_SPARKLE_UPDATE_CHECK=1", "-DSPARKLE_UPDATE_CHECK_URL=" + args.update_sparkle_appcast]
 
 display_stage("Building")
-build_component("msa", ['-DENABLE_MSA_QT_UI=ON', '-DMSA_UI_PATH_DEV=OFF', '-DCMAKE_CXX_FLAGS=-DNDEBUG  -Wl,-L' + path.abspath('libcxx-build') + ',-rpath,@loader_path/../Frameworks' +' -D_LIBCPP_DISABLE_AVAILABILITY=1 -I' + path.abspath('libcxx64-build/include/cxx/v1')] + CMAKE_QT_EXTRA_OPTIONS)
-build_component("mcpelauncher", ['-DMSA_DAEMON_PATH=.', '-DENABLE_DEV_PATHS=OFF', '-DBUILD_FAKE_JNI_TESTS=OFF', '-DBUILD_FAKE_JNI_EXAMPLES=OFF', '-DCMAKE_CXX_FLAGS=-DNDEBUG -Wl,-L' + path.abspath('libcxx-build') +',-rpath,@loader_path/../Frameworks -D_LIBCPP_DISABLE_AVAILABILITY=1 -I' + path.abspath('libcxx64-build/include/cxx/v1')])
-build_component32("mcpelauncher", ['-DMSA_DAEMON_PATH=.', '-DENABLE_DEV_PATHS=OFF', '-DBUILD_FAKE_JNI_TESTS=OFF', '-DBUILD_FAKE_JNI_EXAMPLES=OFF', '-DCMAKE_ASM_FLAGS=-m32', '-DCMAKE_C_FLAGS=-m32', '-DCMAKE_CXX_FLAGS=-m32 -DNDEBUG -Wl,-L' + path.abspath('libcxx-build') +',-rpath,@loader_path/../Frameworks -D_LIBCPP_DISABLE_AVAILABILITY=1 -I' + path.abspath('libcxx32-build/include/cxx/v1'), '-DCMAKE_CXX_COMPILER_TARGET=i386-apple-darwin', '-DCMAKE_LIBRARY_ARCHITECTURE=i386-apple-darwin'])
-build_component("mcpelauncher-ui", ['-DGAME_LAUNCHER_PATH=.', '-DCMAKE_CXX_FLAGS=-DNDEBUG -Wl,-F'+ QT_INSTALL_PATH + '/lib/,-L' + path.abspath('libcxx-build') +',-rpath,@loader_path/../Frameworks -D_LIBCPP_DISABLE_AVAILABILITY=1 -I' + path.abspath('libcxx64-build/include/cxx/v1')] + VERSION_OPTS + SPARKLE_OPTS + CMAKE_QT_EXTRA_OPTIONS)
+build_component("msa", ['-DENABLE_MSA_QT_UI=ON', '-DMSA_UI_PATH_DEV=OFF', '-DCMAKE_C_FLAGS=' + args.msa_cflags, '-DCMAKE_CXX_FLAGS=-DNDEBUG  -Wl,-L' + path.abspath('libcxx-build') + ',-rpath,@loader_path/../Frameworks' +' -D_LIBCPP_DISABLE_AVAILABILITY=1 -I' + path.abspath('libcxx64-build/include/cxx/v1') + ' ' + args.msa_cxxflags] + CMAKE_QT_EXTRA_OPTIONS)
+mcpelauncher_build_ops = ['-DMSA_DAEMON_PATH=.', '-DENABLE_DEV_PATHS=OFF', '-DBUILD_FAKE_JNI_TESTS=OFF', '-DBUILD_FAKE_JNI_EXAMPLES=OFF', '-DCMAKE_ASM_FLAGS=-m32', '-DCMAKE_C_FLAGS=-m32 ' + args.mcpelauncher_cflags, '-DCMAKE_CXX_FLAGS=-m32 -DNDEBUG -Wl,-L' + path.abspath('libcxx-build') +',-rpath,@loader_path/../Frameworks -D_LIBCPP_DISABLE_AVAILABILITY=1 -I' + path.abspath('libcxx32-build/include/cxx/v1') + ' ' + args.mcpelauncher_cxxflags, '-DCMAKE_CXX_COMPILER_TARGET=i386-apple-darwin', '-DCMAKE_LIBRARY_ARCHITECTURE=i386-apple-darwin']
+if args.buildlegacy:
+    build_component("mcpelauncher", mcpelauncher_build_ops)
+else:
+    build_component("mcpelauncher", ['-DMSA_DAEMON_PATH=.', '-DENABLE_DEV_PATHS=OFF', '-DBUILD_FAKE_JNI_TESTS=OFF', '-DBUILD_FAKE_JNI_EXAMPLES=OFF', '-DCMAKE_C_FLAGS=' + args.mcpelauncher_cflags, '-DCMAKE_CXX_FLAGS=-DNDEBUG -Wl,-L' + path.abspath('libcxx-build') +',-rpath,@loader_path/../Frameworks -D_LIBCPP_DISABLE_AVAILABILITY=1 -I' + path.abspath('libcxx64-build/include/cxx/v1') + ' ' + args.mcpelauncher_cxxflags])
+    build_component32("mcpelauncher", mcpelauncher_build_ops)
+build_component("mcpelauncher-ui", ['-DGAME_LAUNCHER_PATH=.', '-DCMAKE_C_FLAGS=' + args.mcpelauncher_ui_cflags, '-DCMAKE_CXX_FLAGS=-DNDEBUG -Wl,-F'+ QT_INSTALL_PATH + '/lib/,-L' + path.abspath('libcxx-build') +',-rpath,@loader_path/../Frameworks -D_LIBCPP_DISABLE_AVAILABILITY=1 -I' + path.abspath('libcxx64-build/include/cxx/v1') + ' ' + args.mcpelauncher_ui_cxxflags] + VERSION_OPTS + SPARKLE_OPTS + CMAKE_QT_EXTRA_OPTIONS)
 if args.buildangle:
     call(['bash', '-c', './build.sh'], cwd=path.abspath(path.join(SOURCE_DIR, "osx-angle-ci")))
 
