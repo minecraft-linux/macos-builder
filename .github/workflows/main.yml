@@ -403,7 +403,7 @@ jobs:
         npm run-script build
         cd ..
         grd/bin/grd --token ${{ secrets.GITHUB_TOKEN }} --owner ChristopherHX --repository osx-packaging-scripts --filter-asset '^.*\.dmg$' --match-version 'ng\.dmg' --output sparkle/
-        mv sparkle/${GITHUB_REPOSITORY}/unstable/*.dmg sparkle/ || :
+        mv sparkle/${GITHUB_REPOSITORY}/ng.dmg/*.dmg sparkle/ || :
     - name: Generate Dist
       run: |
         curl -L -C - -o sparkle.tar.bz2 https://github.com/sparkle-project/Sparkle/releases/download/1.23.0/Sparkle-1.23.0.tar.bz2
