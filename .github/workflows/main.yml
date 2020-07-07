@@ -132,7 +132,7 @@ jobs:
       id: cache-brew-libzip
       uses: Mystraht/cache@master
       env:
-        cache-name: cache-brew-libzip-macos-10-10
+        cache-name: cache-brew-libzip-macos-10-13
       with:
         path: /usr/local/Cellar/libzip
         key: ${{ runner.os }}-build-${{ env.cache-name }}
@@ -140,7 +140,7 @@ jobs:
       if: steps.cache-brew-libzip.outputs.cache-hit != 'true'
       uses: actions/cache@v1
       env:
-        cache-name: cache-brew-libzip-macos-10-10
+        cache-name: cache-brew-libzip-macos-10-13
       with:
         path: /usr/local/Cellar/libzip
         key: ${{ runner.os }}-build-${{ env.cache-name }}
@@ -318,7 +318,7 @@ jobs:
     - name: Restore libzip
       uses: actions/cache@v1
       env:
-        cache-name: cache-brew-libzip-macos-10-10
+        cache-name: cache-brew-libzip-macos-10-13
       with:
         path: /usr/local/Cellar/libzip
         key: ${{ runner.os }}-build-${{ env.cache-name }}
