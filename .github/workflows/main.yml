@@ -34,7 +34,7 @@ jobs:
     - name: Build libcxx, libcxxabi
       if: steps.libcxx32-llvm.outputs.cache-hit != 'true'
       run: |
-        export MACOSX_DEPLOYMENT_TARGET=10.10.0
+        export MACOSX_DEPLOYMENT_TARGET=10.13.0
         export SDKROOT=${{ github.workspace }}/../MacOSX10.14.sdk
         git clone https://github.com/llvm/llvm-project.git llvm
         mkdir -p libcxx32-build
@@ -69,7 +69,7 @@ jobs:
     - name: Build libcxx, libcxxabi
       if: steps.libcxx64-llvm.outputs.cache-hit != 'true'
       run: |
-        export MACOSX_DEPLOYMENT_TARGET=10.10.0
+        export MACOSX_DEPLOYMENT_TARGET=10.13.0
         export SDKROOT=${{ github.workspace }}/../MacOSX10.14.sdk
         git clone https://github.com/llvm/llvm-project.git llvm
         mkdir -p libcxx64-build
@@ -163,9 +163,10 @@ jobs:
       if: steps.cache-brew-libzip.outputs.cache-hit != 'true'
       working-directory: ${{ github.workspace }}/../osx-packaging-scripts
       run: |
-        export HOMEBREW_MACOSX_DEPLOYMENT_TARGET=10.10.0
+        HOMEBREW_NO_AUTO_UPDATE=1 brew uninstall libzip || :
+        export HOMEBREW_MACOSX_DEPLOYMENT_TARGET=10.13.0
         export HOMEBREW_SDKROOT=${{ github.workspace }}/../MacOSX10.14.sdk
-        HOMEBREW_NO_AUTO_UPDATE=1 brew reinstall libzip
+        HOMEBREW_NO_AUTO_UPDATE=1 brew install libzip
   brew-protobuf:
     runs-on: macos-latest
     steps:
@@ -204,12 +205,12 @@ jobs:
       if: steps.cache-brew-protobuf.outputs.cache-hit != 'true'
       working-directory: ${{ github.workspace }}/../osx-packaging-scripts
       run: |
+        HOMEBREW_NO_AUTO_UPDATE=1 brew uninstall libzip || :
         export HOMEBREW_NO_AUTO_UPDATE=1
         brew install automake
-        export HOMEBREW_MACOSX_DEPLOYMENT_TARGET=10.10.0
+        export HOMEBREW_MACOSX_DEPLOYMENT_TARGET=10.13.0
         export HOMEBREW_SDKROOT=${{ github.workspace }}/../MacOSX10.14.sdk
-        brew reinstall python@3.8 || brew install python@3.8
-        brew reinstall protobuf || brew install protobuf
+        brew install protobuf
   brew-libuv:
     runs-on: macos-latest
     steps:
@@ -248,8 +249,9 @@ jobs:
       if: steps.cache-brew-libuv.outputs.cache-hit != 'true'
       working-directory: ${{ github.workspace }}/../osx-packaging-scripts
       run: |
+        HOMEBREW_NO_AUTO_UPDATE=1 brew uninstall libuv || :
         HOMEBREW_NO_AUTO_UPDATE=1 brew install automake sphinx-doc
-        export HOMEBREW_MACOSX_DEPLOYMENT_TARGET=10.10.0
+        export HOMEBREW_MACOSX_DEPLOYMENT_TARGET=10.13.0
         export HOMEBREW_SDKROOT=${{ github.workspace }}/../MacOSX10.14.sdk
         HOMEBREW_NO_AUTO_UPDATE=1 brew install libuv
   build:
@@ -257,17 +259,8 @@ jobs:
     needs: [brew-libzip, brew-protobuf, brew-libuv, build-libcxx]
     strategy:
       matrix:
-        target: [ "10.10.0", "10.12.0"]
+        target: ["10.12.0"]
         include:
-          - target: "10.10.0"
-            micro: 0
-            QT_BASE_URL: http://download.qt.io/online/qtsdkrepository/mac_x64/desktop/qt5_592/
-            QT_VERSION_SHORT: 5.9.2
-            QT_VERSION: 5.9.2-0-201710050729
-            QT_PACKAGE_PREFIX: qt.592.
-            QT_PACKAGE_SUFFIX: clang_64
-            QT_PREBUILT_SUFFIX: -MacOS-OSX_10_10-Clang-MacOS-OSX_10_10-X86_64
-            extraflags: "--qtworkaround"
           - target: "10.12.0"
             micro: 1
             QT_BASE_URL: http://download.qt.io/online/qtsdkrepository/mac_x64/desktop/qt5_5113/
@@ -290,6 +283,12 @@ jobs:
         repository: ChristopherHX/MacOSX10.14.sdk
         ref: 5d1c9b28f01ef0b01225f92670ee587b430efa8e
         token: ${{ secrets.MacOSX1014sdk }}
+    - name: brew install / link
+      run: |
+        brew install p7zip automake
+        HOMEBREW_NO_AUTO_UPDATE=1 brew uninstall libuv || :
+        HOMEBREW_NO_AUTO_UPDATE=1 brew uninstall protobuf || :
+        HOMEBREW_NO_AUTO_UPDATE=1 brew uninstall libzip || :
     - name: Cache libcxx32
       id: libcxx32-llvm
       uses: actions/cache@v1
@@ -340,7 +339,6 @@ jobs:
     - name: brew install / link
       run: |
         brew install p7zip automake
-        HOMEBREW_NO_AUTO_UPDATE=1 brew unlink libzip
         HOMEBREW_NO_AUTO_UPDATE=1 brew link libuv protobuf libzip
     - name: Cache qt
       id: cache-qt
