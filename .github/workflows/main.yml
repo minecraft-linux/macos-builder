@@ -341,7 +341,9 @@ jobs:
       run: |
         brew install p7zip automake
         HOMEBREW_NO_AUTO_UPDATE=1 brew unlink libzip
-        HOMEBREW_NO_AUTO_UPDATE=1 brew link libuv protobuf libzip
+        HOMEBREW_NO_AUTO_UPDATE=1 brew reinstall openssl@1.1 || HOMEBREW_NO_AUTO_UPDATE=1 brew install openssl@1.1
+        HOMEBREW_NO_AUTO_UPDATE=1 brew reinstall ossp-uuid || HOMEBREW_NO_AUTO_UPDATE=1 brew install ossp-uuid
+        HOMEBREW_NO_AUTO_UPDATE=1 brew link libuv protobuf libzip openssl@1.1 ossp-uuid
     - name: Cache qt
       id: cache-qt
       uses: actions/cache@v1
@@ -374,37 +376,6 @@ jobs:
         DMG_FILENAME="Minecraft_Bedrock_Launcher_0.0.${GITHUB_RUN_NUMBER}_macOS_${{ matrix.target }}.dmg"
         mkdir -p dist
         mv "${{ github.workspace }}/../osx-packaging-scripts/output/Minecraft Bedrock Launcher.dmg" "dist/${DMG_FILENAME}"
-    - name: Upload Latest
-      run: |
-        curl -L https://github.com/tcnksm/ghr/releases/download/v0.13.0/ghr_v0.13.0_darwin_amd64.zip --output ghr.zip
-        unzip ghr.zip
-        ./ghr*/ghr -t ${{ secrets.GITHUB_TOKEN }} -u ChristopherHX -r osx-packaging-scripts -replace -prerelease -b "# NO SUPPORT THIS IS A TEST RELEASE" ng.dmg dist/
-  upload:
-    runs-on: macos-latest
-    needs: build
-    steps:
-    - name: Use Node.js
-      uses: actions/setup-node@v1
-      with:
-        node-version: '12.x'
-    - name: Download old dmg's
-      run: |
-        mkdir -p sparkle/
-        git clone https://github.com/ChristopherHX/github-release-downloader.git grd
-        cd grd
-        npm install
-        npm run-script build
-        cd ..
-        grd/bin/grd --token ${{ secrets.GITHUB_TOKEN }} --owner ChristopherHX --repository osx-packaging-scripts --filter-asset '^.*\.dmg$' --match-version 'ng\.dmg' --output sparkle/
-        mv sparkle/${GITHUB_REPOSITORY}/ng.dmg/*.dmg sparkle/ || :
-    - name: Generate Dist
-      run: |
-        curl -L -C - -o sparkle.tar.bz2 https://github.com/sparkle-project/Sparkle/releases/download/1.23.0/Sparkle-1.23.0.tar.bz2
-        tar -xf ./sparkle.tar.bz2
-        ./bin/generate_appcast -s ${{ secrets.SPARKLE_ECDSA }} sparkle/
-        mkdir -p dist
-        sed 's/\%20/./g' sparkle/appcast.xml > dist/appcast.xml
-        mv sparkle/*.delta dist/|| :
     - name: Upload Latest
       run: |
         curl -L https://github.com/tcnksm/ghr/releases/download/v0.13.0/ghr_v0.13.0_darwin_amd64.zip --output ghr.zip
