@@ -71,8 +71,8 @@ def clone_repo(name, url, branch):
         call(['git', 'submodule', 'update', '--recursive'], cwd=directory)
 
 display_stage("Downloading sources")
-clone_repo('msa', 'https://github.com/minecraft-linux/msa-manifest.git', 'master')
-clone_repo('mcpelauncher', 'https://github.com/minecraft-linux/mcpelauncher-manifest.git', 'ng')
+clone_repo('msa', 'https://github.com/minecraft-linux/msa-manifest.git', 'feature-xal')
+clone_repo('mcpelauncher', 'https://github.com/minecraft-linux/mcpelauncher-manifest.git', 'feature-xal')
 clone_repo('mcpelauncher-ui', 'https://github.com/minecraft-linux/mcpelauncher-ui-manifest.git', 'ng')
 if args.buildangle:
     clone_repo('osx-angle-ci', 'https://github.com/christopherhx/osx-angle-ci.git', 'master')
