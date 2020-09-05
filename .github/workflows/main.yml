@@ -271,9 +271,17 @@ jobs:
       with:
         path: /usr/local/ssl32
         key: ${{ runner.os }}-build-${{ env.cache-name }}
+    - uses: actions/checkout@v1
+      if: steps.cache-openssl32.outputs.cache-hit != 'true'
+      with:
+        repository: ChristopherHX/MacOSX10.14.sdk
+        ref: 5d1c9b28f01ef0b01225f92670ee587b430efa8e
+        token: ${{ secrets.MacOSX1014sdk }}
     - name: Build OpenSSL
       if: steps.cache-openssl32.outputs.cache-hit != 'true'
       run: |
+        export MACOSX_DEPLOYMENT_TARGET=10.10.0
+        export SDKROOT=${{ github.workspace }}/../MacOSX10.14.sdk
         git clone https://github.com/openssl/openssl.git -b OpenSSL_1_1_1-stable
         cd openssl
         KERNEL_BITS=32 ./config --prefix=/usr/local/ssl32
@@ -297,9 +305,17 @@ jobs:
       with:
         path: /usr/local/ssl64
         key: ${{ runner.os }}-build-${{ env.cache-name }}
+    - uses: actions/checkout@v1
+      if: steps.cache-openssl64.outputs.cache-hit != 'true'
+      with:
+        repository: ChristopherHX/MacOSX10.14.sdk
+        ref: 5d1c9b28f01ef0b01225f92670ee587b430efa8e
+        token: ${{ secrets.MacOSX1014sdk }}
     - name: Build OpenSSL
       if: steps.cache-openssl64.outputs.cache-hit != 'true'
       run: |
+        export MACOSX_DEPLOYMENT_TARGET=10.10.0
+        export SDKROOT=${{ github.workspace }}/../MacOSX10.14.sdk
         git clone https://github.com/openssl/openssl.git -b OpenSSL_1_1_1-stable
         cd openssl
         KERNEL_BITS=64 ./config --prefix=/usr/local/ssl64
