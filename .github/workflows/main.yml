@@ -285,6 +285,7 @@ jobs:
         git clone https://github.com/openssl/openssl.git -b OpenSSL_1_1_1-stable
         cd openssl
         KERNEL_BITS=32 ./config --prefix=/usr/local/ssl32
+        make
         sudo make install_sw
   buildopenssl64:
     runs-on: macos-latest
