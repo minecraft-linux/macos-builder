@@ -465,10 +465,12 @@ jobs:
         key: ${{ runner.os }}-build-${{ env.cache-name }}
     - name: patch ssl
       run: |
-        rm -rf ssl32/lib
-        ln -s $PWD/ssl/lib $PWD/ssl32/lib
-        rm -rf ssl64/lib
-        ln -s $PWD/ssl/lib $PWD/ssl64/lib
+        cd ssl32
+        rm -rf lib
+        ln -s ../ssl/lib
+        cd ../ssl64
+        rm -rf lib
+        ln -s ../ssl/lib
     - name: brew install / link
       run: |
         brew install p7zip automake
