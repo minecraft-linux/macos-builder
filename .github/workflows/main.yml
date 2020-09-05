@@ -329,17 +329,17 @@ jobs:
       id: openssl
       uses: Mystraht/cache@master
       env:
-        cache-name: cache-openssl-macos-10-10
+        cache-name: cache-openssl
       with:
-        path: /usr/local/ssl
+        path: ssl
         key: ${{ runner.os }}-build-${{ env.cache-name }}
     - name: Cache openssl
       if: steps.openssl.cache-hit != 'true'
       uses: actions/cache@v1
       env:
-        cache-name: cache-openssl-macos-10-10
+        cache-name: cache-openssl
       with:
-        path: /usr/local/ssl
+        path: ssl
         key: ${{ runner.os }}-build-${{ env.cache-name }}
     - name: Cache openssl32
       if: steps.openssl.cache-hit != 'true'
@@ -360,12 +360,12 @@ jobs:
     - name: Build universal lib
       if: steps.openssl.cache-hit != 'true'
       run: |
-        sudo mkdir -p ssl/lib
-        sudo lipo -create ssl32/lib/libssl.dylib ssl64/lib/libssl.dylib -output ssl/lib/libssl.dylib
-        sudo lipo -create ssl32/lib/libcrypto.dylib ssl64/lib/libcrypto.dylib -output ssl/lib/libcrypto.dylib
+        mkdir -p ssl/lib
+        lipo -create ssl32/lib/libssl.dylib ssl64/lib/libssl.dylib -output ssl/lib/libssl.dylib
+        lipo -create ssl32/lib/libcrypto.dylib ssl64/lib/libcrypto.dylib -output ssl/lib/libcrypto.dylib
         cd ssl/lib
-        sudo install_name_tool -id @rpath/libssl.dylib -add_rpath @loader_path/../Frameworks libssl.dylib
-        sudo install_name_tool -id @rpath/libcrypto.dylib -add_rpath @loader_path/../Frameworks libcrypto.dylib
+        install_name_tool -id @rpath/libssl.dylib -add_rpath @loader_path/../Frameworks libssl.dylib
+        install_name_tool -id @rpath/libcrypto.dylib -add_rpath @loader_path/../Frameworks libcrypto.dylib
   build:
     runs-on: macos-latest
     needs: [brew-libzip, brew-protobuf, brew-libuv, build-libcxx, buildopenssl]
@@ -443,15 +443,13 @@ jobs:
         path: /usr/local/Cellar/libuv
         key: ${{ runner.os }}-build-${{ env.cache-name }}
     - name: Cache openssl
-      if: steps.openssl.cache-hit != 'true'
       uses: actions/cache@v1
       env:
-        cache-name: cache-openssl-macos-10-10
+        cache-name: cache-openssl
       with:
         path: ssl
         key: ${{ runner.os }}-build-${{ env.cache-name }}
     - name: Cache openssl32
-      if: steps.openssl.cache-hit != 'true'
       uses: actions/cache@v1
       env:
         cache-name: cache-openssl32-macos-10-10
@@ -459,7 +457,6 @@ jobs:
         path: ssl32
         key: ${{ runner.os }}-build-${{ env.cache-name }}
     - name: Cache openssl64
-      if: steps.openssl.cache-hit != 'true'
       uses: actions/cache@v1
       env:
         cache-name: cache-openssl64-macos-10-10
