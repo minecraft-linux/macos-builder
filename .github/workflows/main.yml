@@ -360,12 +360,12 @@ jobs:
     - name: Build universal lib
       if: steps.openssl.cache-hit != 'true'
       run: |
-        mkdir -p /usr/local/ssl/lib
-        lipo -create /usr/local/ssl32/lib/libssl.dylib /usr/local/ssl64/lib/libssl.dylib -output /usr/local/ssl64/lib/libssl.dylib
-        lipo -create /usr/local/ssl32/lib/libcrypto.dylib /usr/local/ssl64/lib/libcrypto.dylib -output /usr/local/ssl64/lib/libcrypto.dylib
+        sudo mkdir -p /usr/local/ssl/lib
+        sudo lipo -create /usr/local/ssl32/lib/libssl.dylib /usr/local/ssl64/lib/libssl.dylib -output /usr/local/ssl64/lib/libssl.dylib
+        sudo lipo -create /usr/local/ssl32/lib/libcrypto.dylib /usr/local/ssl64/lib/libcrypto.dylib -output /usr/local/ssl64/lib/libcrypto.dylib
         cd /usr/local/ssl/lib
-        install_name_tool -id @rpath/libssl.dylib -add_rpath @loader_path/../Frameworks libssl.dylib
-        install_name_tool -id @rpath/libcrypto.dylib -add_rpath @loader_path/../Frameworks libcrypto.dylib
+        sudo install_name_tool -id @rpath/libssl.dylib -add_rpath @loader_path/../Frameworks libssl.dylib
+        sudo install_name_tool -id @rpath/libcrypto.dylib -add_rpath @loader_path/../Frameworks libcrypto.dylib
   build:
     runs-on: macos-latest
     needs: [brew-libzip, brew-protobuf, brew-libuv, build-libcxx]
