@@ -329,20 +329,20 @@ jobs:
       id: openssl
       uses: Mystraht/cache@master
       env:
-        cache-name: cache-openssl
+        cache-name: cache-openssl-2
       with:
         path: ssl
         key: ${{ runner.os }}-build-${{ env.cache-name }}
     - name: Cache openssl
-      if: steps.openssl.cache-hit != 'true'
+      if: steps.openssl.outputs.cache-hit != 'true'
       uses: actions/cache@v1
       env:
-        cache-name: cache-openssl
+        cache-name: cache-openssl-2
       with:
         path: ssl
         key: ${{ runner.os }}-build-${{ env.cache-name }}
     - name: Cache openssl32
-      if: steps.openssl.cache-hit != 'true'
+      if: steps.openssl.outputs.cache-hit != 'true'
       uses: actions/cache@v1
       env:
         cache-name: cache-openssl32-macos-10-10
@@ -350,7 +350,7 @@ jobs:
         path: ssl32
         key: ${{ runner.os }}-build-${{ env.cache-name }}
     - name: Cache openssl64
-      if: steps.openssl.cache-hit != 'true'
+      if: steps.openssl.outputs.cache-hit != 'true'
       uses: actions/cache@v1
       env:
         cache-name: cache-openssl64-macos-10-10
@@ -358,7 +358,7 @@ jobs:
         path: ssl64
         key: ${{ runner.os }}-build-${{ env.cache-name }}
     - name: Build universal lib
-      if: steps.openssl.cache-hit != 'true'
+      if: steps.openssl.outputs.cache-hit != 'true'
       run: |
         mkdir -p ssl/lib
         lipo -create ssl32/lib/libssl.dylib ssl64/lib/libssl.dylib -output ssl/lib/libssl.dylib
@@ -445,7 +445,7 @@ jobs:
     - name: Cache openssl
       uses: actions/cache@v1
       env:
-        cache-name: cache-openssl
+        cache-name: cache-openssl-2
       with:
         path: ssl
         key: ${{ runner.os }}-build-${{ env.cache-name }}
