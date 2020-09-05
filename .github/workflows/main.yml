@@ -347,7 +347,7 @@ jobs:
       env:
         cache-name: cache-openssl32-macos-10-10
       with:
-        path: /usr/local/ssl32
+        path: ssl32
         key: ${{ runner.os }}-build-${{ env.cache-name }}
     - name: Cache openssl64
       if: steps.openssl.cache-hit != 'true'
@@ -355,15 +355,15 @@ jobs:
       env:
         cache-name: cache-openssl64-macos-10-10
       with:
-        path: /usr/local/ssl64
+        path: ssl64
         key: ${{ runner.os }}-build-${{ env.cache-name }}
     - name: Build universal lib
       if: steps.openssl.cache-hit != 'true'
       run: |
-        sudo mkdir -p /usr/local/ssl/lib
-        sudo lipo -create /usr/local/ssl32/lib/libssl.dylib /usr/local/ssl64/lib/libssl.dylib -output /usr/local/ssl64/lib/libssl.dylib
-        sudo lipo -create /usr/local/ssl32/lib/libcrypto.dylib /usr/local/ssl64/lib/libcrypto.dylib -output /usr/local/ssl64/lib/libcrypto.dylib
-        cd /usr/local/ssl/lib
+        sudo mkdir -p ssl/lib
+        sudo lipo -create ssl32/lib/libssl.dylib ssl64/lib/libssl.dylib -output ssl/lib/libssl.dylib
+        sudo lipo -create ssl32/lib/libcrypto.dylib ssl64/lib/libcrypto.dylib -output ssl/lib/libcrypto.dylib
+        cd ssl/lib
         sudo install_name_tool -id @rpath/libssl.dylib -add_rpath @loader_path/../Frameworks libssl.dylib
         sudo install_name_tool -id @rpath/libcrypto.dylib -add_rpath @loader_path/../Frameworks libcrypto.dylib
   build:
