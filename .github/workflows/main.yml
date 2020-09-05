@@ -468,9 +468,9 @@ jobs:
         key: ${{ runner.os }}-build-${{ env.cache-name }}
     - name: patch ssl
       run: |
-        rm -f ssl32/lib
+        rm -rf ssl32/lib
         ln -s $PWD/ssl/lib $PWD/ssl32/lib
-        rm -f ssl64/lib
+        rm -rf ssl64/lib
         ln -s $PWD/ssl/lib $PWD/ssl64/lib
     - name: brew install / link
       run: |
