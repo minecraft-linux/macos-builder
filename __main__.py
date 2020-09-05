@@ -115,8 +115,8 @@ if args.update_sparkle_appcast:
 
 display_stage("Building")
 build_component("msa", ['-DENABLE_MSA_QT_UI=ON', '-DMSA_UI_PATH_DEV=OFF', '-DCMAKE_CXX_FLAGS=-DNDEBUG  -Wl,-L' + path.abspath('libcxx-build') + ',-rpath,@loader_path/../Frameworks' +' -D_LIBCPP_DISABLE_AVAILABILITY=1 -I' + path.abspath('libcxx64-build/include/cxx/v1')] + CMAKE_QT_EXTRA_OPTIONS)
-build_component("mcpelauncher", ['-DMSA_DAEMON_PATH=.', '-DENABLE_DEV_PATHS=OFF', '-DBUILD_FAKE_JNI_TESTS=OFF', '-DOPENSSL_ROOT_DIR=/usr/local/opt/openssl', '-DBUILD_FAKE_JNI_EXAMPLES=OFF', '-DCMAKE_CXX_FLAGS=-DNDEBUG -Wl,-L' + path.abspath('libcxx-build') +',-rpath,@loader_path/../Frameworks -D_LIBCPP_DISABLE_AVAILABILITY=1 -I' + path.abspath('libcxx64-build/include/cxx/v1') + ' -I/usr/local/opt/openssl@1.1/include -L/usr/local/opt/openssl@1.1/lib -L/usr/local/Cellar/ossp-uuid/1.6.2_2/lib/'])
-# build_component32("mcpelauncher", ['-DMSA_DAEMON_PATH=.', '-DENABLE_DEV_PATHS=OFF', '-DBUILD_FAKE_JNI_TESTS=OFF', '-DBUILD_FAKE_JNI_EXAMPLES=OFF', '-DCMAKE_ASM_FLAGS=-m32', '-DCMAKE_C_FLAGS=-m32', '-DCMAKE_CXX_FLAGS=-m32 -DNDEBUG -Wl,-L' + path.abspath('libcxx-build') +',-rpath,@loader_path/../Frameworks -D_LIBCPP_DISABLE_AVAILABILITY=1 -I' + path.abspath('libcxx32-build/include/cxx/v1') + ' -I/usr/local/opt/openssl@1.1/include -L/usr/local/opt/openssl@1.1/lib', '-DCMAKE_CXX_COMPILER_TARGET=i386-apple-darwin', '-DCMAKE_LIBRARY_ARCHITECTURE=i386-apple-darwin'])
+build_component("mcpelauncher", ['-DMSA_DAEMON_PATH=.', '-DENABLE_DEV_PATHS=OFF', '-DBUILD_FAKE_JNI_TESTS=OFF', '-DOPENSSL_ROOT_DIR=' + path.abspath('ssl64'), '-DBUILD_FAKE_JNI_EXAMPLES=OFF', '-DCMAKE_CXX_FLAGS=-DNDEBUG -Wl,-L' + path.abspath('libcxx-build') +',-rpath,@loader_path/../Frameworks -D_LIBCPP_DISABLE_AVAILABILITY=1 -I' + path.abspath('libcxx64-build/include/cxx/v1') + ' -I' + path.abspath('ssl64/include')])
+build_component32("mcpelauncher", ['-DMSA_DAEMON_PATH=.', '-DENABLE_DEV_PATHS=OFF', '-DBUILD_FAKE_JNI_TESTS=OFF', '-DOPENSSL_ROOT_DIR=' + path.abspath('ssl32'), '-DBUILD_FAKE_JNI_EXAMPLES=OFF', '-DCMAKE_ASM_FLAGS=-m32', '-DCMAKE_C_FLAGS=-m32', '-DCMAKE_CXX_FLAGS=-m32 -DNDEBUG -Wl,-L' + path.abspath('libcxx-build') +',-rpath,@loader_path/../Frameworks -D_LIBCPP_DISABLE_AVAILABILITY=1 -I' + path.abspath('libcxx32-build/include/cxx/v1') + ' -I' + path.abspath('ssl32/include'), '-DCMAKE_CXX_COMPILER_TARGET=i386-apple-darwin', '-DCMAKE_LIBRARY_ARCHITECTURE=i386-apple-darwin'])
 build_component("mcpelauncher-ui", ['-DGAME_LAUNCHER_PATH=.', '-DCMAKE_CXX_FLAGS=-DNDEBUG -Wl,-F'+ QT_INSTALL_PATH + '/lib/,-L' + path.abspath('libcxx-build') +',-rpath,@loader_path/../Frameworks -D_LIBCPP_DISABLE_AVAILABILITY=1 -I' + path.abspath('libcxx64-build/include/cxx/v1')] + VERSION_OPTS + SPARKLE_OPTS + CMAKE_QT_EXTRA_OPTIONS)
 if args.buildangle:
     call(['bash', '-c', './build.sh'], cwd=path.abspath(path.join(SOURCE_DIR, "osx-angle-ci")))
@@ -133,6 +133,7 @@ def copy_installed_files(from_path, to_path):
 copy_installed_files(path.join(CMAKE_INSTALL_PREFIX, 'bin'), path.join(APP_OUTPUT_DIR, 'Contents', 'MacOS'))
 copy_installed_files(path.join(CMAKE_INSTALL_PREFIX, 'share'), path.join(APP_OUTPUT_DIR, 'Contents', 'Resources'))
 copy_installed_files('libcxx-build', path.join(APP_OUTPUT_DIR, 'Contents', 'Frameworks'))
+copy_installed_files('ssl/lib', path.join(APP_OUTPUT_DIR, 'Contents', 'Frameworks'))
 # Workaround Qt 5.9.2
 if args.qtworkaround:
     copy_installed_files(path.join(QT_INSTALL_PATH, 'qml', 'QtQuick'), path.join(APP_OUTPUT_DIR, 'Contents', 'Resources', 'qml', 'QtQuick'))
