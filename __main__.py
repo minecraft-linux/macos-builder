@@ -74,7 +74,7 @@ display_stage("Downloading sources")
 clone_repo('msa', 'https://github.com/minecraft-linux/msa-manifest.git', 'feature-xal')
 clone_repo('mcpelauncher', 'https://github.com/minecraft-linux/mcpelauncher-manifest.git', 'feature-jnivm')
 clone_repo('mcpelauncher-ui', 'https://github.com/minecraft-linux/mcpelauncher-ui-manifest.git', 'ng')
-call(['git', 'checkout', 'ng-v0.0.1-rp1'], cwd=path.join(SOURCE_DIR, 'mcpelauncher-ui', 'mcpelauncher-ui'))
+call(['git', 'checkout', 'ng-v0.0.1-rp1'], cwd=path.join(SOURCE_DIR, 'mcpelauncher-ui', 'mcpelauncher-ui-qt'))
 if args.buildangle:
     clone_repo('osx-angle-ci', 'https://github.com/christopherhx/osx-angle-ci.git', 'master')
 
