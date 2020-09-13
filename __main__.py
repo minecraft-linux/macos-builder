@@ -71,8 +71,8 @@ def clone_repo(name, url, branch):
         call(['git', 'submodule', 'update', '--recursive'], cwd=directory)
 
 display_stage("Downloading sources")
-clone_repo('msa', 'https://github.com/minecraft-linux/msa-manifest.git', 'feature-xal')
-clone_repo('mcpelauncher', 'https://github.com/minecraft-linux/mcpelauncher-manifest.git', 'feature-xal')
+clone_repo('msa', 'https://github.com/minecraft-linux/msa-manifest.git', 'master')
+clone_repo('mcpelauncher', 'https://github.com/minecraft-linux/mcpelauncher-manifest.git', 'ng')
 clone_repo('mcpelauncher-ui', 'https://github.com/minecraft-linux/mcpelauncher-ui-manifest.git', 'ng')
 call(['git', 'checkout', 'ng-v0.0.1-rp1'], cwd=path.join(SOURCE_DIR, 'mcpelauncher-ui', 'mcpelauncher-ui-qt'))
 call(['git', 'checkout', 'feature-1.16.20-32bit'], cwd=path.join(SOURCE_DIR, 'mcpelauncher', 'mcpelauncher-core'))
