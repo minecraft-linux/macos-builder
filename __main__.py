@@ -78,6 +78,7 @@ call(['git', 'checkout', 'ng-v0.0.1-rp1'], cwd=path.join(SOURCE_DIR, 'mcpelaunch
 call(['git', 'checkout', 'feature-jnivm'], cwd=path.join(SOURCE_DIR, 'mcpelauncher', 'mcpelauncher-client'))
 call(['git', 'checkout', 'feature-1.16.20-32bit'], cwd=path.join(SOURCE_DIR, 'mcpelauncher', 'mcpelauncher-core'))
 call(['git', 'checkout', 'ng'], cwd=path.join(SOURCE_DIR, 'mcpelauncher', 'minecraft-imported-symbols'))
+call(['git', 'checkout', 'feature-jnivm'], cwd=path.join(SOURCE_DIR, 'mcpelauncher', 'libjnivm'))
 if args.buildangle:
     clone_repo('osx-angle-ci', 'https://github.com/christopherhx/osx-angle-ci.git', 'master')
 
