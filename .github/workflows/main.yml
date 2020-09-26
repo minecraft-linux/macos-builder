@@ -525,9 +525,9 @@ jobs:
         token: ${{ secrets.MacOSX1014sdk }}
     - name: brew install / link
       run: |
-        HOMEBREW_NO_AUTO_UPDATE=1 brew remove libuv || :
-        HOMEBREW_NO_AUTO_UPDATE=1 brew remove protobuf || :
-        HOMEBREW_NO_AUTO_UPDATE=1 brew remove libzip || :
+        HOMEBREW_NO_AUTO_UPDATE=1 brew remove --ignore-dependencies libuv || :
+        HOMEBREW_NO_AUTO_UPDATE=1 brew remove --ignore-dependenciesprotobuf || :
+        HOMEBREW_NO_AUTO_UPDATE=1 brew remove --ignore-dependencies libzip || :
     - name: Cache libcxx32
       id: libcxx32-llvm
       uses: actions/cache@v1
