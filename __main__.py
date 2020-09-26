@@ -80,8 +80,8 @@ call(['git', 'checkout', 'feature-1.16.20-32bit'], cwd=path.join(SOURCE_DIR, 'mc
 call(['git', 'checkout', 'ng'], cwd=path.join(SOURCE_DIR, 'mcpelauncher', 'minecraft-imported-symbols'))
 call(['git', 'checkout', 'feature-jnivm'], cwd=path.join(SOURCE_DIR, 'mcpelauncher', 'libjnivm'))
 call(['git', 'checkout', 'fakesyscall'], cwd=path.join(SOURCE_DIR, 'mcpelauncher', 'libc-shim'))
-if args.buildangle:
-    clone_repo('osx-angle-ci', 'https://github.com/christopherhx/osx-angle-ci.git', 'master')
+#if args.buildangle:
+#    clone_repo('osx-angle-ci', 'https://github.com/christopherhx/osx-angle-ci.git', 'master')
 
 # Build
 # QT_INSTALL_PATH = subprocess.check_output(['brew', '--prefix', 'qt']).decode('utf-8').strip()
@@ -124,8 +124,8 @@ build_component("msa", ['-DENABLE_MSA_QT_UI=ON', '-DMSA_UI_PATH_DEV=OFF', '-DCMA
 build_component("mcpelauncher", ['-DMSA_DAEMON_PATH=.', '-DENABLE_DEV_PATHS=OFF', '-DBUILD_FAKE_JNI_TESTS=OFF', '-DOPENSSL_ROOT_DIR=' + path.abspath('ssl64'), '-DOPENSSL_CRYPTO_LIBRARY=' + path.abspath('ssl64/lib/libcrypto.dylib'), '-DBUILD_FAKE_JNI_EXAMPLES=OFF', '-DCMAKE_CXX_FLAGS=-DNDEBUG -Wl,-L' + path.abspath('libcxx-build') +',-rpath,@loader_path/../Frameworks -D_LIBCPP_DISABLE_AVAILABILITY=1 -I' + path.abspath('libcxx64-build/include/cxx/v1') + ' -I' + path.abspath('ssl64/include') + ' -L' + path.abspath('ssl64/lib')])
 build_component32("mcpelauncher", ['-DMSA_DAEMON_PATH=.', '-DENABLE_DEV_PATHS=OFF', '-DBUILD_FAKE_JNI_TESTS=OFF', '-DOPENSSL_ROOT_DIR=' + path.abspath('ssl32'), '-DOPENSSL_CRYPTO_LIBRARY=' + path.abspath('ssl32/lib/libcrypto.dylib'), '-DBUILD_FAKE_JNI_EXAMPLES=OFF', '-DCMAKE_ASM_FLAGS=-m32', '-DCMAKE_C_FLAGS=-m32', '-DCMAKE_CXX_FLAGS=-m32 -DNDEBUG -Wl,-L' + path.abspath('libcxx-build') +',-rpath,@loader_path/../Frameworks -D_LIBCPP_DISABLE_AVAILABILITY=1 -I' + path.abspath('libcxx32-build/include/cxx/v1') + ' -I' + path.abspath('ssl32/include') + ' -L' + path.abspath('ssl32/lib'), '-DCMAKE_CXX_COMPILER_TARGET=i386-apple-darwin', '-DCMAKE_LIBRARY_ARCHITECTURE=i386-apple-darwin'])
 build_component("mcpelauncher-ui", ['-DGAME_LAUNCHER_PATH=.', '-DCMAKE_CXX_FLAGS=-DNDEBUG -Wl,-F'+ QT_INSTALL_PATH + '/lib/,-L' + path.abspath('libcxx-build') +',-rpath,@loader_path/../Frameworks -D_LIBCPP_DISABLE_AVAILABILITY=1 -I' + path.abspath('libcxx64-build/include/cxx/v1')] + VERSION_OPTS + SPARKLE_OPTS + CMAKE_QT_EXTRA_OPTIONS)
-if args.buildangle:
-    call(['bash', '-c', './build.sh'], cwd=path.abspath(path.join(SOURCE_DIR, "osx-angle-ci")))
+#if args.buildangle:
+#    call(['bash', '-c', './build.sh'], cwd=path.abspath(path.join(SOURCE_DIR, "osx-angle-ci")))
 
 display_stage("Copying files")
 def copy_installed_files(from_path, to_path):
