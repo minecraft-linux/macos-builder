@@ -382,9 +382,17 @@ jobs:
       with:
         path: angle/out/Release
         key: ${{ runner.os }}-build-${{ env.cache-name }}
+    - uses: actions/checkout@v1
+      if: steps.angle.outputs.cache-hit != 'true'
+      with:
+        repository: ChristopherHX/MacOSX10.14.sdk
+        ref: 5d1c9b28f01ef0b01225f92670ee587b430efa8e
+        token: ${{ secrets.MacOSX1014sdk }}
     - name: brew install / link
       if: steps.angle.outputs.cache-hit != 'true'
       run: |
+        export MACOSX_DEPLOYMENT_TARGET=${{ matrix.target }}
+        export SDKROOT=${{ github.workspace }}/../MacOSX10.14.sdk
         git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
         export PATH=$PATH:$PWD/depot_tools
         git clone https://github.com/minecraft-linux/angle.git
