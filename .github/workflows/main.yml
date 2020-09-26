@@ -484,6 +484,7 @@ jobs:
             QT_PACKAGE_PREFIX: qt.592.
             QT_PACKAGE_SUFFIX: clang_64
             QT_PREBUILT_SUFFIX: -MacOS-OSX_10_10-Clang-MacOS-OSX_10_10-X86_64
+            extraflags: "--qtworkaround"
           - target: "10.12.0"
             micro: 1
             QT_BASE_URL: http://download.qt.io/online/qtsdkrepository/mac_x64/desktop/qt5_5113/
