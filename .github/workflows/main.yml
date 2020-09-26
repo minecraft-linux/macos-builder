@@ -13,7 +13,7 @@ jobs:
       id: libcxx32-llvm
       uses: Mystraht/cache@master
       env:
-        cache-name: cache-libcxx32-macos-10-10-2
+        cache-name: cache-libcxx32--macos-10-10-4
       with:
         path: libcxx32-build
         key: ${{ runner.os }}-build-${{ env.cache-name }}
@@ -21,22 +21,21 @@ jobs:
       if: steps.libcxx32-llvm.outputs.cache-hit != 'true'
       uses: actions/cache@v1
       env:
-        cache-name: cache-libcxx32-macos-10-10-2
+        cache-name: cache-libcxx32--macos-10-10-4
       with:
         path: libcxx32-build
         key: ${{ runner.os }}-build-${{ env.cache-name }}
     - uses: actions/checkout@v1
       if: steps.libcxx32-llvm.outputs.cache-hit != 'true'
       with:
-        repository: ChristopherHX/MacOSX10.14.sdk
-        ref: 5d1c9b28f01ef0b01225f92670ee587b430efa8e
-        token: ${{ secrets.MacOSX1014sdk }}
+        repository: phracker/MacOSX-SDKs
+        ref: refs/heads/master
     - name: Build libcxx, libcxxabi
       if: steps.libcxx32-llvm.outputs.cache-hit != 'true'
       run: |
         export MACOSX_DEPLOYMENT_TARGET=10.10.0
-        export SDKROOT=${{ github.workspace }}/../MacOSX10.14.sdk
-        git clone https://github.com/llvm/llvm-project.git llvm
+        export SDKROOT=${{ github.workspace }}/../MacOSX-SDKs/MacOSX10.10.sdk
+        git clone https://github.com/llvm/llvm-project.git llvm -b release/10.x
         mkdir -p libcxx32-build
         cd libcxx32-build
         cmake ../llvm/llvm -DLLVM_ENABLE_PROJECTS="libcxx;libcxxabi" -DCMAKE_BUILD_TYPE=Release -DLIBCXX_BUILD_32_BITS=ON -DLIBCXXABI_BUILD_32_BITS=ON -DLLVM_BUILD_32_BITS=ON
@@ -48,7 +47,7 @@ jobs:
       id: libcxx64-llvm
       uses: Mystraht/cache@master
       env:
-        cache-name: cache-libcxx64-macos-10-10-2
+        cache-name: cache-libcxx64--macos-10-10-4
       with:
         path: libcxx64-build
         key: ${{ runner.os }}-build-${{ env.cache-name }}
@@ -56,22 +55,21 @@ jobs:
       if: steps.libcxx64-llvm.outputs.cache-hit != 'true'
       uses: actions/cache@v1
       env:
-        cache-name: cache-libcxx64-macos-10-10-2
+        cache-name: cache-libcxx64--macos-10-10-4
       with:
         path: libcxx64-build
         key: ${{ runner.os }}-build-${{ env.cache-name }}
     - uses: actions/checkout@v1
       if: steps.libcxx64-llvm.outputs.cache-hit != 'true'
       with:
-        repository: ChristopherHX/MacOSX10.14.sdk
-        ref: 5d1c9b28f01ef0b01225f92670ee587b430efa8e
-        token: ${{ secrets.MacOSX1014sdk }}
+        repository: phracker/MacOSX-SDKs
+        ref: refs/heads/master
     - name: Build libcxx, libcxxabi
       if: steps.libcxx64-llvm.outputs.cache-hit != 'true'
       run: |
         export MACOSX_DEPLOYMENT_TARGET=10.10.0
-        export SDKROOT=${{ github.workspace }}/../MacOSX10.14.sdk
-        git clone https://github.com/llvm/llvm-project.git llvm
+        export SDKROOT=${{ github.workspace }}/../MacOSX-SDKs/MacOSX10.10.sdk
+        git clone https://github.com/llvm/llvm-project.git llvm -b release/10.x
         mkdir -p libcxx64-build
         cd libcxx64-build
         cmake ../llvm/llvm -DLLVM_ENABLE_PROJECTS="libcxx;libcxxabi" -DCMAKE_BUILD_TYPE=Release
@@ -84,7 +82,7 @@ jobs:
       id: libcxx-llvm
       uses: Mystraht/cache@master
       env:
-        cache-name: cache-libcxx-macos-10-10-2
+        cache-name: cache-libcxx--macos-10-10-4
       with:
         path: libcxx-build
         key: ${{ runner.os }}-build-${{ env.cache-name }}
@@ -93,7 +91,7 @@ jobs:
       id: libcxx32-llvm
       uses: actions/cache@v1
       env:
-        cache-name: cache-libcxx32-macos-10-10-2
+        cache-name: cache-libcxx32--macos-10-10-4
       with:
         path: libcxx32-build
         key: ${{ runner.os }}-build-${{ env.cache-name }}
@@ -102,7 +100,7 @@ jobs:
       id: libcxx64-llvm
       uses: actions/cache@v1
       env:
-        cache-name: cache-libcxx64-macos-10-10-2
+        cache-name: cache-libcxx64--macos-10-10-4
       with:
         path: libcxx64-build
         key: ${{ runner.os }}-build-${{ env.cache-name }}
@@ -110,7 +108,7 @@ jobs:
       if: steps.libcxx-llvm.outputs.cache-hit != 'true'
       uses: actions/cache@v1
       env:
-        cache-name: cache-libcxx-macos-10-10-2
+        cache-name: cache-libcxx--macos-10-10-4
       with:
         path: libcxx-build
         key: ${{ runner.os }}-build-${{ env.cache-name }}
@@ -132,7 +130,7 @@ jobs:
       id: cache-brew-libzip
       uses: Mystraht/cache@master
       env:
-        cache-name: cache-brew-libzip-macos-10-10
+        cache-name: cache-brew-libzip-macos-10-10-2
       with:
         path: /usr/local/Cellar/libzip
         key: ${{ runner.os }}-build-${{ env.cache-name }}
@@ -140,16 +138,15 @@ jobs:
       if: steps.cache-brew-libzip.outputs.cache-hit != 'true'
       uses: actions/cache@v1
       env:
-        cache-name: cache-brew-libzip-macos-10-10
+        cache-name: cache-brew-libzip-macos-10-10-2
       with:
         path: /usr/local/Cellar/libzip
         key: ${{ runner.os }}-build-${{ env.cache-name }}
     - uses: actions/checkout@v1
       if: steps.cache-brew-libzip.outputs.cache-hit != 'true'
       with:
-        repository: ChristopherHX/MacOSX10.14.sdk
-        ref: 5d1c9b28f01ef0b01225f92670ee587b430efa8e
-        token: ${{ secrets.MacOSX1014sdk }}
+        repository: phracker/MacOSX-SDKs
+        ref: refs/heads/master
     - name: Apply custom patch and Update brew
       if: steps.cache-brew-libzip.outputs.cache-hit != 'true'
       working-directory: "/usr/local/Homebrew"
@@ -158,13 +155,13 @@ jobs:
         git fetch fork
         git config --global user.email "CI@local"
         git config --global user.name "CI Bot"
-        git merge fork/master
+        git checkout fork/master
     - name: Install brew dependencies
       if: steps.cache-brew-libzip.outputs.cache-hit != 'true'
       working-directory: ${{ github.workspace }}/../osx-packaging-scripts
       run: |
         export HOMEBREW_MACOSX_DEPLOYMENT_TARGET=10.10.0
-        export HOMEBREW_SDKROOT=${{ github.workspace }}/../MacOSX10.14.sdk
+        export HOMEBREW_SDKROOT=${{ github.workspace }}/../MacOSX-SDKs/MacOSX10.10.sdk
         HOMEBREW_NO_AUTO_UPDATE=1 brew reinstall libzip
   brew-protobuf:
     runs-on: macos-latest
@@ -411,11 +408,16 @@ jobs:
         repository: ChristopherHX/MacOSX10.14.sdk
         ref: 5d1c9b28f01ef0b01225f92670ee587b430efa8e
         token: ${{ secrets.MacOSX1014sdk }}
+    - name: brew install / link
+      run: |
+        HOMEBREW_NO_AUTO_UPDATE=1 brew remove libuv || :
+        HOMEBREW_NO_AUTO_UPDATE=1 brew remove protobuf || :
+        HOMEBREW_NO_AUTO_UPDATE=1 brew remove libzip || :
     - name: Cache libcxx32
       id: libcxx32-llvm
       uses: actions/cache@v1
       env:
-        cache-name: cache-libcxx32-macos-10-10-2
+        cache-name: cache-libcxx32--macos-10-10-4
       with:
         path: libcxx32-build
         key: ${{ runner.os }}-build-${{ env.cache-name }}
@@ -423,7 +425,7 @@ jobs:
       id: libcxx64-llvm
       uses: actions/cache@v1
       env:
-        cache-name: cache-libcxx64-macos-10-10-2
+        cache-name: cache-libcxx64--macos-10-10-4
       with:
         path: libcxx64-build
         key: ${{ runner.os }}-build-${{ env.cache-name }}
@@ -431,7 +433,7 @@ jobs:
       id: libcxx-llvm
       uses: actions/cache@v1
       env:
-        cache-name: cache-libcxx-macos-10-10-2
+        cache-name: cache-libcxx--macos-10-10-4
       with:
         path: libcxx-build
         key: ${{ runner.os }}-build-${{ env.cache-name }}
@@ -440,7 +442,7 @@ jobs:
     - name: Restore libzip
       uses: actions/cache@v1
       env:
-        cache-name: cache-brew-libzip-macos-10-10
+        cache-name: cache-brew-libzip-macos-10-10-2
       with:
         path: /usr/local/Cellar/libzip
         key: ${{ runner.os }}-build-${{ env.cache-name }}
@@ -489,11 +491,8 @@ jobs:
         ln -s ../ssl/lib
     - name: brew install / link
       run: |
-        brew install p7zip automake
-        HOMEBREW_NO_AUTO_UPDATE=1 brew unlink libzip
-        HOMEBREW_NO_AUTO_UPDATE=1 brew reinstall openssl@1.1 || HOMEBREW_NO_AUTO_UPDATE=1 brew install openssl@1.1
-        HOMEBREW_NO_AUTO_UPDATE=1 brew reinstall ossp-uuid || HOMEBREW_NO_AUTO_UPDATE=1 brew install ossp-uuid
-        HOMEBREW_NO_AUTO_UPDATE=1 brew link libuv protobuf libzip openssl@1.1 ossp-uuid
+        HOMEBREW_NO_AUTO_UPDATE=1 brew install p7zip automake
+        HOMEBREW_NO_AUTO_UPDATE=1 brew link libuv protobuf libzip
     - name: Cache qt
       id: cache-qt
       uses: actions/cache@v1
