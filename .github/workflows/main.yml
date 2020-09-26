@@ -471,7 +471,7 @@ jobs:
         lipo -create angle/out/Release/libGLESv2.dylib angle/out/Release64/libGLESv2.dylib -output ./osx-angle-ci/artifacts/libGLESv2.dylib
   build:
     runs-on: macos-latest
-    needs: [brew-libzip, brew-protobuf, brew-libuv, build-libcxx, buildopenssl]
+    needs: [brew-libzip, brew-protobuf, brew-libuv, build-libcxx, buildopenssl, buildangle]
     strategy:
       fail-fast: false
       matrix:
