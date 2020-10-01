@@ -21,7 +21,7 @@ jobs:
         npm install
         npm run-script build
         cd ..
-        grd/bin/grd --token ${{ secrets.GITHUB_TOKEN }} --owner ChristopherHX --repository osx-packaging-scripts --filter-asset '^.*168_macOS_10\.12\.0\.dmg$' --match-version 'ng\.dmg' --output sparkle/
+        grd/bin/grd --token ${{ secrets.GITHUB_TOKEN }} --owner ChristopherHX --repository osx-packaging-scripts --filter-asset '^.*236_macOS_10\.1[0-9]\.0\.dmg$' --match-version 'ng\.dmg' --output sparkle/
         mv sparkle/${GITHUB_REPOSITORY}/ng.dmg/*.dmg sparkle/ || :
     - name: Generate Dist
       run: |
