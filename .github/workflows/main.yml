@@ -645,7 +645,7 @@ jobs:
       run: python3 build_dmg.py
     - name: Generate Dist
       run: |
-        DMG_FILENAME="Minecraft_Bedrock_Launcher_0.1.p4-macOS-x86_64-0.${{ matrix.micro }}.${GITHUB_RUN_NUMBER}_macOS_${{ matrix.target }}.dmg"
+        DMG_FILENAME="Minecraft_Bedrock_Launcher_0.1.b1-macOS-x86_64-0.${{ matrix.micro }}.${GITHUB_RUN_NUMBER}_macOS_${{ matrix.target }}.dmg"
         mkdir -p dist
         mv "${{ github.workspace }}/../osx-packaging-scripts/output/Minecraft Bedrock Launcher.dmg" "dist/${DMG_FILENAME}"
     - name: Upload Latest
