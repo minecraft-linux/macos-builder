@@ -370,7 +370,7 @@ jobs:
       id: angle
       uses: Mystraht/cache@master
       env:
-        cache-name: cache-2-angle-macos-10-10
+        cache-name: cache-3-angle-macos-10-10
       with:
         path: angle/out/Release
         key: ${{ runner.os }}-build-${{ env.cache-name }}
@@ -378,7 +378,7 @@ jobs:
       if: steps.angle.outputs.cache-hit != 'true'
       uses: actions/cache@v1
       env:
-        cache-name: cache-2-angle-macos-10-10
+        cache-name: cache-3-angle-macos-10-10
       with:
         path: angle/out/Release
         key: ${{ runner.os }}-build-${{ env.cache-name }}
@@ -410,7 +410,7 @@ jobs:
       id: angle
       uses: Mystraht/cache@master
       env:
-        cache-name: cache-2-angle64-macos-10-10
+        cache-name: cache-3-angle64-macos-10-10
       with:
         path: angle/out/Release64
         key: ${{ runner.os }}-build-${{ env.cache-name }}
@@ -418,7 +418,7 @@ jobs:
       if: steps.angle.outputs.cache-hit != 'true'
       uses: actions/cache@v1
       env:
-        cache-name: cache-2-angle64-macos-10-10
+        cache-name: cache-3-angle64-macos-10-10
       with:
         path: angle/out/Release64
         key: ${{ runner.os }}-build-${{ env.cache-name }}
@@ -443,7 +443,7 @@ jobs:
       id: angle
       uses: Mystraht/cache@master
       env:
-        cache-name: cache-angle-2
+        cache-name: cache-angle-3
       with:
         path: osx-angle-ci/artifacts
         key: ${{ runner.os }}-build-${{ env.cache-name }}
@@ -451,7 +451,7 @@ jobs:
       if: steps.angle.outputs.cache-hit != 'true'
       uses: actions/cache@v1
       env:
-        cache-name: cache-angle-2
+        cache-name: cache-angle-3
       with:
         path: osx-angle-ci/artifacts
         key: ${{ runner.os }}-build-${{ env.cache-name }}
@@ -459,7 +459,7 @@ jobs:
       if: steps.angle.outputs.cache-hit != 'true'
       uses: actions/cache@v1
       env:
-        cache-name: cache-2-angle-macos-10-10
+        cache-name: cache-3-angle-macos-10-10
       with:
         path: angle/out/Release
         key: ${{ runner.os }}-build-${{ env.cache-name }}
@@ -467,7 +467,7 @@ jobs:
       if: steps.angle.outputs.cache-hit != 'true'
       uses: actions/cache@v1
       env:
-        cache-name: cache-2-angle64-macos-10-10
+        cache-name: cache-3-angle64-macos-10-10
       with:
         path: angle/out/Release64
         key: ${{ runner.os }}-build-${{ env.cache-name }}
@@ -608,7 +608,7 @@ jobs:
       if: steps.angle.outputs.cache-hit != 'true'
       uses: actions/cache@v1
       env:
-        cache-name: cache-angle-2
+        cache-name: cache-angle-3
       with:
         path: source/osx-angle-ci/artifacts
         key: ${{ runner.os }}-build-${{ env.cache-name }}
