@@ -363,24 +363,25 @@ jobs:
         cd ssl/lib
         install_name_tool -id @rpath/libssl.dylib -add_rpath @loader_path/../Frameworks libssl.dylib
         install_name_tool -id @rpath/libcrypto.dylib -add_rpath @loader_path/../Frameworks libcrypto.dylib
-  buildangle32:
+  buildangle:
     runs-on: macos-latest
+    # needs: [buildangle32, buildangle64]
     steps:
-    - name: Check angle32
+    - name: Check angle
       id: angle
       uses: Mystraht/cache@master
       env:
-        cache-name: cache-4-angle-macos-10-10
+        cache-name: cache-angle-3
       with:
-        path: angle/out/Release
+        path: osx-angle-ci/artifacts
         key: ${{ runner.os }}-build-${{ env.cache-name }}
-    - name: Cache angle32
+    - name: Cache angle
       if: steps.angle.outputs.cache-hit != 'true'
       uses: actions/cache@v1
       env:
-        cache-name: cache-4-angle-macos-10-10
+        cache-name: cache-angle-3
       with:
-        path: angle/out/Release
+        path: osx-angle-ci/artifacts
         key: ${{ runner.os }}-build-${{ env.cache-name }}
     - uses: actions/checkout@v1
       if: steps.angle.outputs.cache-hit != 'true'
@@ -403,74 +404,15 @@ jobs:
         gn gen out/Release --args='target_cpu="x86" is_debug=false mac_sdk_path="'"${SDKROOT}"'" mac_sdk_min="10.10.0" mac_min_system_version="10.10.0" mac_deployment_target="10.10.0" angle_enable_metal=false angle_enable_swiftshader=false angle_enable_vulkan=false'
         autoninja -C out/Release libEGL libGLESv2
         popd
-  buildangle64:
-    runs-on: macos-latest
-    steps:
-    - name: check angle64
-      id: angle
-      uses: Mystraht/cache@master
-      env:
-        cache-name: cache-4-angle64-macos-10-10
-      with:
-        path: angle/out/Release64
-        key: ${{ runner.os }}-build-${{ env.cache-name }}
-    - name: Cache angle64
-      if: steps.angle.outputs.cache-hit != 'true'
-      uses: actions/cache@v1
-      env:
-        cache-name: cache-4-angle64-macos-10-10
-      with:
-        path: angle/out/Release64
-        key: ${{ runner.os }}-build-${{ env.cache-name }}
     - name: brew install / link
       if: steps.angle.outputs.cache-hit != 'true'
       run: |
-        git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
-        export PATH=$PATH:$PWD/depot_tools
-        git clone https://github.com/minecraft-linux/angle.git
+        export MACOSX_DEPLOYMENT_TARGET=${{ matrix.target }}
+        export SDKROOT=${{ github.workspace }}/../MacOSX10.14.sdk
         pushd angle
-        python scripts/bootstrap.py
-        gclient sync
-        find build -name '*.gn' | xargs -n 1 sed -i '' 's/-fatal_warnings//g'
         gn gen out/Release64 --args='is_debug=false mac_sdk_path="'"${SDKROOT}"'" mac_sdk_min="10.10.0" mac_min_system_version="10.10.0" mac_deployment_target="10.10.0" angle_enable_swiftshader=false angle_enable_vulkan=false'
         autoninja -C out/Release64 libEGL libGLESv2
         popd
-  buildangle:
-    runs-on: macos-latest
-    needs: [buildangle32, buildangle64]
-    steps:
-    - name: Check angle
-      id: angle
-      uses: Mystraht/cache@master
-      env:
-        cache-name: cache-angle-3
-      with:
-        path: osx-angle-ci/artifacts
-        key: ${{ runner.os }}-build-${{ env.cache-name }}
-    - name: Cache angle
-      if: steps.angle.outputs.cache-hit != 'true'
-      uses: actions/cache@v1
-      env:
-        cache-name: cache-angle-3
-      with:
-        path: osx-angle-ci/artifacts
-        key: ${{ runner.os }}-build-${{ env.cache-name }}
-    - name: Cache angle32
-      if: steps.angle.outputs.cache-hit != 'true'
-      uses: actions/cache@v1
-      env:
-        cache-name: cache-4-angle-macos-10-10
-      with:
-        path: angle/out/Release
-        key: ${{ runner.os }}-build-${{ env.cache-name }}
-    - name: Cache angle64
-      if: steps.angle.outputs.cache-hit != 'true'
-      uses: actions/cache@v1
-      env:
-        cache-name: cache-4-angle64-macos-10-10
-      with:
-        path: angle/out/Release64
-        key: ${{ runner.os }}-build-${{ env.cache-name }}
     - name:
       if: steps.angle.outputs.cache-hit != 'true'
       run: |
