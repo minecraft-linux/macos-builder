@@ -62,13 +62,14 @@ if not path.exists(ICON_FILE):
 copyfile(ICON_FILE, path.join(APP_OUTPUT_DIR, 'Contents', 'Resources', 'minecraft.icns'))
 
 # Download the sources
-def clone_repo(name, url, branch, orgurl = url):
+def clone_repo(name, url, branch, orgurl = ""):
     display_stage("Cloning repository: " + url)
     directory = path.join(SOURCE_DIR, name)
     if not path.isdir(directory):
         call(['git', 'clone', '-b', branch, url, directory])
-        call(['git', 'remote', 'set-url', 'origin', orgurl, directory])
-        call(['git', 'submodule', 'sync'], cwd=directory)
+        if orgurl
+            call(['git', 'remote', 'set-url', 'origin', orgurl, directory])
+            call(['git', 'submodule', 'sync'], cwd=directory)
     else:
         call(['git', 'pull'], cwd=directory)
     call(['git', 'submodule', 'update', '--recursive'], cwd=directory)
