@@ -67,7 +67,7 @@ def clone_repo(name, url, branch, orgurl = ""):
     directory = path.join(SOURCE_DIR, name)
     if not path.isdir(directory):
         call(['git', 'clone', '-b', branch, url, directory])
-        if orgurl
+        if orgurl:
             call(['git', 'remote', 'set-url', 'origin', orgurl, directory])
             call(['git', 'submodule', 'sync'], cwd=directory)
     else:
