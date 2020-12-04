@@ -72,7 +72,7 @@ def clone_repo(name, url, branch, orgurl = ""):
             call(['git', 'submodule', 'sync'], cwd=directory)
     else:
         call(['git', 'pull'], cwd=directory)
-    call(['git', 'submodule', 'update', '--recursive'], cwd=directory)
+    call(['git', 'submodule', 'update', '--init', '--recursive'], cwd=directory)
 
 display_stage("Downloading sources")
 clone_repo('msa', 'https://github.com/minecraft-linux/msa-manifest.git', 'master')
