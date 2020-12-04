@@ -62,18 +62,20 @@ if not path.exists(ICON_FILE):
 copyfile(ICON_FILE, path.join(APP_OUTPUT_DIR, 'Contents', 'Resources', 'minecraft.icns'))
 
 # Download the sources
-def clone_repo(name, url, branch):
+def clone_repo(name, url, branch, orgurl = url):
     display_stage("Cloning repository: " + url)
     directory = path.join(SOURCE_DIR, name)
     if not path.isdir(directory):
-        call(['git', 'clone', '--recursive', '-b', branch, url, directory])
+        call(['git', 'clone', '-b', branch, url, directory])
+        call(['git', 'remote', 'set-url', 'origin', orgurl, directory])
+        call(['git', 'submodule', 'sync'], cwd=directory)
     else:
         call(['git', 'pull'], cwd=directory)
-        call(['git', 'submodule', 'update', '--recursive'], cwd=directory)
+    call(['git', 'submodule', 'update', '--recursive'], cwd=directory)
 
 display_stage("Downloading sources")
 clone_repo('msa', 'https://github.com/minecraft-linux/msa-manifest.git', 'master')
-clone_repo('mcpelauncher', 'https://github.com/ChristopherHX/mcpelauncher-manifest.git', 'trmacOS')
+clone_repo('mcpelauncher', 'https://github.com/ChristopherHX/mcpelauncher-manifest.git', 'trmacOS', 'https://github.com/minecraft-linux/mcpelauncher-manifest.git')
 clone_repo('mcpelauncher-ui', 'https://github.com/minecraft-linux/mcpelauncher-ui-manifest.git', 'ng')
 #if args.buildangle:
 #    clone_repo('osx-angle-ci', 'https://github.com/christopherhx/osx-angle-ci.git', 'master')
