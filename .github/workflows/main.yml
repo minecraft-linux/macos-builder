@@ -205,7 +205,8 @@ jobs:
         brew install automake
         export HOMEBREW_MACOSX_DEPLOYMENT_TARGET=10.10.0
         export HOMEBREW_SDKROOT=${{ github.workspace }}/../MacOSX10.14.sdk
-        brew install --build-from-source python@3.9
+        brew remove --ignore-dependencies python@3 || :
+        brew remove --ignore-dependencies protobuf || :
         brew install --build-from-source protobuf
   brew-libuv:
     runs-on: macos-latest
@@ -237,6 +238,7 @@ jobs:
       working-directory: ${{ github.workspace }}/../osx-packaging-scripts
       run: |
         brew install automake sphinx-doc
+        brew remove --ignore-dependencies libuv || :
     - name: Apply custom patch and Update brew
       if: steps.cache-brew-libuv.outputs.cache-hit != 'true'
       working-directory: "/usr/local/Homebrew"
@@ -252,7 +254,7 @@ jobs:
       run: |
         export HOMEBREW_MACOSX_DEPLOYMENT_TARGET=10.10.0
         export HOMEBREW_SDKROOT=${{ github.workspace }}/../MacOSX10.14.sdk
-        HOMEBREW_NO_AUTO_UPDATE=1 brew install libuv
+        HOMEBREW_NO_AUTO_UPDATE=1 brew install --build-from-source libuv
   buildopenssl32:
     runs-on: macos-latest
     steps:
@@ -465,7 +467,7 @@ jobs:
     - name: brew install / link
       run: |
         HOMEBREW_NO_AUTO_UPDATE=1 brew remove --ignore-dependencies libuv || :
-        HOMEBREW_NO_AUTO_UPDATE=1 brew remove --ignore-dependenciesprotobuf || :
+        HOMEBREW_NO_AUTO_UPDATE=1 brew remove --ignore-dependencies protobuf || :
         HOMEBREW_NO_AUTO_UPDATE=1 brew remove --ignore-dependencies libzip || :
     - name: Cache libcxx32
       id: libcxx32-llvm
