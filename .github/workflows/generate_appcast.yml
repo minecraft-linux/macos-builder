@@ -28,8 +28,8 @@ jobs:
         mv sparkle/${GITHUB_REPOSITORY}/ng.dmg/*.dmg sparkle/ || :
     - name: Generate Dist
       run: |
-        curl -L -C - -o sparkle.tar.bz2 https://github.com/sparkle-project/Sparkle/releases/download/1.23.0/Sparkle-1.23.0.tar.bz2
-        tar -xf ./sparkle.tar.bz2
+        curl -L -C - -o sparkle.tar.xz https://github.com/sparkle-project/Sparkle/releases/download/1.26.0/Sparkle-1.26.0.tar.xz
+        tar -xf ./sparkle.tar.xz
         ./bin/generate_appcast -s ${{ secrets.SPARKLE_ECDSA }} sparkle/
         mkdir -p dist
         sed 's/\%20/./g' sparkle/appcast.xml > dist/appcast_${{ github.event.inputs.buildId }}.xml
