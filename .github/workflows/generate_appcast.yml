@@ -1,0 +1,44 @@
+name: generate_appcast
+on:
+  workflow_dispatch:
+    inputs:
+      buildId:
+        description: 'Generate update info for the specfic version and upload it'
+        required: true
+      GA:
+        required: true
+        default: "'false'"
+jobs:
+  upload:
+    runs-on: macos-latest
+    steps:
+    - name: Use Node.js
+      uses: actions/setup-node@v1
+      with:
+        node-version: '12.x'
+    - name: Download old dmg's
+      run: |
+        mkdir -p sparkle/
+        git clone https://github.com/ChristopherHX/github-release-downloader.git grd
+        cd grd
+        npm install
+        npm run-script build
+        cd ..
+        grd/bin/grd --token ${{ secrets.GITHUB_TOKEN }} --owner ChristopherHX --repository osx-packaging-scripts --filter-asset '^.*${{ github.event.inputs.buildId }}_macOS_10\.1[0-9]\.0\.dmg$' --match-version 'ng\.dmg' --output sparkle/
+        mv sparkle/${GITHUB_REPOSITORY}/ng.dmg/*.dmg sparkle/ || :
+    - name: Generate Dist
+      run: |
+        curl -L -C - -o sparkle.tar.xz https://github.com/sparkle-project/Sparkle/releases/download/1.26.0/Sparkle-1.26.0.tar.xz
+        tar -xf ./sparkle.tar.xz
+        ./bin/generate_appcast -s ${{ secrets.SPARKLE_ECDSA }} sparkle/
+        mkdir -p dist
+        sed 's/\%20/./g' sparkle/appcast.xml > dist/appcast_${{ github.event.inputs.buildId }}.xml
+        mv sparkle/*.delta dist/|| :
+    - name: GA
+      if: ${{ github.event.inputs.buildId }} != 'false'
+      run: cp dist/appcast_${{ github.event.inputs.buildId }}.xml dist/appcast.xml
+    - name: Upload Latest
+      run: |
+        curl -L https://github.com/tcnksm/ghr/releases/download/v0.13.0/ghr_v0.13.0_darwin_amd64.zip --output ghr.zip
+        unzip ghr.zip
+        ./ghr*/ghr -t ${{ secrets.GITHUB_TOKEN }} -u ChristopherHX -r osx-packaging-scripts -replace -prerelease -b "# NO SUPPORT THIS IS A TEST RELEASE" ng.dmg dist/

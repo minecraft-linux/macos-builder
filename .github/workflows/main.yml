@@ -1,10 +1,5 @@
 name: CI
-on:
-  push:
-    branches:
-      - '*'
-    tags-ignore:
-      - '*'
+on: [workflow_dispatch]
 jobs:
   build-libcxx32:
     runs-on: macos-latest
@@ -196,7 +191,7 @@ jobs:
         git fetch fork
         git config --global user.email "CI@local"
         git config --global user.name "CI Bot"
-        git checkout fork/master
+        git merge fork/master
     - name: Install brew dependencies
       if: steps.cache-brew-protobuf.outputs.cache-hit != 'true'
       working-directory: ${{ github.workspace }}/../osx-packaging-scripts
@@ -205,8 +200,9 @@ jobs:
         brew install automake
         export HOMEBREW_MACOSX_DEPLOYMENT_TARGET=10.10.0
         export HOMEBREW_SDKROOT=${{ github.workspace }}/../MacOSX10.14.sdk
-        brew reinstall python@3.9 || brew install python@3.9
-        brew reinstall protobuf || brew install protobuf
+        brew remove --ignore-dependencies python@3 || :
+        brew remove --ignore-dependencies protobuf || :
+        brew install --build-from-source protobuf
   brew-libuv:
     runs-on: macos-latest
     steps:
@@ -232,6 +228,12 @@ jobs:
         repository: ChristopherHX/MacOSX10.14.sdk
         ref: 5d1c9b28f01ef0b01225f92670ee587b430efa8e
         token: ${{ secrets.MacOSX1014sdk }}
+    - name: Install libuv breq dependencies
+      if: steps.cache-brew-libuv.outputs.cache-hit != 'true'
+      working-directory: ${{ github.workspace }}/../osx-packaging-scripts
+      run: |
+        brew install automake sphinx-doc
+        brew remove --ignore-dependencies libuv || :
     - name: Apply custom patch and Update brew
       if: steps.cache-brew-libuv.outputs.cache-hit != 'true'
       working-directory: "/usr/local/Homebrew"
@@ -240,15 +242,14 @@ jobs:
         git fetch fork
         git config --global user.email "CI@local"
         git config --global user.name "CI Bot"
-        git checkout fork/master
+        git merge fork/master
     - name: Install brew dependencies
       if: steps.cache-brew-libuv.outputs.cache-hit != 'true'
       working-directory: ${{ github.workspace }}/../osx-packaging-scripts
       run: |
-        HOMEBREW_NO_AUTO_UPDATE=1 brew install automake sphinx-doc
         export HOMEBREW_MACOSX_DEPLOYMENT_TARGET=10.10.0
         export HOMEBREW_SDKROOT=${{ github.workspace }}/../MacOSX10.14.sdk
-        HOMEBREW_NO_AUTO_UPDATE=1 brew install libuv
+        HOMEBREW_NO_AUTO_UPDATE=1 brew install --build-from-source libuv
   buildopenssl32:
     runs-on: macos-latest
     steps:
@@ -363,81 +364,9 @@ jobs:
         cd ssl/lib
         install_name_tool -id @rpath/libssl.dylib -add_rpath @loader_path/../Frameworks libssl.dylib
         install_name_tool -id @rpath/libcrypto.dylib -add_rpath @loader_path/../Frameworks libcrypto.dylib
-  buildangle32:
-    runs-on: macos-latest
-    steps:
-    - name: Check angle32
-      id: angle
-      uses: Mystraht/cache@master
-      env:
-        cache-name: cache-3-angle-macos-10-10
-      with:
-        path: angle/out/Release
-        key: ${{ runner.os }}-build-${{ env.cache-name }}
-    - name: Cache angle32
-      if: steps.angle.outputs.cache-hit != 'true'
-      uses: actions/cache@v1
-      env:
-        cache-name: cache-3-angle-macos-10-10
-      with:
-        path: angle/out/Release
-        key: ${{ runner.os }}-build-${{ env.cache-name }}
-    - uses: actions/checkout@v1
-      if: steps.angle.outputs.cache-hit != 'true'
-      with:
-        repository: ChristopherHX/MacOSX10.14.sdk
-        ref: 5d1c9b28f01ef0b01225f92670ee587b430efa8e
-        token: ${{ secrets.MacOSX1014sdk }}
-    - name: brew install / link
-      if: steps.angle.outputs.cache-hit != 'true'
-      run: |
-        export MACOSX_DEPLOYMENT_TARGET=${{ matrix.target }}
-        export SDKROOT=${{ github.workspace }}/../MacOSX10.14.sdk
-        git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
-        export PATH=$PATH:$PWD/depot_tools
-        git clone https://github.com/minecraft-linux/angle.git
-        pushd angle
-        python scripts/bootstrap.py
-        gclient sync
-        find build -name '*.gn' | xargs -n 1 sed -i '' 's/-fatal_warnings//g'
-        gn gen out/Release --args='target_cpu="x86" is_debug=false mac_sdk_path="'"${SDKROOT}"'" mac_sdk_min="10.10.0" mac_min_system_version="10.10.0" mac_deployment_target="10.10.0" angle_enable_metal=false angle_enable_swiftshader=false angle_enable_vulkan=false'
-        autoninja -C out/Release libEGL libGLESv2
-        popd
-  buildangle64:
-    runs-on: macos-latest
-    steps:
-    - name: check angle64
-      id: angle
-      uses: Mystraht/cache@master
-      env:
-        cache-name: cache-3-angle64-macos-10-10
-      with:
-        path: angle/out/Release64
-        key: ${{ runner.os }}-build-${{ env.cache-name }}
-    - name: Cache angle64
-      if: steps.angle.outputs.cache-hit != 'true'
-      uses: actions/cache@v1
-      env:
-        cache-name: cache-3-angle64-macos-10-10
-      with:
-        path: angle/out/Release64
-        key: ${{ runner.os }}-build-${{ env.cache-name }}
-    - name: brew install / link
-      if: steps.angle.outputs.cache-hit != 'true'
-      run: |
-        git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
-        export PATH=$PATH:$PWD/depot_tools
-        git clone https://github.com/minecraft-linux/angle.git
-        pushd angle
-        python scripts/bootstrap.py
-        gclient sync
-        find build -name '*.gn' | xargs -n 1 sed -i '' 's/-fatal_warnings//g'
-        gn gen out/Release64 --args='is_debug=false mac_sdk_path="'"${SDKROOT}"'" mac_sdk_min="10.10.0" mac_min_system_version="10.10.0" mac_deployment_target="10.10.0" angle_enable_swiftshader=false angle_enable_vulkan=false'
-        autoninja -C out/Release64 libEGL libGLESv2
-        popd
   buildangle:
     runs-on: macos-latest
-    needs: [buildangle32, buildangle64]
+    # needs: [buildangle32, buildangle64]
     steps:
     - name: Check angle
       id: angle
@@ -455,23 +384,30 @@ jobs:
       with:
         path: osx-angle-ci/artifacts
         key: ${{ runner.os }}-build-${{ env.cache-name }}
-    - name: Cache angle32
+    - uses: actions/checkout@v1
       if: steps.angle.outputs.cache-hit != 'true'
-      uses: actions/cache@v1
-      env:
-        cache-name: cache-3-angle-macos-10-10
       with:
-        path: angle/out/Release
-        key: ${{ runner.os }}-build-${{ env.cache-name }}
-    - name: Cache angle64
+        repository: ChristopherHX/MacOSX10.14.sdk
+        ref: 5d1c9b28f01ef0b01225f92670ee587b430efa8e
+        token: ${{ secrets.MacOSX1014sdk }}
+    - name: brew install / link
       if: steps.angle.outputs.cache-hit != 'true'
-      uses: actions/cache@v1
-      env:
-        cache-name: cache-3-angle64-macos-10-10
-      with:
-        path: angle/out/Release64
-        key: ${{ runner.os }}-build-${{ env.cache-name }}
-    - name:
+      run: |
+        export MACOSX_DEPLOYMENT_TARGET=${{ matrix.target }}
+        git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
+        export PATH=$PATH:$PWD/depot_tools
+        git clone https://github.com/minecraft-linux/angle.git
+        pushd angle
+        python scripts/bootstrap.py
+        gclient sync
+        gn gen out/Release64 --args='is_debug=false mac_sdk_path="'"${SDKROOT}"'" mac_sdk_min="10.10.0" mac_min_system_version="10.10.0" mac_deployment_target="10.10.0" angle_enable_swiftshader=false angle_enable_vulkan=false'
+        autoninja -C out/Release64 libEGL libGLESv2
+        find build -name '*.gn' | xargs -n 1 sed -i '' 's/-fatal_warnings//g'
+        export SDKROOT=${{ github.workspace }}/../MacOSX10.14.sdk
+        gn gen out/Release --args='target_cpu="x86" is_debug=false mac_sdk_path="'"${SDKROOT}"'" mac_sdk_min="10.10.0" mac_min_system_version="10.10.0" mac_deployment_target="10.10.0" angle_enable_metal=false angle_enable_swiftshader=false angle_enable_vulkan=false'
+        autoninja -C out/Release libEGL libGLESv2
+        popd
+    - name: upload
       if: steps.angle.outputs.cache-hit != 'true'
       run: |
         mkdir -p osx-angle-ci/artifacts
@@ -503,10 +439,10 @@ jobs:
             QT_PREBUILT_SUFFIX: -MacOS-MacOS_10_12-Clang-MacOS-MacOS_10_12-X86_64
           - target: "10.13.0"
             micro: 2
-            QT_BASE_URL: http://download.qt.io/online/qtsdkrepository/mac_x64/desktop/qt5_5150/
-            QT_VERSION_SHORT: 5.15.0
-            QT_VERSION: 5.15.0-0-202005140805
-            QT_PACKAGE_PREFIX: qt.qt5.5150.
+            QT_BASE_URL: http://download.qt.io/online/qtsdkrepository/mac_x64/desktop/qt5_5152/
+            QT_VERSION_SHORT: 5.15.2
+            QT_VERSION: 5.15.2-0-202011130601
+            QT_PACKAGE_PREFIX: qt.qt5.5152.
             QT_PACKAGE_SUFFIX: clang_64
             QT_PREBUILT_SUFFIX: -MacOS-MacOS_10_13-Clang-MacOS-MacOS_10_13-X86_64
     steps:
@@ -521,12 +457,12 @@ jobs:
     - uses: actions/checkout@v1
       with:
         repository: ChristopherHX/MacOSX10.14.sdk
-        ref: 5d1c9b28f01ef0b01225f92670ee587b430efa8e
+        ref: eea27130a21aea7605cd019e5a45369535bec800
         token: ${{ secrets.MacOSX1014sdk }}
     - name: brew install / link
       run: |
         HOMEBREW_NO_AUTO_UPDATE=1 brew remove --ignore-dependencies libuv || :
-        HOMEBREW_NO_AUTO_UPDATE=1 brew remove --ignore-dependenciesprotobuf || :
+        HOMEBREW_NO_AUTO_UPDATE=1 brew remove --ignore-dependencies protobuf || :
         HOMEBREW_NO_AUTO_UPDATE=1 brew remove --ignore-dependencies libzip || :
     - name: Cache libcxx32
       id: libcxx32-llvm
