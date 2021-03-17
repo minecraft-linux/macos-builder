@@ -639,17 +639,17 @@ jobs:
       run: |
         export MACOSX_DEPLOYMENT_TARGET=${{ matrix.target }}
         export SDKROOT=${{ github.workspace }}/../MacOSX10.14.sdk
-        python3 __main__.py --qt-path qt/*/* --update-sparkle-appcast https://github.com/${GITHUB_REPOSITORY}/releases/download/ng.dmg/appcast.xml --update-sparkle-ed-public-key ${{ secrets.SPARKLE_ECDSA_PUB }} --buildangle --build-id ${GITHUB_RUN_NUMBER} --prettyversion "0.1.b2-macOS-x86_64-0.${{ matrix.micro }}.${GITHUB_RUN_NUMBER}" --version "0.${{ matrix.micro }}.${GITHUB_RUN_NUMBER}" ${{ matrix.extraflags }}
+        python3 __main__.py --qt-path qt/*/* --update-sparkle-appcast https://github.com/${GITHUB_REPOSITORY}/releases/download/ng.dmg/appcast.xml --update-sparkle-ed-public-key ${{ secrets.SPARKLE_ECDSA_PUB }} --buildangle --build-id ${GITHUB_RUN_NUMBER} --prettyversion "$(cat version.txt)-macOS-x86_64-0.${{ matrix.micro }}.${GITHUB_RUN_NUMBER}" --version "0.${{ matrix.micro }}.${GITHUB_RUN_NUMBER}" ${{ matrix.extraflags }}
     - name: Build .dmg
       working-directory: ${{ github.workspace }}/../osx-packaging-scripts
       run: python3 build_dmg.py
     - name: Generate Dist
       run: |
-        DMG_FILENAME="Minecraft_Bedrock_Launcher_0.1.b1-macOS-x86_64-0.${{ matrix.micro }}.${GITHUB_RUN_NUMBER}_macOS_${{ matrix.target }}.dmg"
+        DMG_FILENAME="Minecraft_Bedrock_Launcher_$(cat version.txt)-macOS-x86_64-0.${{ matrix.micro }}.${GITHUB_RUN_NUMBER}_macOS_${{ matrix.target }}.dmg"
         mkdir -p dist
         mv "${{ github.workspace }}/../osx-packaging-scripts/output/Minecraft Bedrock Launcher.dmg" "dist/${DMG_FILENAME}"
     - name: Upload Latest
       run: |
         curl -L https://github.com/tcnksm/ghr/releases/download/v0.13.0/ghr_v0.13.0_darwin_amd64.zip --output ghr.zip
         unzip ghr.zip
-        ./ghr*/ghr -t ${{ secrets.GITHUB_TOKEN }} -u ChristopherHX -r osx-packaging-scripts -replace -prerelease -b "# NO SUPPORT THIS IS A TEST RELEASE" ng.dmg dist/
+        ./ghr*/ghr -t ${{ secrets.GITHUB_TOKEN }} -u ChristopherHX -r osx-packaging-scripts -replace -b "$(cat changelog.txt)" "$(cat version.txt)" dist/
