@@ -24,7 +24,7 @@ jobs:
         npm install
         npm run-script build
         cd ..
-        grd/bin/grd --token ${{ secrets.GITHUB_TOKEN }} --owner ChristopherHX --repository osx-packaging-scripts --filter-asset '^.*${{ github.event.inputs.buildId }}_macOS_10\.1[0-9]\.0\.dmg$' --output sparkle/
+        grd/bin/grd --token ${{ secrets.GITHUB_TOKEN }} --owner ChristopherHX --repository osx-packaging-scripts --filter-asset '^.*${{ github.event.inputs.buildId }}_macOS_[1-9][0-9]\.1[0-9]\.0\.dmg$' --output sparkle/
         pushd sparkle/${GITHUB_REPOSITORY}
         expand="*"
         expand=$(echo $expand)
@@ -38,14 +38,12 @@ jobs:
         expand="*"
         expand=$(echo $expand)
         popd
+        curl -L -o sparkle/appcast.xml https://github.com/ChristopherHX/osx-packaging-scripts/releases/download/ng.dmg/appcast.xml
         ./bin/generate_appcast -s ${{ secrets.SPARKLE_ECDSA }} --download-url-prefix https://github.com/ChristopherHX/osx-packaging-scripts/releases/download/$expand/ sparkle/
         mkdir -p dist
         mkdir -p dist2
         sed 's/\%20/./g' sparkle/appcast.xml > dist/appcast_${{ github.event.inputs.buildId }}.xml
         mv sparkle/*.delta dist2/|| :
-    - name: GA
-      if: github.event.inputs.buildId != 'false'
-      run: echo cp dist/appcast_${{ github.event.inputs.buildId }}.xml dist/appcast.xml
     - name: Upload Latest
       run: |
         curl -L https://github.com/tcnksm/ghr/releases/download/v0.13.0/ghr_v0.13.0_darwin_amd64.zip --output ghr.zip
