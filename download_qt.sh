@@ -12,7 +12,7 @@ COLOR_RESET=$'\033[0m'
 
 function install_module() {
   echo "${COLOR_STATUS}Downloading $2${COLOR_RESET}"
-  remote_sha1=$(curl "$2.sha1")
+  remote_sha1=$(curl -L "$2.sha1")
   curl -L -C - -o $1 $2
   local_sha1=$(shasum $1 | cut -d " " -f 1)
   if [[ "$remote_sha1" != "$local_sha1" ]]; then
