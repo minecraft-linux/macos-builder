@@ -45,13 +45,13 @@ jobs:
 
         check_call(['curl', '-L', '-o', path.abspath(path.join('sparkle', 'appcast.xml')), 'https://github.com/ChristopherHX/osx-packaging-scripts/releases/download/ng.dmg/appcast.xml'])
 
-        tree = ET.parse(path.join('sparkle', '/appcast.xml'))
+        tree = ET.parse(path.join('sparkle', 'appcast.xml'))
         root = tree.getroot()
         i = 0
         for rank in root.iter('item'):
             enc = rank.find('enclosure')
             url = enc.get('url')
-            check_call(['curl', '-L', '-o', path.abspath(path.join('sparkle', url[url.rfind('/'):])), url])
+            check_call(['curl', '-L', '-o', path.abspath(path.join('sparkle', url[url.rfind('/')+1:])), url])
         
         directory = fsencode('sparkle')
         versions = []
