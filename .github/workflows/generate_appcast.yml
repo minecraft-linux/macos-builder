@@ -36,7 +36,7 @@ jobs:
     - name: Download some old dmg's and generate deltas
       shell: python
       run: |
-        from os import makedirs, fsencode, fsdecode, listdir, path, rename
+        from os import makedirs, fsencode, fsdecode, listdir, path, rename, getenv
         import xml.etree.ElementTree as ET
         from subprocess import check_call
 
@@ -67,7 +67,7 @@ jobs:
                     versions += [ destdirname ]
                 rename(path.join('sparkle', filename), path.join(destdirname, filename))
         
-        tagname = listdir(path.join('sparkle', '${GITHUB_REPOSITORY}'))[0]
+        tagname = listdir(path.join('sparkle', getenv('GITHUB_REPOSITORY')))[0]
         for ver in versions:
             rename(path.join('sparkle', 'appcast.xml'), path.join(ver, 'appcast.xml'))
             check_call(['./bin/generate_appcast', '-s', '${{ secrets.SPARKLE_ECDSA }}', '--download-url-prefix', 'https://github.com/ChristopherHX/osx-packaging-scripts/releases/download/' + tagname + '/', ver ])
