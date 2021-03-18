@@ -77,7 +77,7 @@ jobs:
             rename(path.join('sparkle', 'appcast.xml'), path.join(ver, 'appcast.xml'))
             check_call(['./bin/generate_appcast', '-s', '${{ secrets.SPARKLE_ECDSA }}', '--download-url-prefix', 'https://github.com/ChristopherHX/osx-packaging-scripts/releases/download/' + tagname + '/', ver ])
             rename(path.join(ver, 'appcast.xml'), path.join('sparkle', 'appcast.xml'))
-            for f in listdir(ver):
+            for file in listdir(ver):
                 filename = fsdecode(file)
                 if filename.endswith(".delta"):
                     print(filename)
