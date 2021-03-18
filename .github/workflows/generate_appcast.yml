@@ -83,13 +83,25 @@ jobs:
                     print(filename)
                     rename(path.join(ver, filename), path.join('dist2', filename))
         
-        with open(path.join('sparkle', 'appcast.xml')) as file:
-            appcast = file.read().replace('%20', '.')
-            with open(path.join('dist', 'appcast_test.xml'), 'w') as file:
-                file.write(appcast)
-            with open(path.join('dist2', 'appcast.xml'), 'w') as file:
-                file.write(appcast)
+        def register_all_namespaces(filename):
+            namespaces = dict([node for _, node in ET.iterparse(filename, events=['start-ns'])])
+            for ns in namespaces:
+                ET.register_namespace(ns, namespaces[ns])
+        register_all_namespaces(path.join('sparkle', 'appcast.xml'))
+        # Revert url changes
+        tree2 = ET.parse(path.join('sparkle', 'appcast.xml'))
+        root2 = tree2.getroot()
+        for rank in root2.iter('item'):
+            enc = rank.find('enclosure')
+            title = rank.find('title').text
+            for rank2 in root.iter('item'):
+                if title == rank2.find('title').text:
+                    enc.set('url', rank2.find('enclosure').get('url'))
+                    print(enc.get('url'))
+                    break
 
+        tree.write(path.join('dist', 'appcast_test.xml'))
+        tree.write(path.join('dist2', 'appcast.xml'))
     - name: Upload Latest
       run: |
         pushd sparkle/${GITHUB_REPOSITORY}
