@@ -5,9 +5,6 @@ on:
       buildId:
         description: 'Generate update info for the specfic version and upload it'
         required: true
-      GA:
-        required: true
-        default: "'false'"
 jobs:
   upload:
     runs-on: macos-latest
@@ -16,7 +13,7 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: '12.x'
-    - name: Download old dmg's
+    - name: Download dmg's
       run: |
         mkdir -p sparkle/
         git clone https://github.com/ChristopherHX/github-release-downloader.git grd
@@ -30,22 +27,71 @@ jobs:
         expand=$(echo $expand)
         popd
         mv sparkle/${GITHUB_REPOSITORY}/$expand/*.dmg sparkle/ || :
-    - name: Generate Dist
-      run: |
         curl -L -C - -o sparkle.tar.xz https://github.com/sparkle-project/Sparkle/releases/download/1.26.0/Sparkle-1.26.0.tar.xz
         tar -xf ./sparkle.tar.xz
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
+    - name: Download some old dmg's and generate deltas
+      shell: python
+      run: |
+        from os import makedirs, fsencode, fsdecode, listdir, path, rename
+        import xml.etree.ElementTree as ET
+        from subprocess import check_call
+
+        makedirs('sparkle')
+        makedirs('dist')
+        makedirs('dist2')
+
+        check_call(['curl', '-L', '-o', path.abspath(path.join('sparkle', 'appcast.xml')), 'https://github.com/ChristopherHX/osx-packaging-scripts/releases/download/ng.dmg/appcast.xml'])
+
+        tree = ET.parse(path.join('sparkle', '/appcast.xml'))
+        root = tree.getroot()
+        i = 0
+        for rank in root.iter('item'):
+            enc = rank.find('enclosure')
+            url = enc.get('url')
+            check_call(['curl', '-L', '-o', path.abspath(path.join('sparkle', url[url.rfind('/'):])), url])
+        
+        directory = fsencode('sparkle')
+        versions = []
+        for file in listdir(directory):
+            filename = fsdecode(file)
+            if filename.endswith(".dmg"):
+                macindex = filename.rindex('macOS_') + 6
+                if macindex == 5:
+                    continue
+                destdirname = path.join('sparkle', filename[macindex:len(filename)-4-macindex])
+                if not path.isdir(destdirname):
+                    makedirs(destdirname)
+                    versions += [ destdirname ]
+                rename(path.join('sparkle', filename), path.join(destdirname, filename))
+        
+        tagname = listdir(path.join('sparkle', '${GITHUB_REPOSITORY}'))[0]
+        for ver in versions:
+            rename(path.join('sparkle', 'appcast.xml'), path.join(ver, 'appcast.xml'))
+            check_call(['./bin/generate_appcast', '-s', '${{ secrets.SPARKLE_ECDSA }}', '--download-url-prefix', 'https://github.com/ChristopherHX/osx-packaging-scripts/releases/download/' + tagname + '/', ver ])
+            rename(path.join(ver, 'appcast.xml'), path.join('sparkle', 'appcast.xml'))
+            for f in listdir(ver):
+                filename = fsdecode(file)
+                if filename.endswith(".delta"):
+                    rename(path.join(ver, filename), path.join('dist2', filename))
+        
+        with open(path.join('sparkle', 'appcast.xml')) as file:
+            appcast = file.read().replace('%20', '.')
+                with open(path.join('dist', 'appcast_test.xml'), 'w') as file:
+                    file.write(appcast)
+                with open(path.join('dist2', 'appcast.xml'), 'w') as file:
+                    file.write(appcast)
+
+    - name: Upload Latest
+      run: |
         pushd sparkle/${GITHUB_REPOSITORY}
         expand="*"
         expand=$(echo $expand)
         popd
-        curl -L -o sparkle/appcast.xml https://github.com/ChristopherHX/osx-packaging-scripts/releases/download/ng.dmg/appcast.xml
-        ./bin/generate_appcast -s ${{ secrets.SPARKLE_ECDSA }} --download-url-prefix https://github.com/ChristopherHX/osx-packaging-scripts/releases/download/$expand/ sparkle/
-        mkdir -p dist
-        mkdir -p dist2
-        sed 's/\%20/./g' sparkle/appcast.xml > dist/appcast_${{ github.event.inputs.buildId }}.xml
-        mv sparkle/*.delta dist2/|| :
-    - name: Upload Latest
-      run: |
         curl -L https://github.com/tcnksm/ghr/releases/download/v0.13.0/ghr_v0.13.0_darwin_amd64.zip --output ghr.zip
         unzip ghr.zip
         ./ghr*/ghr -t ${{ secrets.GITHUB_TOKEN }} -u ChristopherHX -r osx-packaging-scripts -replace -prerelease -b "# NO SUPPORT THIS IS A TEST RELEASE" ng.dmg dist/
+        ./ghr*/ghr -t ${{ secrets.GITHUB_TOKEN }} -u ChristopherHX -r osx-packaging-scripts -replace $expand dist2/
