@@ -40,7 +40,6 @@ jobs:
         import xml.etree.ElementTree as ET
         from subprocess import check_call
 
-        makedirs('sparkle')
         makedirs('dist')
         makedirs('dist2')
 
