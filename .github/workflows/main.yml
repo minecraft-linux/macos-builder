@@ -1,5 +1,5 @@
 name: CI
-on: [workflow_dispatch]
+on: [push]
 jobs:
   build-libcxx32:
     runs-on: macos-latest
