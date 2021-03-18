@@ -58,23 +58,29 @@ jobs:
         for file in listdir(directory):
             filename = fsdecode(file)
             if filename.endswith(".dmg"):
+                print(filename)
                 macindex = filename.rindex('macOS_') + 6
                 if macindex == 5:
                     continue
                 destdirname = path.join('sparkle', filename[macindex:len(filename)-4-macindex])
+                print(destdirname)
                 if not path.isdir(destdirname):
                     makedirs(destdirname)
                     versions += [ destdirname ]
+                    print(versions)
                 rename(path.join('sparkle', filename), path.join(destdirname, filename))
         
         tagname = listdir(path.join('sparkle', getenv('GITHUB_REPOSITORY')))[0]
+        print(tagname)
         for ver in versions:
+            print(ver)
             rename(path.join('sparkle', 'appcast.xml'), path.join(ver, 'appcast.xml'))
             check_call(['./bin/generate_appcast', '-s', '${{ secrets.SPARKLE_ECDSA }}', '--download-url-prefix', 'https://github.com/ChristopherHX/osx-packaging-scripts/releases/download/' + tagname + '/', ver ])
             rename(path.join(ver, 'appcast.xml'), path.join('sparkle', 'appcast.xml'))
             for f in listdir(ver):
                 filename = fsdecode(file)
                 if filename.endswith(".delta"):
+                    print(filename)
                     rename(path.join(ver, filename), path.join('dist2', filename))
         
         with open(path.join('sparkle', 'appcast.xml')) as file:
