@@ -80,10 +80,10 @@ jobs:
         
         with open(path.join('sparkle', 'appcast.xml')) as file:
             appcast = file.read().replace('%20', '.')
-                with open(path.join('dist', 'appcast_test.xml'), 'w') as file:
-                    file.write(appcast)
-                with open(path.join('dist2', 'appcast.xml'), 'w') as file:
-                    file.write(appcast)
+            with open(path.join('dist', 'appcast_test.xml'), 'w') as file:
+                file.write(appcast)
+            with open(path.join('dist2', 'appcast.xml'), 'w') as file:
+                file.write(appcast)
 
     - name: Upload Latest
       run: |
