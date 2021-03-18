@@ -588,4 +588,4 @@ jobs:
       run: |
         curl -L https://github.com/tcnksm/ghr/releases/download/v0.13.0/ghr_v0.13.0_darwin_amd64.zip --output ghr.zip
         unzip ghr.zip
-        ./ghr*/ghr -t ${{ secrets.GITHUB_TOKEN }} -u ChristopherHX -r osx-packaging-scripts -replace -b "$(cat changelog.txt)" "$(cat version.txt)" dist/
+        ./ghr*/ghr -t ${{ secrets.GITHUB_TOKEN }} -u ChristopherHX -r osx-packaging-scripts -draft -b "$(cat changelog.txt)" "$(cat version.txt)-${GITHUB_RUN_NUMBER}" dist/
