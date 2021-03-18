@@ -24,19 +24,28 @@ jobs:
         npm install
         npm run-script build
         cd ..
-        grd/bin/grd --token ${{ secrets.GITHUB_TOKEN }} --owner ChristopherHX --repository osx-packaging-scripts --filter-asset '^.*${{ github.event.inputs.buildId }}_macOS_10\.1[0-9]\.0\.dmg$' --match-version 'ng\.dmg' --output sparkle/
-        mv sparkle/${GITHUB_REPOSITORY}/ng.dmg/*.dmg sparkle/ || :
+        grd/bin/grd --token ${{ secrets.GITHUB_TOKEN }} --owner ChristopherHX --repository osx-packaging-scripts --filter-asset '^.*${{ github.event.inputs.buildId }}_macOS_10\.1[0-9]\.0\.dmg$' --output sparkle/
+        pushd sparkle/${GITHUB_REPOSITORY}
+        expand = *
+        echo Name: $expand
+        popd
+        mv sparkle/${GITHUB_REPOSITORY}/$expand/*.dmg sparkle/ || :
     - name: Generate Dist
       run: |
         curl -L -C - -o sparkle.tar.xz https://github.com/sparkle-project/Sparkle/releases/download/1.26.0/Sparkle-1.26.0.tar.xz
         tar -xf ./sparkle.tar.xz
-        ./bin/generate_appcast -s ${{ secrets.SPARKLE_ECDSA }} sparkle/
+        pushd sparkle/${GITHUB_REPOSITORY}
+        expand = *
+        echo Name: $expand
+        popd
+        ./bin/generate_appcast -s ${{ secrets.SPARKLE_ECDSA }} --download-url-prefix https://github.com/ChristopherHX/osx-packaging-scripts/releases/download/$expand/ sparkle/
         mkdir -p dist
+        mkdir -p dist2
         sed 's/\%20/./g' sparkle/appcast.xml > dist/appcast_${{ github.event.inputs.buildId }}.xml
-        mv sparkle/*.delta dist/|| :
+        mv sparkle/*.delta dist2/|| :
     - name: GA
-      if: ${{ github.event.inputs.buildId }} != 'false'
-      run: cp dist/appcast_${{ github.event.inputs.buildId }}.xml dist/appcast.xml
+      if: github.event.inputs.buildId != 'false'
+      run: echo cp dist/appcast_${{ github.event.inputs.buildId }}.xml dist/appcast.xml
     - name: Upload Latest
       run: |
         curl -L https://github.com/tcnksm/ghr/releases/download/v0.13.0/ghr_v0.13.0_darwin_amd64.zip --output ghr.zip
