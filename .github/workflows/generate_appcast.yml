@@ -62,7 +62,7 @@ jobs:
                 macindex = filename.rindex('macOS_') + 6
                 if macindex == 5:
                     continue
-                destdirname = path.join('sparkle', filename[macindex:len(filename)-4-macindex])
+                destdirname = path.join('sparkle', filename[macindex:len(filename)-4])
                 print(destdirname)
                 if not path.isdir(destdirname):
                     makedirs(destdirname)
