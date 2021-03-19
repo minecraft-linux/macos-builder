@@ -584,8 +584,110 @@ jobs:
         DMG_FILENAME="Minecraft_Bedrock_Launcher_$(cat version.txt)-macOS-x86_64-0.${{ matrix.micro }}.${GITHUB_RUN_NUMBER}_macOS_${{ matrix.target }}.dmg"
         mkdir -p dist
         mv "${{ github.workspace }}/../osx-packaging-scripts/output/Minecraft Bedrock Launcher.dmg" "dist/${DMG_FILENAME}"
-    - name: Upload Latest
+    - name: Upload Build Artifact
+        uses: actions/upload-artifact@v2.2.2
+        with:
+          name: ${{ matrix.target }}
+          path: dist
+  publish:
+    runs-on: macos-latest
+    needs: build
+    if: ${{ always() }}
+    steps:
+    - uses: actions/checkout@v2
+    - name: Download everything
+      uses: actions/download-artifact@v2
+      with:
+        path: sparkle
+    - name: Download sparkle
+      run: |
+        curl -L -C - -o sparkle.tar.xz https://github.com/sparkle-project/Sparkle/releases/download/1.26.0/Sparkle-1.26.0.tar.xz
+        tar -xf ./sparkle.tar.xz
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.9
+    - name: Download some old dmg's and generate deltas
+      shell: python
+      run: |
+        from os import makedirs, fsencode, fsdecode, listdir, path, rename, getenv
+        import xml.etree.ElementTree as ET
+        from subprocess import check_call
+        makedirs('dist')
+        makedirs('dist2')
+        check_call(['curl', '-L', '-o', path.abspath(path.join('sparkle', 'appcast.xml')), 'https://github.com/ChristopherHX/osx-packaging-scripts/releases/download/ng.dmg/appcast.xml'])
+        tree = ET.parse(path.join('sparkle', 'appcast.xml'))
+        root = tree.getroot()
+        i = 0
+        for rank in root.iter('item'):
+            enc = rank.find('enclosure')
+            url = enc.get('url')
+            check_call(['curl', '-L', '-o', path.abspath(path.join('sparkle', url[url.rfind('/')+1:])), url])
+        
+        directory = fsencode('sparkle')
+        versions = []
+        for file in listdir(directory):
+            filename = fsdecode(file)
+            if filename.endswith(".dmg"):
+                print(filename)
+                macindex = filename.rindex('macOS_') + 6
+                if macindex == 5:
+                    continue
+                destdirname = path.join('sparkle', filename[macindex:len(filename)-4])
+                print(destdirname)
+                if not path.isdir(destdirname):
+                    makedirs(destdirname)
+                    versions += [ destdirname ]
+                    print(versions)
+                rename(path.join('sparkle', filename), path.join(destdirname, filename))
+
+        tagname = 'invalid'
+        with open('version.txt', 'r') as file:
+            tagname = file.read().replace('\n', '') + ' ' + getenv('GITHUB_RUN_NUMBER')
+
+        print(tagname)
+        for file in listdir(directory):
+            ver = path.join('sparkle', fsdecode(file))
+            if not path.isdir(ver):
+                continue
+            print(ver)
+            rename(path.join('sparkle', 'appcast.xml'), path.join(ver, 'appcast.xml'))
+            check_call(['./bin/generate_appcast', '-s', '${{ secrets.SPARKLE_ECDSA }}', '--download-url-prefix', 'https://github.com/ChristopherHX/osx-packaging-scripts/releases/download/' + tagname + '/', ver ])
+            rename(path.join(ver, 'appcast.xml'), path.join('sparkle', 'appcast.xml'))
+            for file in listdir(ver):
+                filename = fsdecode(file)
+                if filename.endswith(".delta") or (filename.endswith(".dmg") and filename.find(getenv('GITHUB_RUN_NUMBER') + '_macOS_') != -1):
+                    print(filename)
+                    rename(path.join(ver, filename), path.join('dist2', filename))
+        
+        def register_all_namespaces(filename):
+            namespaces = dict([node for _, node in ET.iterparse(filename, events=['start-ns'])])
+            for ns in namespaces:
+                ET.register_namespace(ns, namespaces[ns])
+        register_all_namespaces(path.join('sparkle', 'appcast.xml'))
+        # Revert url changes
+        tree2 = ET.parse(path.join('sparkle', 'appcast.xml'))
+        root2 = tree2.getroot()
+        for rank in root2.iter('item'):
+            enc = rank.find('enclosure')
+            title = rank.find('title').text
+            for rank2 in root.iter('item'):
+                if title == rank2.find('title').text:
+                    enc.set('url', rank2.find('enclosure').get('url'))
+                    print(enc.get('url'))
+                    break
+        tree.write(path.join('dist', 'appcast.xml'))
+        tree.write(path.join('dist2', 'appcast.xml'))
+    - name: download ghr
       run: |
         curl -L https://github.com/tcnksm/ghr/releases/download/v0.13.0/ghr_v0.13.0_darwin_amd64.zip --output ghr.zip
         unzip ghr.zip
-        ./ghr*/ghr -t ${{ secrets.GITHUB_TOKEN }} -u ChristopherHX -r osx-packaging-scripts -draft -b "$(cat changelog.txt)" "$(cat version.txt)-${GITHUB_RUN_NUMBER}" dist/
+    - name: Upload Draft
+      if: github.ref != 'refs/heads/main'
+      run: |
+        ./ghr*/ghr -t ${{ secrets.GITHUB_TOKEN }} -u ChristopherHX -r osx-packaging-scripts -draft -b "$(cat changelog.txt)" "$(cat version.txt)-${GITHUB_RUN_NUMBER}" dist2/
+    - name: Upload Latest
+      if: github.ref == 'refs/heads/main'
+      run: |
+        ./ghr*/ghr -t ${{ secrets.GITHUB_TOKEN }} -u ChristopherHX -r osx-packaging-scripts -b "$(cat changelog.txt)" "$(cat version.txt)-${GITHUB_RUN_NUMBER}" dist2/
+        ./ghr*/ghr -t ${{ secrets.GITHUB_TOKEN }} -u ChristopherHX -r osx-packaging-scripts -replace ng.dmg dist/
