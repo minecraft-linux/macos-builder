@@ -585,10 +585,10 @@ jobs:
         mkdir -p dist
         mv "${{ github.workspace }}/../osx-packaging-scripts/output/Minecraft Bedrock Launcher.dmg" "dist/${DMG_FILENAME}"
     - name: Upload Build Artifact
-        uses: actions/upload-artifact@v2.2.2
-        with:
-          name: ${{ matrix.target }}
-          path: dist
+      uses: actions/upload-artifact@v2.2.2
+      with:
+        name: ${{ matrix.target }}
+        path: dist
   publish:
     runs-on: macos-latest
     needs: build
