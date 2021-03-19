@@ -643,7 +643,7 @@ jobs:
 
         tagname = 'invalid'
         with open('version.txt', 'r') as file:
-            tagname = file.read().replace('\n', '') + ' ' + getenv('GITHUB_RUN_NUMBER')
+            tagname = file.read().replace('\n', '') + '-' + getenv('GITHUB_RUN_NUMBER')
 
         print(tagname)
         for file in listdir(directory):
