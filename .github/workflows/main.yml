@@ -684,9 +684,9 @@ jobs:
                     enc.set('url', rank2.find('enclosure').get('url'))
                     print(enc.get('url'))
                     break
-        tree.write(path.join('dist', 'appcast.xml'))
+        tree2.write(path.join('dist', 'appcast.xml'), encoding='utf-8', xml_declaration=True)
         dumpfile(path.join('dist', 'appcast.xml'))
-        tree.write(path.join('dist2', 'appcast.xml'))
+        tree2.write(path.join('dist2', 'appcast.xml'), encoding='utf-8', xml_declaration=True)
     - name: download ghr
       run: |
         curl -L https://github.com/tcnksm/ghr/releases/download/v0.13.0/ghr_v0.13.0_darwin_amd64.zip --output ghr.zip
