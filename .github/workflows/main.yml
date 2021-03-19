@@ -625,7 +625,6 @@ jobs:
             check_call(['curl', '-L', '-o', path.abspath(path.join('sparkle', url[url.rfind('/')+1:])), url])
         
         directory = fsencode('sparkle')
-        versions = []
         for file in listdir(directory):
             filename = fsdecode(file)
             if filename.endswith(".dmg"):
@@ -637,8 +636,6 @@ jobs:
                 print(destdirname)
                 if not path.isdir(destdirname):
                     makedirs(destdirname)
-                    versions += [ destdirname ]
-                    print(versions)
                 rename(path.join('sparkle', filename), path.join(destdirname, filename))
 
         tagname = 'invalid'
@@ -646,14 +643,23 @@ jobs:
             tagname = file.read().replace('\n', '') + '-' + getenv('GITHUB_RUN_NUMBER')
 
         print(tagname)
+        def dumpfile(f):
+            print('dumpfile: ' + f)
+            with open(f, 'r') as file:
+                print(file.read())
+        
         for file in listdir(directory):
             ver = path.join('sparkle', fsdecode(file))
             if not path.isdir(ver):
                 continue
             print(ver)
+            dumpfile(path.join('sparkle', 'appcast.xml'))
             rename(path.join('sparkle', 'appcast.xml'), path.join(ver, 'appcast.xml'))
+            dumpfile(path.join(ver, 'appcast.xml'))
             check_call(['./bin/generate_appcast', '-s', '${{ secrets.SPARKLE_ECDSA }}', '--download-url-prefix', 'https://github.com/ChristopherHX/osx-packaging-scripts/releases/download/' + tagname + '/', ver ])
+            dumpfile(path.join(ver, 'appcast.xml'))
             rename(path.join(ver, 'appcast.xml'), path.join('sparkle', 'appcast.xml'))
+            dumpfile(path.join('sparkle', 'appcast.xml'))
             for file in listdir(ver):
                 filename = fsdecode(file)
                 if filename.endswith(".delta") or (filename.endswith(".dmg") and filename.find(getenv('GITHUB_RUN_NUMBER') + '_macOS_') != -1):
@@ -664,6 +670,8 @@ jobs:
             namespaces = dict([node for _, node in ET.iterparse(filename, events=['start-ns'])])
             for ns in namespaces:
                 ET.register_namespace(ns, namespaces[ns])
+        
+        dumpfile(path.join('sparkle', 'appcast.xml'))
         register_all_namespaces(path.join('sparkle', 'appcast.xml'))
         # Revert url changes
         tree2 = ET.parse(path.join('sparkle', 'appcast.xml'))
@@ -677,6 +685,7 @@ jobs:
                     print(enc.get('url'))
                     break
         tree.write(path.join('dist', 'appcast.xml'))
+        dumpfile(path.join('dist', 'appcast.xml'))
         tree.write(path.join('dist2', 'appcast.xml'))
     - name: download ghr
       run: |
