@@ -439,10 +439,10 @@ jobs:
             QT_PREBUILT_SUFFIX: -MacOS-MacOS_10_12-Clang-MacOS-MacOS_10_12-X86_64
           - target: "10.13.0"
             micro: 2
-            QT_BASE_URL: http://download.qt.io/online/qtsdkrepository/mac_x64/desktop/qt5_5152/
-            QT_VERSION_SHORT: 5.15.2
-            QT_VERSION: 5.15.2-0-202011130601
-            QT_PACKAGE_PREFIX: qt.qt5.5152.
+            QT_BASE_URL: http://download.qt.io/online/qtsdkrepository/mac_x64/desktop/qt5_5150/
+            QT_VERSION_SHORT: 5.15.0
+            QT_VERSION: 5.15.0-0-202005140805
+            QT_PACKAGE_PREFIX: qt.qt5.5150.
             QT_PACKAGE_SUFFIX: clang_64
             QT_PREBUILT_SUFFIX: -MacOS-MacOS_10_13-Clang-MacOS-MacOS_10_13-X86_64
     steps:
@@ -553,6 +553,7 @@ jobs:
         HOMEBREW_NO_AUTO_UPDATE=1 brew install p7zip automake
         HOMEBREW_NO_AUTO_UPDATE=1 brew link libuv protobuf libzip
     - name: Cache qt
+      if: 'false'
       id: cache-qt
       uses: actions/cache@v1
       env:
@@ -561,7 +562,7 @@ jobs:
         path: qt
         key: ${{ runner.os }}-build-${{ env.cache-name }}
     - name: Download Qt
-      if: steps.cache-qt.outputs.cache-hit != 'true'
+      # if: steps.cache-qt.outputs.cache-hit != 'true'
       run: |
         export QT_BASE_URL=${{ matrix.QT_BASE_URL }}
         export QT_VERSION_SHORT=${{ matrix.QT_VERSION_SHORT }}
