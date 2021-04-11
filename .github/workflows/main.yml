@@ -158,51 +158,53 @@ jobs:
         export HOMEBREW_MACOSX_DEPLOYMENT_TARGET=10.10.0
         export HOMEBREW_SDKROOT=${{ github.workspace }}/../MacOSX-SDKs/MacOSX10.10.sdk
         HOMEBREW_NO_AUTO_UPDATE=1 brew reinstall libzip
-  brew-protobuf:
+  protobuf:
+    if: 'false'
     runs-on: macos-latest
     steps:
     - name: Check for protobuf
-      id: cache-brew-protobuf
+      id: cache-protobuf
       uses: Mystraht/cache@master
       env:
-        cache-name: cache-brew-protobuf-macos-10-10
+        cache-name: cache-protobuf-macos-10-10
       with:
         path: /usr/local/Cellar/protobuf
         key: ${{ runner.os }}-build-${{ env.cache-name }}
     - name: Cache protobuf
-      if: steps.cache-brew-protobuf.outputs.cache-hit != 'true'
+      if: steps.cache-protobuf.outputs.cache-hit != 'true'
       uses: actions/cache@v1
       env:
-        cache-name: cache-brew-protobuf-macos-10-10
+        cache-name: cache-protobuf-macos-10-10
       with:
         path: /usr/local/Cellar/protobuf
         key: ${{ runner.os }}-build-${{ env.cache-name }}
     - uses: actions/checkout@v1
-      if: steps.cache-brew-protobuf.outputs.cache-hit != 'true'
+      if: steps.cache-protobuf.outputs.cache-hit != 'true'
       with:
         repository: ChristopherHX/MacOSX10.14.sdk
         ref: 5d1c9b28f01ef0b01225f92670ee587b430efa8e
         token: ${{ secrets.MacOSX1014sdk }}
-    - name: Apply custom patch and Update brew
-      if: steps.cache-brew-protobuf.outputs.cache-hit != 'true'
-      working-directory: "/usr/local/Homebrew"
-      run: |
-        git remote add fork https://github.com/ChristopherHX/brew.git
-        git fetch fork
-        git config --global user.email "CI@local"
-        git config --global user.name "CI Bot"
-        git merge fork/master
     - name: Install brew dependencies
-      if: steps.cache-brew-protobuf.outputs.cache-hit != 'true'
+      if: steps.cache-protobuf.outputs.cache-hit != 'true'
       working-directory: ${{ github.workspace }}/../osx-packaging-scripts
       run: |
-        export HOMEBREW_NO_AUTO_UPDATE=1
-        brew install automake
-        export HOMEBREW_MACOSX_DEPLOYMENT_TARGET=10.10.0
-        export HOMEBREW_SDKROOT=${{ github.workspace }}/../MacOSX10.14.sdk
-        brew remove --ignore-dependencies python@3 || :
-        brew remove --ignore-dependencies protobuf || :
-        brew install --build-from-source protobuf
+        brew install autoconf || :
+        brew install automake || :
+        brew install libtool || :
+    - name: Get Source
+      run: |
+        git clone https://github.com/protocolbuffers/protobuf.git
+        cd protobuf
+        git submodule update --init --recursive
+    - name: Build
+      run: |
+        cd protobuf
+        export MACOSX_DEPLOYMENT_TARGET=10.10.0
+        export SDKROOT=${{ github.workspace }}/../MacOSX10.14.sdk
+        ./autogen.sh
+        ./configure
+        make
+        sudo make install
   brew-libuv:
     runs-on: macos-latest
     steps:
@@ -415,7 +417,7 @@ jobs:
         lipo -create angle/out/Release/libGLESv2.dylib angle/out/Release64/libGLESv2.dylib -output ./osx-angle-ci/artifacts/libGLESv2.dylib
   build:
     runs-on: macos-latest
-    needs: [brew-libzip, brew-protobuf, brew-libuv, build-libcxx, buildopenssl, buildangle]
+    needs: [brew-libzip, brew-libuv, build-libcxx, buildopenssl, buildangle]
     strategy:
       fail-fast: false
       matrix:
@@ -498,12 +500,34 @@ jobs:
         path: /usr/local/Cellar/libzip
         key: ${{ runner.os }}-build-${{ env.cache-name }}
     - name: Restore protobuf
+      if: 'false'
       uses: actions/cache@v1
       env:
-        cache-name: cache-brew-protobuf-macos-10-10
+        cache-name: cache-protobuf-macos-10-10
       with:
         path: /usr/local/Cellar/protobuf
         key: ${{ runner.os }}-build-${{ env.cache-name }}
+
+    - name: Install brew dependencies
+      working-directory: ${{ github.workspace }}/../osx-packaging-scripts
+      run: |
+        brew install autoconf || :
+        brew install automake || :
+        brew install libtool || :
+    - name: Get Source Protobuf
+      run: |
+        git clone https://github.com/protocolbuffers/protobuf.git
+        cd protobuf
+        git submodule update --init --recursive
+    - name: Build Protobuf
+      run: |
+        cd protobuf
+        export MACOSX_DEPLOYMENT_TARGET=${{ matrix.target }}
+        export SDKROOT=${{ github.workspace }}/../MacOSX10.14.sdk
+        ./autogen.sh
+        ./configure
+        make
+        sudo make install
     - name: Restore libuv
       uses: actions/cache@v1
       env:
@@ -551,7 +575,7 @@ jobs:
     - name: brew install / link
       run: |
         HOMEBREW_NO_AUTO_UPDATE=1 brew install p7zip automake
-        HOMEBREW_NO_AUTO_UPDATE=1 brew link libuv protobuf libzip
+        HOMEBREW_NO_AUTO_UPDATE=1 brew link libuv libzip
     - name: Cache qt
       if: 'false'
       id: cache-qt
