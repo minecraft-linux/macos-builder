@@ -416,7 +416,7 @@ jobs:
         lipo -create angle/out/Release/libEGL.dylib angle/out/Release64/libEGL.dylib -output ./osx-angle-ci/artifacts/libEGL.dylib
         lipo -create angle/out/Release/libGLESv2.dylib angle/out/Release64/libGLESv2.dylib -output ./osx-angle-ci/artifacts/libGLESv2.dylib
   build:
-    runs-on: macos-latest
+    runs-on: macos-11.0
     needs: [brew-libzip, brew-libuv, build-libcxx, buildopenssl, buildangle]
     strategy:
       fail-fast: false
