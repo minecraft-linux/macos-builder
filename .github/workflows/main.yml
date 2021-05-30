@@ -148,6 +148,7 @@ jobs:
       run: |
         git remote add fork https://github.com/ChristopherHX/brew.git
         git fetch fork
+        git fetch origin
         git config --global user.email "CI@local"
         git config --global user.name "CI Bot"
         git checkout origin/master
@@ -243,6 +244,7 @@ jobs:
       run: |
         git remote add fork https://github.com/ChristopherHX/brew.git
         git fetch fork
+        git fetch origin
         git config --global user.email "CI@local"
         git config --global user.name "CI Bot"
         git checkout origin/master
