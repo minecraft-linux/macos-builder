@@ -366,58 +366,9 @@ jobs:
         cd ssl/lib
         install_name_tool -id @rpath/libssl.dylib -add_rpath @loader_path/../Frameworks libssl.dylib
         install_name_tool -id @rpath/libcrypto.dylib -add_rpath @loader_path/../Frameworks libcrypto.dylib
-  buildangle:
-    runs-on: macos-latest
-    # needs: [buildangle32, buildangle64]
-    steps:
-    - name: Check angle
-      id: angle
-      uses: Mystraht/cache@master
-      env:
-        cache-name: cache-angle-3
-      with:
-        path: osx-angle-ci/artifacts
-        key: ${{ runner.os }}-build-${{ env.cache-name }}
-    - name: Cache angle
-      if: steps.angle.outputs.cache-hit != 'true'
-      uses: actions/cache@v1
-      env:
-        cache-name: cache-angle-3
-      with:
-        path: osx-angle-ci/artifacts
-        key: ${{ runner.os }}-build-${{ env.cache-name }}
-    - uses: actions/checkout@v1
-      if: steps.angle.outputs.cache-hit != 'true'
-      with:
-        repository: ChristopherHX/MacOSX10.14.sdk
-        ref: 5d1c9b28f01ef0b01225f92670ee587b430efa8e
-        token: ${{ secrets.MacOSX1014sdk }}
-    - name: brew install / link
-      if: steps.angle.outputs.cache-hit != 'true'
-      run: |
-        export MACOSX_DEPLOYMENT_TARGET=${{ matrix.target }}
-        git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
-        export PATH=$PATH:$PWD/depot_tools
-        git clone https://github.com/minecraft-linux/angle.git
-        pushd angle
-        python scripts/bootstrap.py
-        gclient sync
-        gn gen out/Release64 --args='is_debug=false mac_sdk_path="'"${SDKROOT}"'" mac_sdk_min="10.10.0" mac_min_system_version="10.10.0" mac_deployment_target="10.10.0" angle_enable_swiftshader=false angle_enable_vulkan=false'
-        autoninja -C out/Release64 libEGL libGLESv2
-        find build -name '*.gn' | xargs -n 1 sed -i '' 's/-fatal_warnings//g'
-        export SDKROOT=${{ github.workspace }}/../MacOSX10.14.sdk
-        gn gen out/Release --args='target_cpu="x86" is_debug=false mac_sdk_path="'"${SDKROOT}"'" mac_sdk_min="10.10.0" mac_min_system_version="10.10.0" mac_deployment_target="10.10.0" angle_enable_metal=false angle_enable_swiftshader=false angle_enable_vulkan=false'
-        autoninja -C out/Release libEGL libGLESv2
-        popd
-    - name: upload
-      if: steps.angle.outputs.cache-hit != 'true'
-      run: |
-        mkdir -p osx-angle-ci/artifacts
-        lipo -create angle/out/Release/libEGL.dylib angle/out/Release64/libEGL.dylib -output ./osx-angle-ci/artifacts/libEGL.dylib
-        lipo -create angle/out/Release/libGLESv2.dylib angle/out/Release64/libGLESv2.dylib -output ./osx-angle-ci/artifacts/libGLESv2.dylib
   build:
     runs-on: macos-latest
-    needs: [brew-libzip, brew-libuv, build-libcxx, buildopenssl, buildangle]
+    needs: [brew-libzip, brew-libuv, build-libcxx, buildopenssl]
     strategy:
       fail-fast: false
       matrix:
@@ -564,14 +515,6 @@ jobs:
         cd ../ssl64
         rm -rf lib
         ln -s ../ssl/lib
-    - name: Cache angle
-      if: steps.angle.outputs.cache-hit != 'true'
-      uses: actions/cache@v1
-      env:
-        cache-name: cache-angle-3
-      with:
-        path: source/osx-angle-ci/artifacts
-        key: ${{ runner.os }}-build-${{ env.cache-name }}
     - name: brew install / link
       run: |
         HOMEBREW_NO_AUTO_UPDATE=1 brew install p7zip automake
@@ -600,7 +543,7 @@ jobs:
       run: |
         export MACOSX_DEPLOYMENT_TARGET=${{ matrix.target }}
         export SDKROOT=${{ github.workspace }}/../MacOSX10.14.sdk
-        python3 __main__.py --qt-path qt/*/* --update-sparkle-appcast https://github.com/${GITHUB_REPOSITORY}/releases/download/ng.dmg/appcast.xml --update-sparkle-ed-public-key ${{ secrets.SPARKLE_ECDSA_PUB }} --buildangle --build-id ${GITHUB_RUN_NUMBER} --prettyversion "$(cat version.txt)-macOS-x86_64-0.${{ matrix.micro }}.${GITHUB_RUN_NUMBER}" --version "0.${{ matrix.micro }}.${GITHUB_RUN_NUMBER}" ${{ matrix.extraflags }}
+        python3 __main__.py --qt-path qt/*/* --update-sparkle-appcast https://github.com/${GITHUB_REPOSITORY}/releases/download/ng.dmg/appcast.xml --update-sparkle-ed-public-key ${{ secrets.SPARKLE_ECDSA_PUB }} --build-id ${GITHUB_RUN_NUMBER} --prettyversion "$(cat version.txt)-macOS-x86_64-0.${{ matrix.micro }}.${GITHUB_RUN_NUMBER}" --version "0.${{ matrix.micro }}.${GITHUB_RUN_NUMBER}" ${{ matrix.extraflags }}
     - name: Build .dmg
       working-directory: ${{ github.workspace }}/../osx-packaging-scripts
       run: python3 build_dmg.py
