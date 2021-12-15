@@ -428,6 +428,9 @@ jobs:
         architecture: 'x64'
       if: steps.angle.outputs.cache-hit != 'true'
     - run: |
+        mkdir -p osx-angle-ci/artifacts
+      if: steps.angle.outputs.cache-hit != 'true'
+    - run: |
         from subprocess import check_call as call
         import shutil
         from os import path
