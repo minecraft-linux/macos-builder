@@ -399,6 +399,7 @@ jobs:
       if: steps.angle.outputs.cache-hit != 'true'
       run: |
         export MACOSX_DEPLOYMENT_TARGET=${{ matrix.target }}
+        export SDKROOT=${{ github.workspace }}/../MacOSX10.14.sdk
         git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
         export PATH=$PATH:$PWD/depot_tools
         git clone https://github.com/minecraft-linux/angle.git
@@ -408,7 +409,6 @@ jobs:
         gn gen out/Release64 --args='is_debug=false mac_sdk_path="'"${SDKROOT}"'" mac_sdk_min="10.10.0" mac_min_system_version="10.10.0" mac_deployment_target="10.10.0" angle_enable_swiftshader=false angle_enable_vulkan=false'
         autoninja -C out/Release64 libEGL libGLESv2
         find build -name '*.gn' | xargs -n 1 sed -i '' 's/-fatal_warnings//g'
-        export SDKROOT=${{ github.workspace }}/../MacOSX10.14.sdk
         gn gen out/Release --args='target_cpu="x86" is_debug=false mac_sdk_path="'"${SDKROOT}"'" mac_sdk_min="10.10.0" mac_min_system_version="10.10.0" mac_deployment_target="10.10.0" angle_enable_metal=false angle_enable_swiftshader=false angle_enable_vulkan=false'
         autoninja -C out/Release libEGL libGLESv2
         popd
