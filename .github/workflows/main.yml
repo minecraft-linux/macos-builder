@@ -435,8 +435,8 @@ jobs:
         DMG_FILE = 'Minecraft Bedrock Launcher.dmg'
         call(['curl', '-sL', '-o', DMG_FILE, 'https://github.com/ChristopherHX/osx-packaging-scripts/releases/download/v0.3.0.1-352/Minecraft_Bedrock_Launcher_v0.3.0.1-macOS-x86_64-0.0.352_macOS_10.10.0.dmg'])
         call(['hdiutil', 'attach', '-noautoopen', '-mountpoint', DMG_MOUNT_PATH, '-quiet', DMG_FILE])
-        shutil.copy2(path.join(DMG_MOUNT_PATH, 'Minecraft Bedrock Launcher.app', 'Contents', 'MacOS', 'libEGL.dylib'), './osx-angle-ci/artifacts/libEGL.dylib', follow_symlinks = True)
-        shutil.copy2(path.join(DMG_MOUNT_PATH, 'Minecraft Bedrock Launcher.app', 'Contents', 'MacOS', 'libGLESv2.dylib'), './osx-angle-ci/artifacts/libGLESv2.dylib', follow_symlinks = True)
+        shutil.copy2(path.join(DMG_MOUNT_PATH, 'Minecraft Bedrock Launcher.app', 'Contents', 'Frameworks', 'libEGL.dylib'), './osx-angle-ci/artifacts/libEGL.dylib', follow_symlinks = True)
+        shutil.copy2(path.join(DMG_MOUNT_PATH, 'Minecraft Bedrock Launcher.app', 'Contents', 'Frameworks', 'libGLESv2.dylib'), './osx-angle-ci/artifacts/libGLESv2.dylib', follow_symlinks = True)
       shell: python
       if: steps.angle.outputs.cache-hit != 'true'
   build:
