@@ -430,6 +430,7 @@ jobs:
     - run: |
         from subprocess import check_call as call
         import shutil
+        from os import path
         DMG_MOUNT_PATH = '/Volumes/Minecraft Bedrock Launcher/'
         DMG_FILE = 'Minecraft Bedrock Launcher.dmg'
         call(['curl', '-sL', '-o', DMG_FILE, 'https://github.com/ChristopherHX/osx-packaging-scripts/releases/download/v0.3.0.1-352/Minecraft_Bedrock_Launcher_v0.3.0.1-macOS-x86_64-0.0.352_macOS_10.10.0.dmg'])
