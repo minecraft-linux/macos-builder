@@ -82,8 +82,6 @@ with open('msa.commit', 'r') as file:
     clone_repo('msa', 'https://github.com/minecraft-linux/msa-manifest.git', file.read().replace('\n', ''))
 with open('mcpelauncher.commit', 'r') as file:
     clone_repo('mcpelauncher', 'https://github.com/minecraft-linux/mcpelauncher-manifest.git', file.read().replace('\n', ''))
-    call(['git', 'cherry-pick', '9d8f5771c4cd1e0589a2d4a510175f592aba1bdc'], cwd=path.join(SOURCE_DIR, 'mcpelauncher/mcpelauncher-client'))
-    call(['git', 'cherry-pick', 'd73cac9e937b4eda31d5f27e862fa220c514e5f9'], cwd=path.join(SOURCE_DIR, 'mcpelauncher/mcpelauncher-core'))
 with open('mcpelauncher-ui.commit', 'r') as file:
     clone_repo('mcpelauncher-ui', 'https://github.com/minecraft-linux/mcpelauncher-ui-manifest.git', file.read().replace('\n', ''))
 #if args.buildangle:

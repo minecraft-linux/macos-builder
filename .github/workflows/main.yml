@@ -623,6 +623,7 @@ jobs:
     if: ${{ always() }}
     steps:
     - uses: actions/checkout@v2
+    - run: echo "DMG_VERSION=$(cat version.txt)" >> $GITHUB_ENV
     - name: Download everything
       uses: actions/download-artifact@v2
       with:
@@ -726,5 +727,34 @@ jobs:
     - name: Upload Latest
       if: github.ref == 'refs/heads/main'
       run: |
-        ./ghr*/ghr -t ${{ secrets.GITHUB_TOKEN }} -u ChristopherHX -r osx-packaging-scripts -b "$(cat changelog.txt)" "$(cat version.txt)-${GITHUB_RUN_NUMBER}" dist2/
+        ./ghr*/ghr -t ${{ secrets.GITHUB_TOKEN }} -u ChristopherHX -r osx-packaging-scripts -b "$LAUNCHER_RELEASE_DESCRIPTION$(cat changelog.txt)" "$(cat version.txt)-${GITHUB_RUN_NUMBER}" dist2/
         ./ghr*/ghr -t ${{ secrets.GITHUB_TOKEN }} -u ChristopherHX -r osx-packaging-scripts -replace ng.dmg dist/
+      env:
+        LAUNCHER_RELEASE_DESCRIPTION: |
+          # This Project has been suspended by me since 2021/11/1, further changes or bug fixes are requiring Pull Requests to github repositories of minecraft-linux See https://github.com/ChristopherHX/mcpelauncher-manifest/issues/48#issuecomment-962518143
+
+          **You need to own Minecraft on the google play store and login with your google account to use this launcher**
+          Links for linux flatpak or AppImage can be found on our wiki https://mcpelauncher.readthedocs.io.
+
+          [Download link for intel or amd based 64bit systems ( known as amd64, intel64 and x86_64 e.g. most PC's or Laptops )](https://github.com/ChristopherHX/osx-packaging-scripts/releases/download/${{env.DMG_VERSION}}-${{github.run_number}}/Minecraft_Bedrock_Launcher_${{env.DMG_VERSION}}-macOS-x86_64-0.2.${{github.run_number}}_macOS_10.13.0.dmg)
+
+          We don't support macOS 10.10 - 10.12, but are still providing releases for them under assets.
+
+          **We don't own any m1 macs so this Launcher doesn't support macOS arm64 and you need to install Rosetta 2 to run the intel version under x86_64 emulation**
+          - Compiling for apple m1 ok
+            - since linux/arm64 support where added 2020/10
+          - Loading android libraries **broken**
+            - we received a crash report, mmap returned map failed
+            - unable to debug mmap failure's without access to m1 hardware
+            - No m1 ci on github actions
+
+          No free opengl es 2/3 drivers other than google/angle for macOS, leads to some graphic anomalies
+          - glowing sheeps, spiders and enchanted stuff
+            - the macOS dark mode might help a little bit
+            - lower resolutions reduce this glitch
+          - possible more frame drops compared to linux
+
+          No sound on unsupported ancient mac's from pre 2012 in i386 compatibility mode
+
+          ### Changelog
+          
