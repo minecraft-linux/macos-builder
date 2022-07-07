@@ -4,29 +4,23 @@ jobs:
   buildangle:
     runs-on: macos-latest
     steps:
-    - uses: actions/checkout@v1
-      if: steps.angle.outputs.cache-hit != 'true'
-      with:
-        repository: ChristopherHX/MacOSX10.14.sdk
-        ref: 5d1c9b28f01ef0b01225f92670ee587b430efa8e
-        token: ${{ secrets.MacOSX1014sdk }}
     - name: brew install / link
       if: steps.angle.outputs.cache-hit != 'true'
       run: |
-        export MACOSX_DEPLOYMENT_TARGET=${{ matrix.target }}
-        export SDKROOT=${{ github.workspace }}/../MacOSX10.14.sdk
+        export MACOSX_DEPLOYMENT_TARGET="10.11.0"
         git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
         export PATH=$PATH:$PWD/depot_tools
-        git clone -b angle-vulkan https://github.com/ChristopherHX/moltenvk-angle Urho3D
-        pushd Urho3D/Source/ThirdParty/angle
+        git clone -b angle-vulkan https://github.com/minecraft-linux/angle -b vk
+        pushd angle
         python scripts/bootstrap.py
         gclient sync
-        gn gen out/Release64 --args='is_debug=false mac_sdk_path="'"${SDKROOT}"'" mac_sdk_min="10.10.0" mac_min_system_version="10.10.0" mac_deployment_target="10.10.0" angle_enable_vulkan=true'
+        gn gen out/Release64 --args='is_debug=false mac_sdk_min="10.11.0" mac_min_system_version="10.11.0" mac_deployment_target="10.11.0" angle_enable_vulkan=true'
         autoninja -C out/Release64
         popd
     - uses: actions/upload-artifact@v3
+      if: always()
       with:
         name: angle
-        path: Urho3D/Source/ThirdParty/angle/out/Release64
+        path: angle/out/Release64
 
     
