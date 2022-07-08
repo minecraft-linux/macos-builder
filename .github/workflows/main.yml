@@ -9,7 +9,7 @@ jobs:
         export MACOSX_DEPLOYMENT_TARGET="10.11.0"
         git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
         export PATH=$PATH:$PWD/depot_tools
-        git clone -b angle-vulkan https://github.com/minecraft-linux/angle -b vk
+        git clone -b angle-vulkan https://github.com/minecraft-linux/angle -b vk-ext2
         pushd angle
         python scripts/bootstrap.py
         gclient sync
