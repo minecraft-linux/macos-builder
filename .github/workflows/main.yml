@@ -22,10 +22,10 @@ jobs:
       with:
         name: angle
         path: |
-          angle/out/Release64
-          !angle/out/Release64/*/**
+          angle/out/Release64/**/*.dylib
+          angle/out/Release64/**/*.icd
     - uses: actions/upload-artifact@v3
-      if: always() && steps.firstupload.outcome != 'success'
+      if: always()
       with:
         name: angle-fallback
         path: |
