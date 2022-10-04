@@ -378,11 +378,12 @@ jobs:
     - name: Get Source libzip
       run: |
         git clone https://github.com/nih-at/libzip libzip
+        git -C libzip checkout v1.9.2
     - name: Build libzip
       run: |
         export MACOSX_DEPLOYMENT_TARGET=${{ matrix.target }}
         export SDKROOT=${{ github.workspace }}/../MacOSX10.14.sdk
-        cmake libzip -B libzip-build -DBUILD_TOOLS=OFF -DBUILD_REGRESS=OFF -DBUILD_EXAMPLES=OFF -DBUILD_DOC=OFF
+        cmake libzip -B libzip-build -DBUILD_TOOLS=OFF -DBUILD_REGRESS=OFF -DBUILD_EXAMPLES=OFF -DBUILD_DOC=OFF -DENABLE_BZIP2=OFF -DENABLE_LZMA=OFF -DENABLE_ZSTD=OFF -DENABLE_COMMONCRYPTO=OFF -DENABLE_GNUTLS=OFF -DENABLE_MBEDTLS=OFF -DENABLE_OPENSSL=OFF -DENABLE_WINDOWS_CRYPTO=OFF -DENABLE_FDOPEN=OFF
         cmake --build libzip-build --parallel
         sudo cmake --build libzip-build --target install --parallel
     - name: Install python dependencies
@@ -396,18 +397,17 @@ jobs:
         brew install libtool || :
     - name: Get Source Protobuf
       run: |
-        git clone https://github.com/protocolbuffers/protobuf.git
-        cd protobuf
-        git submodule update --init --recursive
+        git clone https://github.com/protocolbuffers/protobuf.git -b 21.x protobuf
+        git -C protobuf submodule update --init --recursive
     - name: Build Protobuf
       run: |
-        cd protobuf
         export MACOSX_DEPLOYMENT_TARGET=${{ matrix.target }}
         export SDKROOT=${{ github.workspace }}/../MacOSX10.14.sdk
         ./autogen.sh
         ./configure
         make
         sudo make install
+      working-directory: protobuf
     - name: Cache openssl
       uses: actions/cache@v1
       env:
