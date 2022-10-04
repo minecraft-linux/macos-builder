@@ -405,8 +405,8 @@ jobs:
         export SDKROOT=${{ github.workspace }}/../MacOSX10.14.sdk
         ./autogen.sh
         ./configure
-        make
-        sudo make install
+        make -j8
+        sudo make install -j8
       working-directory: protobuf
     - name: Cache openssl
       uses: actions/cache@v1
