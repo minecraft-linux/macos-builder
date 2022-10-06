@@ -1,5 +1,5 @@
 name: CI
-on: [push]
+on: [push, pull_request]
 jobs:
   build-libcxx32:
     runs-on: macos-latest
@@ -138,16 +138,28 @@ jobs:
         path: /usr/local/ssl32
         key: ${{ runner.os }}-build-${{ env.cache-name }}
     - uses: actions/checkout@v1
-      if: steps.cache-openssl32.outputs.cache-hit != 'true'
+      if: env.HAVE_SECRET && steps.cache-openssl32.outputs.cache-hit != 'true'
       with:
         repository: ChristopherHX/MacOSX10.14.sdk
         ref: 5d1c9b28f01ef0b01225f92670ee587b430efa8e
         token: ${{ secrets.MacOSX1014sdk }}
+      env:
+        HAVE_SECRET: ${{ secrets.MacOSX1014sdk && '1' || '' }}
+    - uses: actions/checkout@v1 && steps.cache-openssl32.outputs.cache-hit != 'true'
+      if: env.MISSING_SECRET
+      with:
+        repository: phracker/MacOSX-SDKs
+        ref: refs/heads/master
+      env:
+        MISSING_SECRET: ${{ !secrets.MacOSX1014sdk && '1' || '' }}
+    - name: Update env
+      if: steps.cache-openssl32.outputs.cache-hit != 'true'
+      run: |
+        echo MACOSX_DEPLOYMENT_TARGET=10.10.0 > $GITHUB_ENV
+        echo SDKROOT=${{ github.workspace }}/../${{ secrets.MacOSX1014sdk && MacOSX10.14.sdk || 'MacOSX-SDKs/MacOSX10.13.sdk' }} >> $GITHUB_ENV
     - name: Build OpenSSL
       if: steps.cache-openssl32.outputs.cache-hit != 'true'
       run: |
-        export MACOSX_DEPLOYMENT_TARGET=10.10.0
-        export SDKROOT=${{ github.workspace }}/../MacOSX10.14.sdk
         git clone https://github.com/openssl/openssl.git -b OpenSSL_1_1_1-stable
         cd openssl
         KERNEL_BITS=32 ./config --prefix=/usr/local/ssl32
@@ -173,16 +185,29 @@ jobs:
         path: /usr/local/ssl64
         key: ${{ runner.os }}-build-${{ env.cache-name }}
     - uses: actions/checkout@v1
-      if: steps.cache-openssl64.outputs.cache-hit != 'true'
+      if: env.HAVE_SECRET && steps.cache-openssl64.outputs.cache-hit != 'true'
       with:
         repository: ChristopherHX/MacOSX10.14.sdk
         ref: 5d1c9b28f01ef0b01225f92670ee587b430efa8e
         token: ${{ secrets.MacOSX1014sdk }}
+      env:
+        HAVE_SECRET: ${{ secrets.MacOSX1014sdk && '1' || '' }}
+    - uses: actions/checkout@v1
+      if: env.MISSING_SECRET && steps.cache-openssl64.outputs.cache-hit != 'true'
+      with:
+        repository: phracker/MacOSX-SDKs
+        ref: refs/heads/master
+      env:
+        MISSING_SECRET: ${{ !secrets.MacOSX1014sdk && '1' || '' }}
+    - name: Update env
+      if: steps.cache-openssl64.outputs.cache-hit != 'true'
+      run: |
+        echo MACOSX_DEPLOYMENT_TARGET=10.10.0 > $GITHUB_ENV
+        echo SDKROOT=${{ github.workspace }}/../${{ secrets.MacOSX1014sdk && MacOSX10.14.sdk || 'MacOSX-SDKs/MacOSX10.13.sdk' }} >> $GITHUB_ENV
+    
     - name: Build OpenSSL
       if: steps.cache-openssl64.outputs.cache-hit != 'true'
       run: |
-        export MACOSX_DEPLOYMENT_TARGET=10.10.0
-        export SDKROOT=${{ github.workspace }}/../MacOSX10.14.sdk
         git clone https://github.com/openssl/openssl.git -b OpenSSL_1_1_1-stable
         cd openssl
         KERNEL_BITS=64 ./config --prefix=/usr/local/ssl64
@@ -346,11 +371,6 @@ jobs:
         IFS='/' read -ra REF <<< "${GITHUB_REF}"
         echo "::set-env BRANCH_NAME=${REF[2]}"
     - uses: actions/checkout@v1
-    - uses: actions/checkout@v1
-      with:
-        repository: ChristopherHX/MacOSX10.14.sdk
-        ref: eea27130a21aea7605cd019e5a45369535bec800
-        token: ${{ secrets.MacOSX1014sdk }}
     - name: Cache libcxx32
       id: libcxx32-llvm
       uses: actions/cache@v1
@@ -375,39 +395,6 @@ jobs:
       with:
         path: libcxx-build
         key: ${{ runner.os }}-build-${{ env.cache-name }}
-    - name: Get Source libzip
-      run: |
-        git clone https://github.com/nih-at/libzip libzip
-        git -C libzip checkout v1.9.2
-    - name: Build libzip
-      run: |
-        export MACOSX_DEPLOYMENT_TARGET=${{ matrix.target }}
-        export SDKROOT=${{ github.workspace }}/../MacOSX10.14.sdk
-        cmake libzip -B libzip-build -DBUILD_TOOLS=OFF -DBUILD_REGRESS=OFF -DBUILD_EXAMPLES=OFF -DBUILD_DOC=OFF -DENABLE_BZIP2=OFF -DENABLE_LZMA=OFF -DENABLE_ZSTD=OFF -DENABLE_COMMONCRYPTO=OFF -DENABLE_GNUTLS=OFF -DENABLE_MBEDTLS=OFF -DENABLE_OPENSSL=OFF -DENABLE_WINDOWS_CRYPTO=OFF -DENABLE_FDOPEN=OFF
-        cmake --build libzip-build --parallel
-        sudo cmake --build libzip-build --target install --parallel
-    - name: Install python dependencies
-      run: pip3 install jinja2 ds_store
-
-    - name: Install brew dependencies
-      working-directory: ${{ github.workspace }}/../osx-packaging-scripts
-      run: |
-        brew install autoconf || :
-        brew install automake || :
-        brew install libtool || :
-    - name: Get Source Protobuf
-      run: |
-        git clone https://github.com/protocolbuffers/protobuf.git -b 21.x protobuf
-        git -C protobuf submodule update --init --recursive
-    - name: Build Protobuf
-      run: |
-        export MACOSX_DEPLOYMENT_TARGET=${{ matrix.target }}
-        export SDKROOT=${{ github.workspace }}/../MacOSX10.14.sdk
-        ./autogen.sh
-        ./configure
-        make -j8
-        sudo make install -j8
-      working-directory: protobuf
     - name: Cache openssl
       uses: actions/cache@v1
       env:
@@ -447,7 +434,9 @@ jobs:
         key: ${{ runner.os }}-build-${{ env.cache-name }}
     - name: brew install / link
       run: |
-        HOMEBREW_NO_AUTO_UPDATE=1 brew install p7zip automake
+        brew install p7zip automake
+      env:
+        HOMEBREW_NO_AUTO_UPDATE: 1
     - name: Cache qt
       if: 'false'
       id: cache-qt
@@ -460,19 +449,66 @@ jobs:
     - name: Download Qt
       # if: steps.cache-qt.outputs.cache-hit != 'true'
       run: |
-        export QT_BASE_URL=${{ matrix.QT_BASE_URL }}
-        export QT_VERSION_SHORT=${{ matrix.QT_VERSION_SHORT }}
-        export QT_VERSION=${{ matrix.QT_VERSION }}
-        export QT_PACKAGE_PREFIX=${{ matrix.QT_PACKAGE_PREFIX }}
-        export QT_PACKAGE_SUFFIX=${{ matrix.QT_PACKAGE_SUFFIX }}
-        export QT_PREBUILT_SUFFIX=${{ matrix.QT_PREBUILT_SUFFIX }}
         ./download_qt.sh
+      env:
+        QT_BASE_URL: ${{ matrix.QT_BASE_URL }}
+        QT_VERSION_SHORT: ${{ matrix.QT_VERSION_SHORT }}
+        QT_VERSION: ${{ matrix.QT_VERSION }}
+        QT_PACKAGE_PREFIX: ${{ matrix.QT_PACKAGE_PREFIX }}
+        QT_PACKAGE_SUFFIX: ${{ matrix.QT_PACKAGE_SUFFIX }}
+        QT_PREBUILT_SUFFIX: ${{ matrix.QT_PREBUILT_SUFFIX }}
+    - uses: actions/checkout@v1
+      if: env.HAVE_SECRET
+      with:
+        repository: ChristopherHX/MacOSX10.14.sdk
+        ref: eea27130a21aea7605cd019e5a45369535bec800
+        token: ${{ secrets.MacOSX1014sdk }}
+      env:
+        HAVE_SECRET: ${{ secrets.MacOSX1014sdk && '1' || '' }}
+    - uses: actions/checkout@v1
+      if: env.MISSING_SECRET
+      with:
+        repository: phracker/MacOSX-SDKs
+        ref: refs/heads/master
+      env:
+        MISSING_SECRET: ${{ !secrets.MacOSX1014sdk && '1' || '' }}
+    - name: Update env
+      run: |
+        echo MACOSX_DEPLOYMENT_TARGET=${{ matrix.target }} > $GITHUB_ENV
+        echo SDKROOT=${{ github.workspace }}/../${{ secrets.MacOSX1014sdk && MacOSX10.14.sdk || 'MacOSX-SDKs/MacOSX10.13.sdk' }} >> $GITHUB_ENV
+    - name: Get Source libzip
+      run: |
+        git clone https://github.com/nih-at/libzip libzip
+        git -C libzip checkout v1.9.2
+    - name: Build libzip
+      run: |
+        cmake libzip -B libzip-build -DBUILD_TOOLS=OFF -DBUILD_REGRESS=OFF -DBUILD_EXAMPLES=OFF -DBUILD_DOC=OFF -DENABLE_BZIP2=OFF -DENABLE_LZMA=OFF -DENABLE_ZSTD=OFF -DENABLE_COMMONCRYPTO=OFF -DENABLE_GNUTLS=OFF -DENABLE_MBEDTLS=OFF -DENABLE_OPENSSL=OFF -DENABLE_WINDOWS_CRYPTO=OFF -DENABLE_FDOPEN=OFF
+        cmake --build libzip-build --parallel
+        sudo cmake --build libzip-build --target install --parallel
+    - name: Install python dependencies
+      run: pip3 install jinja2 ds_store
+
+    - name: Install brew dependencies
+      working-directory: ${{ github.workspace }}/../osx-packaging-scripts
+      run: |
+        brew install autoconf || :
+        brew install automake || :
+        brew install libtool || :
+    - name: Get Source Protobuf
+      run: |
+        git clone https://github.com/protocolbuffers/protobuf.git -b 21.x protobuf
+        git -C protobuf submodule update --init --recursive
+    - name: Build Protobuf
+      run: |
+        ./autogen.sh
+        ./configure
+        make -j8
+        sudo make install -j8
+      working-directory: protobuf
     - name: Build
       working-directory: ${{ github.workspace }}/../osx-packaging-scripts
       run: |
-        export MACOSX_DEPLOYMENT_TARGET=${{ matrix.target }}
-        export SDKROOT=${{ github.workspace }}/../MacOSX10.14.sdk
-        python3 __main__.py --qt-path qt/*/* --update-sparkle-appcast https://github.com/${GITHUB_REPOSITORY}/releases/download/ng.dmg/appcast.xml --update-sparkle-ed-public-key ${{ secrets.SPARKLE_ECDSA_PUB }} --buildangle --build-id ${GITHUB_RUN_NUMBER} --prettyversion "$(cat version.txt)-macOS-x86_64-0.${{ matrix.micro }}.${GITHUB_RUN_NUMBER}" --version "0.${{ matrix.micro }}.${GITHUB_RUN_NUMBER}" ${{ matrix.extraflags }}
+        python3 __main__.py --qt-path qt/*/*${{ secrets.SPARKLE_ECDSA_PUB && format('{0} {1}', ' --update-sparkle-appcast https://github.com/${GITHUB_REPOSITORY}/releases/download/ng.dmg/appcast.xml --update-sparkle-ed-public-key ', secrets.SPARKLE_ECDSA_PUB) }} --buildangle --build-id ${GITHUB_RUN_NUMBER} --prettyversion "$(cat version.txt)-macOS-x86_64-0.${{ matrix.micro }}.${GITHUB_RUN_NUMBER}" --version "0.${{ matrix.micro }}.${GITHUB_RUN_NUMBER}" ${{ matrix.extraflags }}
     - name: Build .dmg
       working-directory: ${{ github.workspace }}/../osx-packaging-scripts
       run: python3 build_dmg.py
@@ -489,7 +525,8 @@ jobs:
   publish:
     runs-on: macos-latest
     needs: build
-    if: ${{ !cancelled() }}
+    # Eventually extend this job to be able to run on other repositories, otherwise replace the owner and repository name in this job
+    if: ${{ !cancelled() && github.event_name == 'push' && github.repository == 'ChristopherHX/osx-packaging-scripts' }}
     steps:
     - uses: actions/checkout@v2
     - run: echo "DMG_VERSION=$(cat version.txt)" >> $GITHUB_ENV
