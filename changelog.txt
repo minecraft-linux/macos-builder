@@ -1,1 +1,1 @@
-<p>Attempt to mitigate SIGSYS crash on macOS 12.3 x86_64</p>
+<p>Credits for 1.19.40 beta patches go to GitHub user 0xCatPKG</p><p>Cross Play with macOS is current not possible for game version 1.18.30 and newer, choose an older game version on linux to match the macOS Launcher</p>
