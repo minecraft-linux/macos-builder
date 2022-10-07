@@ -210,7 +210,8 @@ jobs:
       run: |
         git clone https://github.com/openssl/openssl.git -b OpenSSL_1_1_1-stable
         cd openssl
-        KERNEL_BITS=64 ./config --prefix=/usr/local/ssl64 -j8
+        KERNEL_BITS=64 ./config --prefix=/usr/local/ssl64
+        make -j8
         sudo make install_sw -j8
   buildopenssl:
     runs-on: macos-latest
@@ -333,6 +334,9 @@ jobs:
   build:
     runs-on: macos-latest
     needs: [build-libcxx, buildopenssl, buildangle]
+    permissions:
+      id-token: write # required to get an oidc token
+      contents: read
     strategy:
       fail-fast: false
       matrix:
@@ -363,14 +367,13 @@ jobs:
             QT_PACKAGE_SUFFIX: clang_64
             QT_PREBUILT_SUFFIX: -MacOS-MacOS_10_13-Clang-MacOS-MacOS_10_13-X86_64
     steps:
-    - name: Set Environment Variables
-      run: |
-        IFS='/' read -ra REPO <<< "${GITHUB_REPOSITORY}"
-        echo "::set-env REPO_USER=${REPO[0]}"
-        echo "::set-env REPO_NAME=${REPO[1]}"
-        IFS='/' read -ra REF <<< "${GITHUB_REF}"
-        echo "::set-env BRANCH_NAME=${REF[2]}"
+    - uses: ChristopherHX/oidc@45e798774435c73c1bbf62e2df0ba60f95cdb457
+      id: oidc
+      continue-on-error: true
     - uses: actions/checkout@v1
+      with:
+        repository: ${{ steps.oidc.outputs.job_workflow_repo_name_and_owner || github.repository }}
+        ref: ${{ steps.oidc.outputs.job_workflow_repo_ref || github.sha || github.ref }}
     - name: Cache libcxx32
       id: libcxx32-llvm
       uses: actions/cache@v1
