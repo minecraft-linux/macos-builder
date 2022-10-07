@@ -34,7 +34,7 @@ jobs:
         mkdir -p libcxx32-build
         cd libcxx32-build
         cmake ../llvm/llvm -DLLVM_ENABLE_PROJECTS="libcxx;libcxxabi" -DCMAKE_BUILD_TYPE=Release -DLIBCXX_BUILD_32_BITS=ON -DLIBCXXABI_BUILD_32_BITS=ON -DLLVM_BUILD_32_BITS=ON
-        make -j4 cxx cxxabi
+        make -j8 cxx cxxabi
   build-libcxx64:
     runs-on: macos-latest
     steps:
@@ -68,7 +68,7 @@ jobs:
         mkdir -p libcxx64-build
         cd libcxx64-build
         cmake ../llvm/llvm -DLLVM_ENABLE_PROJECTS="libcxx;libcxxabi" -DCMAKE_BUILD_TYPE=Release
-        make -j4 cxx cxxabi
+        make -j8 cxx cxxabi
   build-libcxx:
     runs-on: macos-latest
     needs: [build-libcxx32,build-libcxx64]
@@ -163,8 +163,8 @@ jobs:
         git clone https://github.com/openssl/openssl.git -b OpenSSL_1_1_1-stable
         cd openssl
         KERNEL_BITS=32 ./config --prefix=/usr/local/ssl32
-        make
-        sudo make install_sw
+        make -j8
+        sudo make install_sw -j8
   buildopenssl64:
     runs-on: macos-latest
     steps:
@@ -210,8 +210,8 @@ jobs:
       run: |
         git clone https://github.com/openssl/openssl.git -b OpenSSL_1_1_1-stable
         cd openssl
-        KERNEL_BITS=64 ./config --prefix=/usr/local/ssl64
-        sudo make install_sw
+        KERNEL_BITS=64 ./config --prefix=/usr/local/ssl64 -j8
+        sudo make install_sw -j8
   buildopenssl:
     runs-on: macos-latest
     needs: [buildopenssl32, buildopenssl64]
