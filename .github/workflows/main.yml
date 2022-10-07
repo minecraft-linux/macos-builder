@@ -529,7 +529,7 @@ jobs:
     runs-on: macos-latest
     needs: build
     # Eventually extend this job to be able to run on other repositories, otherwise replace the owner and repository name in this job
-    if: ${{ !cancelled() && github.event_name == 'push' && github.repository == 'ChristopherHX/osx-packaging-scripts' }}
+    if: ${{ !cancelled() && github.event_name == 'push' && github.repository == 'ChristopherHX/osx-packaging-scripts' && !inputs }}
     steps:
     - uses: actions/checkout@v2
     - run: echo "DMG_VERSION=$(cat version.txt)" >> $GITHUB_ENV
