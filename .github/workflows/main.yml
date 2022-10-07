@@ -145,8 +145,8 @@ jobs:
         token: ${{ secrets.MacOSX1014sdk }}
       env:
         HAVE_SECRET: ${{ secrets.MacOSX1014sdk && '1' || '' }}
-    - uses: actions/checkout@v1 && steps.cache-openssl32.outputs.cache-hit != 'true'
-      if: env.MISSING_SECRET
+    - uses: actions/checkout@v1
+      if: env.MISSING_SECRET && steps.cache-openssl32.outputs.cache-hit != 'true'
       with:
         repository: phracker/MacOSX-SDKs
         ref: refs/heads/master
