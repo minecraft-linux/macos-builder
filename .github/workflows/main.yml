@@ -1,5 +1,5 @@
 name: CI
-on: [push]
+on: [push, pull_request, workflow_call, workflow_dispatch]
 jobs:
   build-libcxx32:
     runs-on: macos-latest
@@ -34,7 +34,7 @@ jobs:
         mkdir -p libcxx32-build
         cd libcxx32-build
         cmake ../llvm/llvm -DLLVM_ENABLE_PROJECTS="libcxx;libcxxabi" -DCMAKE_BUILD_TYPE=Release -DLIBCXX_BUILD_32_BITS=ON -DLIBCXXABI_BUILD_32_BITS=ON -DLLVM_BUILD_32_BITS=ON
-        make -j4 cxx cxxabi
+        make -j8 cxx cxxabi
   build-libcxx64:
     runs-on: macos-latest
     steps:
@@ -68,7 +68,7 @@ jobs:
         mkdir -p libcxx64-build
         cd libcxx64-build
         cmake ../llvm/llvm -DLLVM_ENABLE_PROJECTS="libcxx;libcxxabi" -DCMAKE_BUILD_TYPE=Release
-        make -j4 cxx cxxabi
+        make -j8 cxx cxxabi
   build-libcxx:
     runs-on: macos-latest
     needs: [build-libcxx32,build-libcxx64]
@@ -118,143 +118,6 @@ jobs:
         ln -s libc++abi.1.dylib libc++abi.dylib
         install_name_tool -rpath @loader_path/../lib @loader_path/../Frameworks libc++.dylib
         install_name_tool -rpath @loader_path/../lib @loader_path/../Frameworks libc++abi.dylib
-  brew-libzip:
-    runs-on: macos-latest
-    steps:
-    - name: Check for libzip
-      id: cache-brew-libzip
-      uses: Mystraht/cache@master
-      env:
-        cache-name: cache-brew-libzip-macos-10-10
-      with:
-        path: /usr/local/Cellar/libzip
-        key: ${{ runner.os }}-build-${{ env.cache-name }}
-    - name: Cache libzip
-      if: steps.cache-brew-libzip.outputs.cache-hit != 'true'
-      uses: actions/cache@v1
-      env:
-        cache-name: cache-brew-libzip-macos-10-10
-      with:
-        path: /usr/local/Cellar/libzip
-        key: ${{ runner.os }}-build-${{ env.cache-name }}
-    - uses: actions/checkout@v1
-      if: steps.cache-brew-libzip.outputs.cache-hit != 'true'
-      with:
-        repository: phracker/MacOSX-SDKs
-        ref: refs/heads/master
-    - name: Apply custom patch and Update brew
-      if: steps.cache-brew-libzip.outputs.cache-hit != 'true'
-      working-directory: "/usr/local/Homebrew"
-      run: |
-        git remote add fork https://github.com/ChristopherHX/brew.git
-        git fetch fork
-        git config --global user.email "CI@local"
-        git config --global user.name "CI Bot"
-        git merge fork/master
-    - name: Install brew dependencies
-      if: steps.cache-brew-libzip.outputs.cache-hit != 'true'
-      working-directory: ${{ github.workspace }}/../osx-packaging-scripts
-      run: |
-        export HOMEBREW_MACOSX_DEPLOYMENT_TARGET=10.10.0
-        export HOMEBREW_SDKROOT=${{ github.workspace }}/../MacOSX-SDKs/MacOSX10.10.sdk
-        HOMEBREW_NO_AUTO_UPDATE=1 brew uninstall --ignore-dependencies composer || :
-        HOMEBREW_NO_AUTO_UPDATE=1 brew uninstall --ignore-dependencies php || :
-        HOMEBREW_NO_AUTO_UPDATE=1 brew reinstall libzip
-  protobuf:
-    if: 'false'
-    runs-on: macos-latest
-    steps:
-    - name: Check for protobuf
-      id: cache-protobuf
-      uses: Mystraht/cache@master
-      env:
-        cache-name: cache-protobuf-macos-10-10
-      with:
-        path: /usr/local/Cellar/protobuf
-        key: ${{ runner.os }}-build-${{ env.cache-name }}
-    - name: Cache protobuf
-      if: steps.cache-protobuf.outputs.cache-hit != 'true'
-      uses: actions/cache@v1
-      env:
-        cache-name: cache-protobuf-macos-10-10
-      with:
-        path: /usr/local/Cellar/protobuf
-        key: ${{ runner.os }}-build-${{ env.cache-name }}
-    - uses: actions/checkout@v1
-      if: steps.cache-protobuf.outputs.cache-hit != 'true'
-      with:
-        repository: ChristopherHX/MacOSX10.14.sdk
-        ref: 5d1c9b28f01ef0b01225f92670ee587b430efa8e
-        token: ${{ secrets.MacOSX1014sdk }}
-    - name: Install brew dependencies
-      if: steps.cache-protobuf.outputs.cache-hit != 'true'
-      working-directory: ${{ github.workspace }}/../osx-packaging-scripts
-      run: |
-        brew install autoconf || :
-        brew install automake || :
-        brew install libtool || :
-    - name: Get Source
-      run: |
-        git clone https://github.com/protocolbuffers/protobuf.git
-        cd protobuf
-        git submodule update --init --recursive
-    - name: Build
-      run: |
-        cd protobuf
-        export MACOSX_DEPLOYMENT_TARGET=10.10.0
-        export SDKROOT=${{ github.workspace }}/../MacOSX10.14.sdk
-        ./autogen.sh
-        ./configure
-        make
-        sudo make install
-  brew-libuv:
-    runs-on: macos-latest
-    steps:
-    - name: Check for libuv
-      id: cache-brew-libuv
-      uses: Mystraht/cache@master
-      env:
-        cache-name: cache-brew-libuv-macos-10-10
-      with:
-        path: /usr/local/Cellar/libuv
-        key: ${{ runner.os }}-build-${{ env.cache-name }}
-    - name: Cache libuv
-      if: steps.cache-brew-libuv.outputs.cache-hit != 'true'
-      uses: actions/cache@v1
-      env:
-        cache-name: cache-brew-libuv-macos-10-10
-      with:
-        path: /usr/local/Cellar/libuv
-        key: ${{ runner.os }}-build-${{ env.cache-name }}
-    - uses: actions/checkout@v1
-      if: steps.cache-brew-libuv.outputs.cache-hit != 'true'
-      with:
-        repository: ChristopherHX/MacOSX10.14.sdk
-        ref: 5d1c9b28f01ef0b01225f92670ee587b430efa8e
-        token: ${{ secrets.MacOSX1014sdk }}
-    - name: Install libuv breq dependencies
-      if: steps.cache-brew-libuv.outputs.cache-hit != 'true'
-      working-directory: ${{ github.workspace }}/../osx-packaging-scripts
-      run: |
-        brew install automake sphinx-doc
-        brew remove --ignore-dependencies libuv || :
-    - name: Apply custom patch and Update brew
-      if: steps.cache-brew-libuv.outputs.cache-hit != 'true'
-      working-directory: "/usr/local/Homebrew"
-      run: |
-        git remote add fork https://github.com/ChristopherHX/brew.git
-        git fetch fork
-        git config --global user.email "CI@local"
-        git config --global user.name "CI Bot"
-        git merge fork/master
-    - name: Install brew dependencies
-      if: steps.cache-brew-libuv.outputs.cache-hit != 'true'
-      working-directory: ${{ github.workspace }}/../osx-packaging-scripts
-      run: |
-        export HOMEBREW_MACOSX_DEPLOYMENT_TARGET=10.10.0
-        export HOMEBREW_SDKROOT=${{ github.workspace }}/../MacOSX10.14.sdk
-        HOMEBREW_NO_AUTO_UPDATE=1 brew uninstall node@14 node@16 mongosh mongodb/brew/mongodb-community || :
-        HOMEBREW_NO_AUTO_UPDATE=1 brew install --build-from-source libuv
   buildopenssl32:
     runs-on: macos-latest
     steps:
@@ -275,21 +138,33 @@ jobs:
         path: /usr/local/ssl32
         key: ${{ runner.os }}-build-${{ env.cache-name }}
     - uses: actions/checkout@v1
-      if: steps.cache-openssl32.outputs.cache-hit != 'true'
+      if: env.HAVE_SECRET && steps.cache-openssl32.outputs.cache-hit != 'true'
       with:
         repository: ChristopherHX/MacOSX10.14.sdk
         ref: 5d1c9b28f01ef0b01225f92670ee587b430efa8e
         token: ${{ secrets.MacOSX1014sdk }}
+      env:
+        HAVE_SECRET: ${{ secrets.MacOSX1014sdk && '1' || '' }}
+    - uses: actions/checkout@v1
+      if: env.MISSING_SECRET && steps.cache-openssl32.outputs.cache-hit != 'true'
+      with:
+        repository: phracker/MacOSX-SDKs
+        ref: refs/heads/master
+      env:
+        MISSING_SECRET: ${{ !secrets.MacOSX1014sdk && '1' || '' }}
+    - name: Update env
+      if: steps.cache-openssl32.outputs.cache-hit != 'true'
+      run: |
+        echo MACOSX_DEPLOYMENT_TARGET=10.10.0 > $GITHUB_ENV
+        echo SDKROOT=${{ github.workspace }}/../${{ secrets.MacOSX1014sdk && 'MacOSX10.14.sdk' || 'MacOSX-SDKs/MacOSX10.13.sdk' }} >> $GITHUB_ENV
     - name: Build OpenSSL
       if: steps.cache-openssl32.outputs.cache-hit != 'true'
       run: |
-        export MACOSX_DEPLOYMENT_TARGET=10.10.0
-        export SDKROOT=${{ github.workspace }}/../MacOSX10.14.sdk
         git clone https://github.com/openssl/openssl.git -b OpenSSL_1_1_1-stable
         cd openssl
         KERNEL_BITS=32 ./config --prefix=/usr/local/ssl32
-        make
-        sudo make install_sw
+        make -j8
+        sudo make install_sw -j8
   buildopenssl64:
     runs-on: macos-latest
     steps:
@@ -310,20 +185,34 @@ jobs:
         path: /usr/local/ssl64
         key: ${{ runner.os }}-build-${{ env.cache-name }}
     - uses: actions/checkout@v1
-      if: steps.cache-openssl64.outputs.cache-hit != 'true'
+      if: env.HAVE_SECRET && steps.cache-openssl64.outputs.cache-hit != 'true'
       with:
         repository: ChristopherHX/MacOSX10.14.sdk
         ref: 5d1c9b28f01ef0b01225f92670ee587b430efa8e
         token: ${{ secrets.MacOSX1014sdk }}
+      env:
+        HAVE_SECRET: ${{ secrets.MacOSX1014sdk && '1' || '' }}
+    - uses: actions/checkout@v1
+      if: env.MISSING_SECRET && steps.cache-openssl64.outputs.cache-hit != 'true'
+      with:
+        repository: phracker/MacOSX-SDKs
+        ref: refs/heads/master
+      env:
+        MISSING_SECRET: ${{ !secrets.MacOSX1014sdk && '1' || '' }}
+    - name: Update env
+      if: steps.cache-openssl64.outputs.cache-hit != 'true'
+      run: |
+        echo MACOSX_DEPLOYMENT_TARGET=10.10.0 > $GITHUB_ENV
+        echo SDKROOT=${{ github.workspace }}/../${{ secrets.MacOSX1014sdk && 'MacOSX10.14.sdk' || 'MacOSX-SDKs/MacOSX10.13.sdk' }} >> $GITHUB_ENV
+    
     - name: Build OpenSSL
       if: steps.cache-openssl64.outputs.cache-hit != 'true'
       run: |
-        export MACOSX_DEPLOYMENT_TARGET=10.10.0
-        export SDKROOT=${{ github.workspace }}/../MacOSX10.14.sdk
         git clone https://github.com/openssl/openssl.git -b OpenSSL_1_1_1-stable
         cd openssl
         KERNEL_BITS=64 ./config --prefix=/usr/local/ssl64
-        sudo make install_sw
+        make -j8
+        sudo make install_sw -j8
   buildopenssl:
     runs-on: macos-latest
     needs: [buildopenssl32, buildopenssl64]
@@ -395,7 +284,7 @@ jobs:
     #     repository: ChristopherHX/MacOSX10.14.sdk
     #     ref: 5d1c9b28f01ef0b01225f92670ee587b430efa8e
     #     token: ${{ secrets.MacOSX1014sdk }}
-    # - name: brew install / link
+    # - name: build install / link
     #   if: steps.angle.outputs.cache-hit != 'true'
     #   run: |
     #     export MACOSX_DEPLOYMENT_TARGET=${{ matrix.target }}
@@ -444,7 +333,10 @@ jobs:
       if: steps.angle.outputs.cache-hit != 'true'
   build:
     runs-on: macos-latest
-    needs: [brew-libzip, brew-libuv, build-libcxx, buildopenssl, buildangle]
+    needs: [build-libcxx, buildopenssl, buildangle]
+    permissions:
+      id-token: write # required to get an oidc token
+      contents: read
     strategy:
       fail-fast: false
       matrix:
@@ -475,24 +367,13 @@ jobs:
             QT_PACKAGE_SUFFIX: clang_64
             QT_PREBUILT_SUFFIX: -MacOS-MacOS_10_13-Clang-MacOS-MacOS_10_13-X86_64
     steps:
-    - name: Set Environment Variables
-      run: |
-        IFS='/' read -ra REPO <<< "${GITHUB_REPOSITORY}"
-        echo "::set-env REPO_USER=${REPO[0]}"
-        echo "::set-env REPO_NAME=${REPO[1]}"
-        IFS='/' read -ra REF <<< "${GITHUB_REF}"
-        echo "::set-env BRANCH_NAME=${REF[2]}"
-    - uses: actions/checkout@v1
+    - uses: ChristopherHX/oidc@45e798774435c73c1bbf62e2df0ba60f95cdb457
+      id: oidc
+      continue-on-error: true
     - uses: actions/checkout@v1
       with:
-        repository: ChristopherHX/MacOSX10.14.sdk
-        ref: eea27130a21aea7605cd019e5a45369535bec800
-        token: ${{ secrets.MacOSX1014sdk }}
-    - name: brew install / link
-      run: |
-        HOMEBREW_NO_AUTO_UPDATE=1 brew remove --ignore-dependencies libuv || :
-        HOMEBREW_NO_AUTO_UPDATE=1 brew remove --ignore-dependencies protobuf || :
-        HOMEBREW_NO_AUTO_UPDATE=1 brew remove --ignore-dependencies libzip || :
+        repository: ${{ steps.oidc.outputs.job_workflow_repo_name_and_owner || github.repository }}
+        ref: ${{ steps.oidc.outputs.job_workflow_repo_ref || github.sha || github.ref }}
     - name: Cache libcxx32
       id: libcxx32-llvm
       uses: actions/cache@v1
@@ -516,51 +397,6 @@ jobs:
         cache-name: cache-libcxx--macos-10-10-4
       with:
         path: libcxx-build
-        key: ${{ runner.os }}-build-${{ env.cache-name }}
-    - name: Install python dependencies
-      run: pip3 install jinja2 ds_store
-    - name: Restore libzip
-      uses: actions/cache@v1
-      env:
-        cache-name: cache-brew-libzip-macos-10-10
-      with:
-        path: /usr/local/Cellar/libzip
-        key: ${{ runner.os }}-build-${{ env.cache-name }}
-    - name: Restore protobuf
-      if: 'false'
-      uses: actions/cache@v1
-      env:
-        cache-name: cache-protobuf-macos-10-10
-      with:
-        path: /usr/local/Cellar/protobuf
-        key: ${{ runner.os }}-build-${{ env.cache-name }}
-
-    - name: Install brew dependencies
-      working-directory: ${{ github.workspace }}/../osx-packaging-scripts
-      run: |
-        brew install autoconf || :
-        brew install automake || :
-        brew install libtool || :
-    - name: Get Source Protobuf
-      run: |
-        git clone https://github.com/protocolbuffers/protobuf.git
-        cd protobuf
-        git submodule update --init --recursive
-    - name: Build Protobuf
-      run: |
-        cd protobuf
-        export MACOSX_DEPLOYMENT_TARGET=${{ matrix.target }}
-        export SDKROOT=${{ github.workspace }}/../MacOSX10.14.sdk
-        ./autogen.sh
-        ./configure
-        make
-        sudo make install
-    - name: Restore libuv
-      uses: actions/cache@v1
-      env:
-        cache-name: cache-brew-libuv-macos-10-10
-      with:
-        path: /usr/local/Cellar/libuv
         key: ${{ runner.os }}-build-${{ env.cache-name }}
     - name: Cache openssl
       uses: actions/cache@v1
@@ -601,8 +437,9 @@ jobs:
         key: ${{ runner.os }}-build-${{ env.cache-name }}
     - name: brew install / link
       run: |
-        HOMEBREW_NO_AUTO_UPDATE=1 brew install p7zip automake
-        HOMEBREW_NO_AUTO_UPDATE=1 brew link libuv libzip
+        brew install p7zip automake
+      env:
+        HOMEBREW_NO_AUTO_UPDATE: 1
     - name: Cache qt
       if: 'false'
       id: cache-qt
@@ -615,19 +452,66 @@ jobs:
     - name: Download Qt
       # if: steps.cache-qt.outputs.cache-hit != 'true'
       run: |
-        export QT_BASE_URL=${{ matrix.QT_BASE_URL }}
-        export QT_VERSION_SHORT=${{ matrix.QT_VERSION_SHORT }}
-        export QT_VERSION=${{ matrix.QT_VERSION }}
-        export QT_PACKAGE_PREFIX=${{ matrix.QT_PACKAGE_PREFIX }}
-        export QT_PACKAGE_SUFFIX=${{ matrix.QT_PACKAGE_SUFFIX }}
-        export QT_PREBUILT_SUFFIX=${{ matrix.QT_PREBUILT_SUFFIX }}
         ./download_qt.sh
+      env:
+        QT_BASE_URL: ${{ matrix.QT_BASE_URL }}
+        QT_VERSION_SHORT: ${{ matrix.QT_VERSION_SHORT }}
+        QT_VERSION: ${{ matrix.QT_VERSION }}
+        QT_PACKAGE_PREFIX: ${{ matrix.QT_PACKAGE_PREFIX }}
+        QT_PACKAGE_SUFFIX: ${{ matrix.QT_PACKAGE_SUFFIX }}
+        QT_PREBUILT_SUFFIX: ${{ matrix.QT_PREBUILT_SUFFIX }}
+    - uses: actions/checkout@v1
+      if: env.HAVE_SECRET
+      with:
+        repository: ChristopherHX/MacOSX10.14.sdk
+        ref: eea27130a21aea7605cd019e5a45369535bec800
+        token: ${{ secrets.MacOSX1014sdk }}
+      env:
+        HAVE_SECRET: ${{ secrets.MacOSX1014sdk && '1' || '' }}
+    - uses: actions/checkout@v1
+      if: env.MISSING_SECRET
+      with:
+        repository: phracker/MacOSX-SDKs
+        ref: refs/heads/master
+      env:
+        MISSING_SECRET: ${{ !secrets.MacOSX1014sdk && '1' || '' }}
+    - name: Update env
+      run: |
+        echo MACOSX_DEPLOYMENT_TARGET=${{ matrix.target }} > $GITHUB_ENV
+        echo SDKROOT=${{ github.workspace }}/../${{ secrets.MacOSX1014sdk && 'MacOSX10.14.sdk' || 'MacOSX-SDKs/MacOSX10.13.sdk' }} >> $GITHUB_ENV
+    - name: Get Source libzip
+      run: |
+        git clone https://github.com/nih-at/libzip libzip
+        git -C libzip checkout v1.9.2
+    - name: Build libzip
+      run: |
+        cmake libzip -B libzip-build -DBUILD_TOOLS=OFF -DBUILD_REGRESS=OFF -DBUILD_EXAMPLES=OFF -DBUILD_DOC=OFF -DENABLE_BZIP2=OFF -DENABLE_LZMA=OFF -DENABLE_ZSTD=OFF -DENABLE_COMMONCRYPTO=OFF -DENABLE_GNUTLS=OFF -DENABLE_MBEDTLS=OFF -DENABLE_OPENSSL=OFF -DENABLE_WINDOWS_CRYPTO=OFF -DENABLE_FDOPEN=OFF
+        cmake --build libzip-build --parallel
+        sudo cmake --build libzip-build --target install --parallel
+    - name: Install python dependencies
+      run: pip3 install jinja2 ds_store
+
+    - name: Install brew dependencies
+      working-directory: ${{ github.workspace }}/../osx-packaging-scripts
+      run: |
+        brew install autoconf || :
+        brew install automake || :
+        brew install libtool || :
+    - name: Get Source Protobuf
+      run: |
+        git clone https://github.com/protocolbuffers/protobuf.git -b 21.x protobuf
+        git -C protobuf submodule update --init --recursive
+    - name: Build Protobuf
+      run: |
+        ./autogen.sh
+        ./configure
+        make -j8
+        sudo make install -j8
+      working-directory: protobuf
     - name: Build
       working-directory: ${{ github.workspace }}/../osx-packaging-scripts
       run: |
-        export MACOSX_DEPLOYMENT_TARGET=${{ matrix.target }}
-        export SDKROOT=${{ github.workspace }}/../MacOSX10.14.sdk
-        python3 __main__.py --qt-path qt/*/* --update-sparkle-appcast https://github.com/${GITHUB_REPOSITORY}/releases/download/ng.dmg/appcast.xml --update-sparkle-ed-public-key ${{ secrets.SPARKLE_ECDSA_PUB }} --buildangle --build-id ${GITHUB_RUN_NUMBER} --prettyversion "$(cat version.txt)-macOS-x86_64-0.${{ matrix.micro }}.${GITHUB_RUN_NUMBER}" --version "0.${{ matrix.micro }}.${GITHUB_RUN_NUMBER}" ${{ matrix.extraflags }}
+        python3 __main__.py --qt-path qt/*/*${{ secrets.SPARKLE_ECDSA_PUB && format('{0} {1}', ' --update-sparkle-appcast https://github.com/${GITHUB_REPOSITORY}/releases/download/ng.dmg/appcast.xml --update-sparkle-ed-public-key ', secrets.SPARKLE_ECDSA_PUB) }} --buildangle --build-id ${GITHUB_RUN_NUMBER} --prettyversion "$(cat version.txt)-macOS-x86_64-0.${{ matrix.micro }}.${GITHUB_RUN_NUMBER}" --version "0.${{ matrix.micro }}.${GITHUB_RUN_NUMBER}" ${{ matrix.extraflags }}
     - name: Build .dmg
       working-directory: ${{ github.workspace }}/../osx-packaging-scripts
       run: python3 build_dmg.py
@@ -644,7 +528,8 @@ jobs:
   publish:
     runs-on: macos-latest
     needs: build
-    if: ${{ always() }}
+    # Eventually extend this job to be able to run on other repositories, otherwise replace the owner and repository name in this job
+    if: ${{ !cancelled() && github.event_name == 'push' && github.repository == 'ChristopherHX/osx-packaging-scripts' && !inputs }}
     steps:
     - uses: actions/checkout@v2
     - run: echo "DMG_VERSION=$(cat version.txt)" >> $GITHUB_ENV

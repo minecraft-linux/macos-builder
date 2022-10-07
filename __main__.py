@@ -58,7 +58,7 @@ if not path.isdir(SOURCE_DIR):
 ICON_FILE = path.join(SOURCE_DIR, 'minecraft.icns')
 if not path.exists(ICON_FILE):
     display_stage("Downloading icons file")
-    call(['curl', '-sL', '-o', ICON_FILE, 'https://github.com/minecraft-linux/mcpelauncher-proprietary/raw/master/minecraft.icns'])
+    call(['curl', '-sL', '-o', ICON_FILE, 'https://github.com/minecraft-linux/mcpelauncher-ui-qt/raw/0b956a0fc816d900d5b3f2883c6a401330c50fab/Resources/mcpelauncher-icon.icns'])
 copyfile(ICON_FILE, path.join(APP_OUTPUT_DIR, 'Contents', 'Resources', 'minecraft.icns'))
 
 # Download the sources
