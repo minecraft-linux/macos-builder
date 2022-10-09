@@ -640,8 +640,6 @@ jobs:
         ./ghr*/ghr -t ${{ secrets.GITHUB_TOKEN }} -u ChristopherHX -r osx-packaging-scripts -replace ng.dmg dist/
       env:
         LAUNCHER_RELEASE_DESCRIPTION: |
-          # This Project has been suspended by me since 2021/11/1, further changes or bug fixes are requiring Pull Requests to github repositories of minecraft-linux See https://github.com/ChristopherHX/mcpelauncher-manifest/issues/48#issuecomment-962518143
-
           **You need to own Minecraft on the google play store and login with your google account to use this launcher**
           Links for linux flatpak or AppImage can be found on our wiki https://mcpelauncher.readthedocs.io.
 
