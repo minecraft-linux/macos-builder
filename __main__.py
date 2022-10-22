@@ -36,6 +36,7 @@ parser.add_argument('--prettyversion', help='App pretty version in settings')
 parser.add_argument('--force', help='Always remove the output directory', action='store_true')
 parser.add_argument('--buildangle', help='build the angle graphics lib', action='store_true')
 parser.add_argument('--qtworkaround', help='apply a qt workaround', action='store_true')
+parser.add_argument('--skip-sync-sources', help='skip sync-sources', action='store_true')
 args = parser.parse_args()
 
 if(args.version):
@@ -76,16 +77,17 @@ def clone_repo(name, url, branch):
         call(['git', 'pull'], cwd=directory)
         call(['git', 'submodule', 'update', '--init', '--recursive'], cwd=directory)
 
-display_stage("Downloading sources")
+if not args.skip_sync_sources:
+    display_stage("Downloading sources")
 
-with open('msa.commit', 'r') as file:
-    clone_repo('msa', 'https://github.com/minecraft-linux/msa-manifest.git', file.read().replace('\n', ''))
-with open('mcpelauncher.commit', 'r') as file:
-    clone_repo('mcpelauncher', 'https://github.com/minecraft-linux/mcpelauncher-manifest.git', file.read().replace('\n', ''))
-with open('mcpelauncher-ui.commit', 'r') as file:
-    clone_repo('mcpelauncher-ui', 'https://github.com/minecraft-linux/mcpelauncher-ui-manifest.git', file.read().replace('\n', ''))
-#if args.buildangle:
-#    clone_repo('osx-angle-ci', 'https://github.com/christopherhx/osx-angle-ci.git', 'master')
+    with open('msa.commit', 'r') as file:
+        clone_repo('msa', 'https://github.com/minecraft-linux/msa-manifest.git', file.read().replace('\n', ''))
+    with open('mcpelauncher.commit', 'r') as file:
+        clone_repo('mcpelauncher', 'https://github.com/minecraft-linux/mcpelauncher-manifest.git', file.read().replace('\n', ''))
+    with open('mcpelauncher-ui.commit', 'r') as file:
+        clone_repo('mcpelauncher-ui', 'https://github.com/minecraft-linux/mcpelauncher-ui-manifest.git', file.read().replace('\n', ''))
+    #if args.buildangle:
+    #    clone_repo('osx-angle-ci', 'https://github.com/christopherhx/osx-angle-ci.git', 'master')
 
 # Build
 # QT_INSTALL_PATH = subprocess.check_output(['brew', '--prefix', 'qt']).decode('utf-8').strip()
