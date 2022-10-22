@@ -417,8 +417,8 @@ jobs:
           await downloadRepo("msa", process.env.MSA_REPO, process.env.MSA_REF);
           var submoduleRefs = JSON.parse(process.env.SUBMODULEREFS);
           for(var submoduleRef of submoduleRefs) {
-            await exec.exec("git", ["fetch", submoduleRef.origin || "origin"], { cwd: `${submoduleRef.project}/${submoduleRef.submodulePath}` });
-            await exec.exec("git", ["checkout", "FETCH_HEAD"], { cwd: `${submoduleRef.project}/${submoduleRef.submodulePath}` });
+            await exec.exec("git", ["fetch", submoduleRef.origin || "origin", submoduleRef.ref], { cwd: `${submoduleRef.project}/${submoduleRef.path}` });
+            await exec.exec("git", ["checkout", "FETCH_HEAD"], { cwd: `${submoduleRef.project}/${submoduleRef.path}` });
           }
       env:
         SUBMODULEREFS: ${{ inputs.submodule-refs }}
