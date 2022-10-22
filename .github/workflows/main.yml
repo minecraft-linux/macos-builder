@@ -412,13 +412,13 @@ jobs:
             await exec.exec("git", ["reset", "--hard", "FETCH_HEAD"], { cwd: path });
             await exec.exec("git", ["submodule", "update", "--init", "--recursive"], { cwd: path });
           };
-          await downloadRepo("mcpelauncher", process.env.MCPELAUNCHER_REPO, process.env.MCPELAUNCHER_REF);
-          await downloadRepo("mcpelauncher-ui", process.env.MCPELAUNCHER_UI_REPO, process.env.MCPELAUNCHER_UI_REF);
-          await downloadRepo("msa", process.env.MSA_REPO, process.env.MSA_REF);
+          await downloadRepo("source/mcpelauncher", process.env.MCPELAUNCHER_REPO, process.env.MCPELAUNCHER_REF);
+          await downloadRepo("source/mcpelauncher-ui", process.env.MCPELAUNCHER_UI_REPO, process.env.MCPELAUNCHER_UI_REF);
+          await downloadRepo("source/msa", process.env.MSA_REPO, process.env.MSA_REF);
           var submoduleRefs = JSON.parse(process.env.SUBMODULEREFS);
           for(var submoduleRef of submoduleRefs) {
-            await exec.exec("git", ["fetch", submoduleRef.origin || "origin", submoduleRef.ref], { cwd: `${submoduleRef.project}/${submoduleRef.path}` });
-            await exec.exec("git", ["checkout", "FETCH_HEAD"], { cwd: `${submoduleRef.project}/${submoduleRef.path}` });
+            await exec.exec("git", ["fetch", submoduleRef.origin || "origin", submoduleRef.ref], { cwd: `source/${submoduleRef.project}/${submoduleRef.path}` });
+            await exec.exec("git", ["checkout", "FETCH_HEAD"], { cwd: `source/${submoduleRef.project}/${submoduleRef.path}` });
           }
       env:
         SUBMODULEREFS: ${{ inputs.submodule-refs }}
