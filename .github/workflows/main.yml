@@ -1,5 +1,29 @@
 name: CI
-on: [push, pull_request, workflow_call, workflow_dispatch]
+on:
+  push:
+  pull_request:
+  workflow_call:
+    inputs:
+      submodule-refs:
+        type: string
+      mcpelauncher-repo:
+        type: string
+        default: https://github.com/minecraft-linux/mcpelauncher-manifest
+      mcpelauncher-ref:
+        type: string
+        default: ng
+      mcpelauncher-ui-repo:
+        type: string
+        default: https://github.com/minecraft-linux/mcpelauncher-ui-manifest
+      mcpelauncher-ui-ref:
+        type: string
+        default: ng
+      msa-repo:
+        type: string
+        default: https://github.com/minecraft-linux/msa-manifest
+      msa-ref:
+        type: string
+        default: master
 jobs:
   build-libcxx32:
     runs-on: macos-latest
@@ -370,10 +394,41 @@ jobs:
     - uses: ChristopherHX/oidc@45e798774435c73c1bbf62e2df0ba60f95cdb457
       id: oidc
       continue-on-error: true
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v3
       with:
         repository: ${{ steps.oidc.outputs.job_workflow_repo_name_and_owner || github.repository }}
         ref: ${{ steps.oidc.outputs.job_workflow_repo_ref || github.sha || github.ref }}
+    - name: Sync Submodule Sources
+      if: ${{ inputs.submodule-refs }}
+      uses: actions/github-script@v6
+      with:
+        github-token: none
+        script: |
+          var downloadRepo = async function(path, repo, ref) {
+            await io.mkdirP(path);
+            await exec.exec("git", ["init"], { cwd: path });
+            await exec.exec("git", ["remote", "add", "origin", repo], { cwd: path });
+            await exec.exec("git", ["fetch", "origin", ref], { cwd: path });
+            await exec.exec("git", ["reset", "--hard", "FETCH_HEAD"], { cwd: path });
+            await exec.exec("git", ["submodule", "update", "--init", "--recursive"], { cwd: path });
+          };
+          await downloadRepo("mcpelauncher", process.env.MCPELAUNCHER_REPO, process.env.MCPELAUNCHER_REF);
+          await downloadRepo("mcpelauncher-ui", process.env.MCPELAUNCHER_UI_REPO, process.env.MCPELAUNCHER_UI_REF);
+          await downloadRepo("msa", process.env.MSA_REPO, process.env.MSA_REF);
+          var submoduleRefs = JSON.parse(process.env.SUBMODULEREFS);
+          for(var submoduleRef of submoduleRefs) {
+            await exec.exec("git", ["fetch", submoduleRef.origin || "origin"], { cwd: `${submoduleRef.project}/${submoduleRef.submodulePath}` });
+            await exec.exec("git", ["checkout", "FETCH_HEAD"], { cwd: `${submoduleRef.project}/${submoduleRef.submodulePath}` });
+          }
+      env:
+        SUBMODULEREFS: ${{ inputs.submodule-refs }}
+        MCPELAUNCHER_REPO: ${{ inputs.mcpelauncher-repo }}
+        MCPELAUNCHER_REF: ${{ inputs.mcpelauncher-ref }}
+        MCPELAUNCHER_UI_REPO: ${{ inputs.mcpelauncher-ui-repo }}
+        MCPELAUNCHER_UI_REF: ${{ inputs.mcpelauncher-ui-ref }}
+        MSA_REPO: ${{ inputs.msa-repo }}
+        MSA_REF: ${{ inputs.msa-ref }}
+        
     - name: Cache libcxx32
       id: libcxx32-llvm
       uses: actions/cache@v1
@@ -511,7 +566,7 @@ jobs:
     - name: Build
       working-directory: ${{ github.workspace }}/../osx-packaging-scripts
       run: |
-        python3 __main__.py --qt-path qt/*/*${{ secrets.SPARKLE_ECDSA_PUB && format('{0} {1}', ' --update-sparkle-appcast https://github.com/${GITHUB_REPOSITORY}/releases/download/ng.dmg/appcast.xml --update-sparkle-ed-public-key ', secrets.SPARKLE_ECDSA_PUB) }} --buildangle --build-id ${GITHUB_RUN_NUMBER} --prettyversion "$(cat version.txt)-macOS-x86_64-0.${{ matrix.micro }}.${GITHUB_RUN_NUMBER}" --version "0.${{ matrix.micro }}.${GITHUB_RUN_NUMBER}" ${{ matrix.extraflags }}
+        python3 __main__.py --qt-path qt/*/*${{ secrets.SPARKLE_ECDSA_PUB && format('{0} {1}', ' --update-sparkle-appcast https://github.com/${GITHUB_REPOSITORY}/releases/download/ng.dmg/appcast.xml --update-sparkle-ed-public-key ', secrets.SPARKLE_ECDSA_PUB) }} --buildangle --build-id ${GITHUB_RUN_NUMBER} --prettyversion "$(cat version.txt)-macOS-x86_64-0.${{ matrix.micro }}.${GITHUB_RUN_NUMBER}" --version "0.${{ matrix.micro }}.${GITHUB_RUN_NUMBER}" ${{ matrix.extraflags }}${{ inputs.submodule-refs && ' --skip-sync-sources' || '' }}
     - name: Build .dmg
       working-directory: ${{ github.workspace }}/../osx-packaging-scripts
       run: python3 build_dmg.py
@@ -529,7 +584,7 @@ jobs:
     runs-on: macos-latest
     needs: build
     # Eventually extend this job to be able to run on other repositories, otherwise replace the owner and repository name in this job
-    if: ${{ !cancelled() }}
+    if: ${{ !cancelled() && github.server_url == 'https://github.com' && github.repository == 'ChristopherHX/osx-packaging-scripts' }}
     steps:
     - uses: actions/checkout@v2
     - run: echo "DMG_VERSION=$(cat version.txt)" >> $GITHUB_ENV
