@@ -12,19 +12,19 @@ on:
         default: https://github.com/minecraft-linux/mcpelauncher-manifest
       mcpelauncher-ref:
         type: string
-        default: ${{ github.repository == 'minecraft-linux/mcpelauncher-manifest' && (github.sha || github.ref) || 'ng' }
+        default: ${{ github.repository == 'minecraft-linux/mcpelauncher-manifest' && (github.sha || github.ref) || 'ng' }}
       mcpelauncher-ui-repo:
         type: string
         default: https://github.com/minecraft-linux/mcpelauncher-ui-manifest
       mcpelauncher-ui-ref:
         type: string
-        default: ${{ github.repository == 'minecraft-linux/mcpelauncher-ui-manifest' && (github.sha || github.ref) || 'ng' }
+        default: ${{ github.repository == 'minecraft-linux/mcpelauncher-ui-manifest' && (github.sha || github.ref) || 'ng' }}
       msa-repo:
         type: string
         default: https://github.com/minecraft-linux/msa-manifest
       msa-ref:
         type: string
-        default: ${{ github.repository == 'minecraft-linux/msa-manifest' && (github.sha || github.ref) || 'ng' }
+        default: ${{ github.repository == 'minecraft-linux/msa-manifest' && (github.sha || github.ref) || 'ng' }}
 jobs:
   build-libcxx32:
     runs-on: macos-latest
