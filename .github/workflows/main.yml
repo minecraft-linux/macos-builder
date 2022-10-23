@@ -6,31 +6,32 @@ on:
     inputs:
       submodule-refs:
         type: string
+        default: "[]"
       mcpelauncher-repo:
         type: string
         default: https://github.com/minecraft-linux/mcpelauncher-manifest
       mcpelauncher-ref:
         type: string
-        default: ng
+        default: ${{ github.repository == 'minecraft-linux/mcpelauncher-manifest' && (github.sha || github.ref) || 'ng' }
       mcpelauncher-ui-repo:
         type: string
         default: https://github.com/minecraft-linux/mcpelauncher-ui-manifest
       mcpelauncher-ui-ref:
         type: string
-        default: ng
+        default: ${{ github.repository == 'minecraft-linux/mcpelauncher-ui-manifest' && (github.sha || github.ref) || 'ng' }
       msa-repo:
         type: string
         default: https://github.com/minecraft-linux/msa-manifest
       msa-ref:
         type: string
-        default: master
+        default: ${{ github.repository == 'minecraft-linux/msa-manifest' && (github.sha || github.ref) || 'ng' }
 jobs:
   build-libcxx32:
     runs-on: macos-latest
     steps:
     - name: Check Cache libcxx32
       id: libcxx32-llvm
-      uses: Mystraht/cache@master
+      uses: ChristopherHX/check-cache@main
       env:
         cache-name: cache-libcxx32--macos-10-10-4
       with:
@@ -38,7 +39,7 @@ jobs:
         key: ${{ runner.os }}-build-${{ env.cache-name }}
     - name: Cache libcxx32
       if: steps.libcxx32-llvm.outputs.cache-hit != 'true'
-      uses: actions/cache@v1
+      uses: actions/cache@v3
       env:
         cache-name: cache-libcxx32--macos-10-10-4
       with:
@@ -64,7 +65,7 @@ jobs:
     steps:
     - name: Check Cache libcxx64
       id: libcxx64-llvm
-      uses: Mystraht/cache@master
+      uses: ChristopherHX/check-cache@main
       env:
         cache-name: cache-libcxx64--macos-10-10-4
       with:
@@ -72,7 +73,7 @@ jobs:
         key: ${{ runner.os }}-build-${{ env.cache-name }}
     - name: Cache libcxx64
       if: steps.libcxx64-llvm.outputs.cache-hit != 'true'
-      uses: actions/cache@v1
+      uses: actions/cache@v3
       env:
         cache-name: cache-libcxx64--macos-10-10-4
       with:
@@ -99,7 +100,7 @@ jobs:
     steps:
     - name: Check libcxx
       id: libcxx-llvm
-      uses: Mystraht/cache@master
+      uses: ChristopherHX/check-cache@main
       env:
         cache-name: cache-libcxx--macos-10-10-4
       with:
@@ -108,7 +109,7 @@ jobs:
     - name: Cache libcxx32
       if: steps.libcxx-llvm.outputs.cache-hit != 'true'
       id: libcxx32-llvm
-      uses: actions/cache@v1
+      uses: actions/cache@v3
       env:
         cache-name: cache-libcxx32--macos-10-10-4
       with:
@@ -117,7 +118,7 @@ jobs:
     - name: Cache libcxx64
       if: steps.libcxx-llvm.outputs.cache-hit != 'true'
       id: libcxx64-llvm
-      uses: actions/cache@v1
+      uses: actions/cache@v3
       env:
         cache-name: cache-libcxx64--macos-10-10-4
       with:
@@ -125,7 +126,7 @@ jobs:
         key: ${{ runner.os }}-build-${{ env.cache-name }}
     - name: Cache libcxx
       if: steps.libcxx-llvm.outputs.cache-hit != 'true'
-      uses: actions/cache@v1
+      uses: actions/cache@v3
       env:
         cache-name: cache-libcxx--macos-10-10-4
       with:
@@ -147,7 +148,7 @@ jobs:
     steps:
     - name: Check for openssl
       id: cache-openssl32
-      uses: Mystraht/cache@master
+      uses: ChristopherHX/check-cache@main
       env:
         cache-name: cache-openssl32-macos-10-10
       with:
@@ -155,7 +156,7 @@ jobs:
         key: ${{ runner.os }}-build-${{ env.cache-name }}
     - name: Cache openssl
       if: steps.cache-openssl32.outputs.cache-hit != 'true'
-      uses: actions/cache@v1
+      uses: actions/cache@v3
       env:
         cache-name: cache-openssl32-macos-10-10
       with:
@@ -194,7 +195,7 @@ jobs:
     steps:
     - name: Check for openssl
       id: cache-openssl64
-      uses: Mystraht/cache@master
+      uses: ChristopherHX/check-cache@main
       env:
         cache-name: cache-openssl64-macos-10-10
       with:
@@ -202,7 +203,7 @@ jobs:
         key: ${{ runner.os }}-build-${{ env.cache-name }}
     - name: Cache openssl
       if: steps.cache-openssl64.outputs.cache-hit != 'true'
-      uses: actions/cache@v1
+      uses: actions/cache@v3
       env:
         cache-name: cache-openssl64-macos-10-10
       with:
@@ -243,7 +244,7 @@ jobs:
     steps:
     - name: Check openssl
       id: openssl
-      uses: Mystraht/cache@master
+      uses: ChristopherHX/check-cache@main
       env:
         cache-name: cache-openssl-2
       with:
@@ -251,7 +252,7 @@ jobs:
         key: ${{ runner.os }}-build-${{ env.cache-name }}
     - name: Cache openssl
       if: steps.openssl.outputs.cache-hit != 'true'
-      uses: actions/cache@v1
+      uses: actions/cache@v3
       env:
         cache-name: cache-openssl-2
       with:
@@ -259,7 +260,7 @@ jobs:
         key: ${{ runner.os }}-build-${{ env.cache-name }}
     - name: Cache openssl32
       if: steps.openssl.outputs.cache-hit != 'true'
-      uses: actions/cache@v1
+      uses: actions/cache@v3
       env:
         cache-name: cache-openssl32-macos-10-10
       with:
@@ -267,7 +268,7 @@ jobs:
         key: ${{ runner.os }}-build-${{ env.cache-name }}
     - name: Cache openssl64
       if: steps.openssl.outputs.cache-hit != 'true'
-      uses: actions/cache@v1
+      uses: actions/cache@v3
       env:
         cache-name: cache-openssl64-macos-10-10
       with:
@@ -288,7 +289,7 @@ jobs:
     steps:
     - name: Check angle
       id: angle
-      uses: Mystraht/cache@master
+      uses: ChristopherHX/check-cache@main
       env:
         cache-name: cache-angle-3
       with:
@@ -296,7 +297,7 @@ jobs:
         key: ${{ runner.os }}-build-${{ env.cache-name }}
     - name: Cache angle
       if: steps.angle.outputs.cache-hit != 'true'
-      uses: actions/cache@v1
+      uses: actions/cache@v3
       env:
         cache-name: cache-angle-3
       with:
@@ -391,13 +392,13 @@ jobs:
             QT_PACKAGE_SUFFIX: clang_64
             QT_PREBUILT_SUFFIX: -MacOS-MacOS_10_13-Clang-MacOS-MacOS_10_13-X86_64
     steps:
-    - uses: ChristopherHX/oidc@45e798774435c73c1bbf62e2df0ba60f95cdb457
+    - uses: ChristopherHX/oidc@f8f35d97bc37ffbe779bb3ab8453920fedf6fb37
       id: oidc
       continue-on-error: true
     - uses: actions/checkout@v3
       with:
-        repository: ${{ steps.oidc.outputs.job_workflow_repo_name_and_owner || 'ChristopherHX/osx-packaging-scripts' }}
-        ref: ${{ steps.oidc.outputs.job_workflow_repo_ref || 'main' }}
+        repository: ${{ steps.oidc.outputs.job_workflow_repo_name_and_owner || inputs.submodule-refs && 'ChristopherHX/osx-packaging-scripts' || github.repository }}
+        ref: ${{ steps.oidc.outputs.job_workflow_repo_ref || inputs.submodule-refs && 'main' || github.sha || github.ref }}
     - name: Sync Submodule Sources
       if: ${{ inputs.submodule-refs }}
       uses: actions/github-script@v6
@@ -431,7 +432,7 @@ jobs:
         
     - name: Cache libcxx32
       id: libcxx32-llvm
-      uses: actions/cache@v1
+      uses: actions/cache@v3
       env:
         cache-name: cache-libcxx32--macos-10-10-4
       with:
@@ -439,7 +440,7 @@ jobs:
         key: ${{ runner.os }}-build-${{ env.cache-name }}
     - name: Cache libcxx64
       id: libcxx64-llvm
-      uses: actions/cache@v1
+      uses: actions/cache@v3
       env:
         cache-name: cache-libcxx64--macos-10-10-4
       with:
@@ -447,28 +448,28 @@ jobs:
         key: ${{ runner.os }}-build-${{ env.cache-name }}
     - name: Cache libcxx
       id: libcxx-llvm
-      uses: actions/cache@v1
+      uses: actions/cache@v3
       env:
         cache-name: cache-libcxx--macos-10-10-4
       with:
         path: libcxx-build
         key: ${{ runner.os }}-build-${{ env.cache-name }}
     - name: Cache openssl
-      uses: actions/cache@v1
+      uses: actions/cache@v3
       env:
         cache-name: cache-openssl-2
       with:
         path: ssl
         key: ${{ runner.os }}-build-${{ env.cache-name }}
     - name: Cache openssl32
-      uses: actions/cache@v1
+      uses: actions/cache@v3
       env:
         cache-name: cache-openssl32-macos-10-10
       with:
         path: ssl32
         key: ${{ runner.os }}-build-${{ env.cache-name }}
     - name: Cache openssl64
-      uses: actions/cache@v1
+      uses: actions/cache@v3
       env:
         cache-name: cache-openssl64-macos-10-10
       with:
@@ -484,7 +485,7 @@ jobs:
         ln -s ../ssl/lib
     - name: Cache angle
       if: steps.angle.outputs.cache-hit != 'true'
-      uses: actions/cache@v1
+      uses: actions/cache@v3
       env:
         cache-name: cache-angle-3
       with:
@@ -498,7 +499,7 @@ jobs:
     - name: Cache qt
       if: 'false'
       id: cache-qt
-      uses: actions/cache@v1
+      uses: actions/cache@v3
       env:
         cache-name: cache-qt-macos-${{ matrix.target }}
       with:
