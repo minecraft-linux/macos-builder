@@ -152,7 +152,7 @@ jobs:
       env:
         cache-name: cache-openssl32-macos-10-10
       with:
-        path: /usr/local/ssl32
+        path: ssl32
         key: ${{ runner.os }}-build-${{ env.cache-name }}
     - name: Cache openssl
       if: steps.cache-openssl32.outputs.cache-hit != 'true'
@@ -160,7 +160,7 @@ jobs:
       env:
         cache-name: cache-openssl32-macos-10-10
       with:
-        path: /usr/local/ssl32
+        path: ssl32
         key: ${{ runner.os }}-build-${{ env.cache-name }}
     - uses: actions/checkout@v1
       if: env.HAVE_SECRET && steps.cache-openssl32.outputs.cache-hit != 'true'
@@ -187,7 +187,7 @@ jobs:
       run: |
         git clone https://github.com/openssl/openssl.git -b OpenSSL_1_1_1-stable
         cd openssl
-        KERNEL_BITS=32 ./config --prefix=/usr/local/ssl32
+        KERNEL_BITS=32 ./config --prefix="$PWD/../ssl32"
         make -j8
         sudo make install_sw -j8
   buildopenssl64:
@@ -199,7 +199,7 @@ jobs:
       env:
         cache-name: cache-openssl64-macos-10-10
       with:
-        path: /usr/local/ssl64
+        path: ssl64
         key: ${{ runner.os }}-build-${{ env.cache-name }}
     - name: Cache openssl
       if: steps.cache-openssl64.outputs.cache-hit != 'true'
@@ -207,7 +207,7 @@ jobs:
       env:
         cache-name: cache-openssl64-macos-10-10
       with:
-        path: /usr/local/ssl64
+        path: ssl64
         key: ${{ runner.os }}-build-${{ env.cache-name }}
     - uses: actions/checkout@v1
       if: env.HAVE_SECRET && steps.cache-openssl64.outputs.cache-hit != 'true'
@@ -235,7 +235,7 @@ jobs:
       run: |
         git clone https://github.com/openssl/openssl.git -b OpenSSL_1_1_1-stable
         cd openssl
-        KERNEL_BITS=64 ./config --prefix=/usr/local/ssl64
+        KERNEL_BITS=64 ./config --prefix="$PWD/../ssl64"
         make -j8
         sudo make install_sw -j8
   buildopenssl:
