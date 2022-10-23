@@ -293,7 +293,7 @@ jobs:
       env:
         cache-name: cache-angle-3
       with:
-        path: osx-angle-ci/artifacts
+        path: source/osx-angle-ci/artifacts
         key: ${{ runner.os }}-build-${{ env.cache-name }}
     - name: Cache angle
       if: steps.angle.outputs.cache-hit != 'true'
@@ -301,7 +301,7 @@ jobs:
       env:
         cache-name: cache-angle-3
       with:
-        path: osx-angle-ci/artifacts
+        path: source/osx-angle-ci/artifacts
         key: ${{ runner.os }}-build-${{ env.cache-name }}
     # - uses: actions/checkout@v1
     #   if: steps.angle.outputs.cache-hit != 'true'
@@ -333,16 +333,16 @@ jobs:
     # - name: upload
     #   if: steps.angle.outputs.cache-hit != 'true'
     #   run: |
-    #     mkdir -p osx-angle-ci/artifacts
-    #     lipo -create angle/out/Release/libEGL.dylib angle/out/Release64/libEGL.dylib -output ./osx-angle-ci/artifacts/libEGL.dylib
-    #     lipo -create angle/out/Release/libGLESv2.dylib angle/out/Release64/libGLESv2.dylib -output ./osx-angle-ci/artifacts/libGLESv2.dylib
+    #     mkdir -p source/osx-angle-ci/artifacts
+    #     lipo -create angle/out/Release/libEGL.dylib angle/out/Release64/libEGL.dylib -output ./source/osx-angle-ci/artifacts/libEGL.dylib
+    #     lipo -create angle/out/Release/libGLESv2.dylib angle/out/Release64/libGLESv2.dylib -output ./source/osx-angle-ci/artifacts/libGLESv2.dylib
     - uses: actions/setup-python@v2
       with:
         python-version: '3.x'
         architecture: 'x64'
       if: steps.angle.outputs.cache-hit != 'true'
     - run: |
-        mkdir -p osx-angle-ci/artifacts
+        mkdir -p source/osx-angle-ci/artifacts
       if: steps.angle.outputs.cache-hit != 'true'
     - run: |
         from subprocess import check_call as call
@@ -352,8 +352,8 @@ jobs:
         DMG_FILE = 'Minecraft Bedrock Launcher.dmg'
         call(['curl', '-sL', '-o', DMG_FILE, 'https://github.com/ChristopherHX/osx-packaging-scripts/releases/download/v0.3.0.1-352/Minecraft_Bedrock_Launcher_v0.3.0.1-macOS-x86_64-0.0.352_macOS_10.10.0.dmg'])
         call(['hdiutil', 'attach', '-noautoopen', '-mountpoint', DMG_MOUNT_PATH, '-quiet', DMG_FILE])
-        shutil.copy2(path.join(DMG_MOUNT_PATH, 'Minecraft Bedrock Launcher.app', 'Contents', 'Frameworks', 'libEGL.dylib'), './osx-angle-ci/artifacts/libEGL.dylib', follow_symlinks = True)
-        shutil.copy2(path.join(DMG_MOUNT_PATH, 'Minecraft Bedrock Launcher.app', 'Contents', 'Frameworks', 'libGLESv2.dylib'), './osx-angle-ci/artifacts/libGLESv2.dylib', follow_symlinks = True)
+        shutil.copy2(path.join(DMG_MOUNT_PATH, 'Minecraft Bedrock Launcher.app', 'Contents', 'Frameworks', 'libEGL.dylib'), './source/osx-angle-ci/artifacts/libEGL.dylib', follow_symlinks = True)
+        shutil.copy2(path.join(DMG_MOUNT_PATH, 'Minecraft Bedrock Launcher.app', 'Contents', 'Frameworks', 'libGLESv2.dylib'), './source/osx-angle-ci/artifacts/libGLESv2.dylib', follow_symlinks = True)
       shell: python
       if: steps.angle.outputs.cache-hit != 'true'
   build:
@@ -489,7 +489,7 @@ jobs:
       env:
         cache-name: cache-angle-3
       with:
-        path: source/osx-angle-ci/artifacts
+        path: source/source/osx-angle-ci/artifacts
         key: ${{ runner.os }}-build-${{ env.cache-name }}
     - name: brew install / link
       run: |
