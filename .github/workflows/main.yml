@@ -489,7 +489,7 @@ jobs:
       env:
         cache-name: cache-angle-3
       with:
-        path: source/source/osx-angle-ci/artifacts
+        path: source/osx-angle-ci/artifacts
         key: ${{ runner.os }}-build-${{ env.cache-name }}
     - name: brew install / link
       run: |
