@@ -574,7 +574,7 @@ jobs:
         mkdir -p dist
         mv "${{ github.workspace }}/output/Minecraft Bedrock Launcher.dmg" "dist/${DMG_FILENAME}"
     - name: Upload Build Artifact
-      uses: actions/upload-artifact@v2.2.2
+      uses: actions/upload-artifact@v3
       with:
         name: ${{ matrix.target }}
         path: dist
@@ -587,7 +587,7 @@ jobs:
     - uses: actions/checkout@v2
     - run: echo "DMG_VERSION=$(cat version.txt)" >> $GITHUB_ENV
     - name: Download everything
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
         path: sparkle
     - name: Download sparkle
