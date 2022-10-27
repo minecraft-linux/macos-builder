@@ -336,7 +336,7 @@ jobs:
     #     mkdir -p source/osx-angle-ci/artifacts
     #     lipo -create angle/out/Release/libEGL.dylib angle/out/Release64/libEGL.dylib -output ./source/osx-angle-ci/artifacts/libEGL.dylib
     #     lipo -create angle/out/Release/libGLESv2.dylib angle/out/Release64/libGLESv2.dylib -output ./source/osx-angle-ci/artifacts/libGLESv2.dylib
-    - uses: actions/setup-python@v2
+    - uses: actions/setup-python@v4
       with:
         python-version: '3.x'
         architecture: 'x64'
@@ -595,7 +595,7 @@ jobs:
         curl -L -C - -o sparkle.tar.xz https://github.com/sparkle-project/Sparkle/releases/download/1.26.0/Sparkle-1.26.0.tar.xz
         tar -xf ./sparkle.tar.xz
     - name: Set up Python 3.9
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
         python-version: 3.9
     - name: Download some old dmg's and generate deltas
