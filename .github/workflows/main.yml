@@ -9,21 +9,13 @@ jobs:
         export MACOSX_DEPLOYMENT_TARGET="10.11.0"
         git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
         export PATH=$PATH:$PWD/depot_tools
-        git clone -b angle-vulkan https://github.com/minecraft-linux/angle -b vk
+        git clone https://github.com/minecraft-linux/angle -b angle-renderdragon
         pushd angle
         python scripts/bootstrap.py
         gclient sync
-        gn gen out/Release64 --args='is_debug=false mac_sdk_min="10.11.0" mac_min_system_version="10.11.0" mac_deployment_target="10.11.0" angle_enable_vulkan=true'
+        gn gen out/Release64 --args='is_debug=true mac_sdk_min="10.11.0" mac_min_system_version="10.11.0" mac_deployment_target="10.11.0" angle_enable_vulkan=true'
         autoninja -C out/Release64
         popd
-    - uses: actions/upload-artifact@v3
-      if: always()
-      id: firstupload
-      with:
-        name: angle
-        path: |
-          angle/out/Release64/**/*.dylib
-          angle/out/Release64/**/*.icd
     - uses: actions/upload-artifact@v3
       if: always()
       with:
