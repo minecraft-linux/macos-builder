@@ -6,14 +6,14 @@ jobs:
     steps:
     - name: build
       run: |
-        export MACOSX_DEPLOYMENT_TARGET="10.14.0"
+        export MACOSX_DEPLOYMENT_TARGET="10.10.0"
         git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
         export PATH=$PATH:$PWD/depot_tools
         git clone https://github.com/minecraft-linux/angle -b angle-renderdragon
         pushd angle
         python scripts/bootstrap.py
         gclient sync
-        gn gen out/Release64 --args='is_debug=false mac_sdk_min="10.14.0" mac_min_system_version="10.14.0" mac_deployment_target="10.14.0" angle_enable_vulkan=true'
+        gn gen out/Release64 --args='is_debug=false mac_sdk_min="10.10.0" mac_min_system_version="10.10.0" mac_deployment_target="10.10.0" angle_enable_metal=false angle_enable_vulkan=false angle_enable_glsl=false'
         autoninja -C out/Release64
         popd
     - uses: actions/upload-artifact@v3
@@ -21,5 +21,5 @@ jobs:
       with:
         name: angle-fallback
         path: |
-          angle/out/Release64
+          angle/out
     
