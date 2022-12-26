@@ -1,1 +1,1 @@
-<p>Credits for fixing access to the new world screens go to GitHub user reedacartwright</p><p>Credits for 1.19.40 beta patches go to GitHub user 0xCatPKG</p><p>Cross Play with macOS is current not possible for game version 1.18.30 and newer, choose an older game version on linux to match the macOS Launcher</p>
+<p>It's now possible to run mcpe with renderdragon engine on macOS! You can play up to Minecraft 1.19.40</p>
