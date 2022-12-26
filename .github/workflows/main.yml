@@ -303,59 +303,66 @@ jobs:
       with:
         path: source/osx-angle-ci/artifacts
         key: ${{ runner.os }}-build-${{ env.cache-name }}
-    # - uses: actions/checkout@v1
-    #   if: steps.angle.outputs.cache-hit != 'true'
-    #   with:
-    #     repository: ChristopherHX/MacOSX10.14.sdk
-    #     ref: 5d1c9b28f01ef0b01225f92670ee587b430efa8e
-    #     token: ${{ secrets.MacOSX1014sdk }}
-    # - name: build install / link
-    #   if: steps.angle.outputs.cache-hit != 'true'
-    #   run: |
-    #     export MACOSX_DEPLOYMENT_TARGET=${{ matrix.target }}
-    #     export SDKROOT=${{ github.workspace }}/../MacOSX10.14.sdk
-    #     git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
-    #     export PATH=$PATH:$PWD/depot_tools
-    #     git clone https://github.com/minecraft-linux/angle.git
-    #     pushd angle
-    #     python scripts/bootstrap.py
-    #     gclient sync
-    #     find build -name '*.gn' | xargs -n 1 sed -i '' 's/-fatal_warnings//g'
-    #     find build -name '*.gn' | xargs -n 1 sed -i '' 's/-Werror//g'
-    #     find build -name '*.gn' | xargs -n 1 sed -i '' 's/-ferror//g'
-    #     find build -name '*.gn' | xargs -n 1 sed -i '' 's/-Wundef-prefix/-Wno-undef-prefix/g'
-    #     find build -name '*.gn' | xargs -n 1 sed -i '' 's/-Wshadow-field/-DTARGET_OS_MACCATALYST=0/g'
-    #     gn gen out/Release64 --args='is_debug=false mac_sdk_path="'"${SDKROOT}"'" mac_sdk_min="10.10.0" mac_min_system_version="10.10.0" mac_deployment_target="10.10.0" angle_enable_swiftshader=false angle_enable_vulkan=false'
-    #     autoninja -C out/Release64 libEGL libGLESv2
-    #     gn gen out/Release --args='target_cpu="x86" is_debug=false mac_sdk_path="'"${SDKROOT}"'" mac_sdk_min="10.10.0" mac_min_system_version="10.10.0" mac_deployment_target="10.10.0" angle_enable_metal=false angle_enable_swiftshader=false angle_enable_vulkan=false'
-    #     autoninja -C out/Release libEGL libGLESv2
-    #     popd
-    # - name: upload
-    #   if: steps.angle.outputs.cache-hit != 'true'
-    #   run: |
-    #     mkdir -p source/osx-angle-ci/artifacts
-    #     lipo -create angle/out/Release/libEGL.dylib angle/out/Release64/libEGL.dylib -output ./source/osx-angle-ci/artifacts/libEGL.dylib
-    #     lipo -create angle/out/Release/libGLESv2.dylib angle/out/Release64/libGLESv2.dylib -output ./source/osx-angle-ci/artifacts/libGLESv2.dylib
-    - uses: actions/setup-python@v4
+    - uses: actions/checkout@v1
+      if: env.HAVE_SECRET && steps.angle.outputs.cache-hit != 'true'
       with:
-        python-version: '3.x'
-        architecture: 'x64'
+        repository: ChristopherHX/MacOSX10.14.sdk
+        ref: eea27130a21aea7605cd019e5a45369535bec800
+        token: ${{ secrets.MacOSX1014sdk }}
+      env:
+        HAVE_SECRET: ${{ secrets.MacOSX1014sdk && '1' || '' }}
+    - uses: actions/checkout@v1
+      if: env.MISSING_SECRET && steps.angle.outputs.cache-hit != 'true'
+      with:
+        repository: phracker/MacOSX-SDKs
+        ref: refs/heads/master
+      env:
+        MISSING_SECRET: ${{ !secrets.MacOSX1014sdk && '1' || '' }}
+    - name: Update env
       if: steps.angle.outputs.cache-hit != 'true'
-    - run: |
+      run: |
+        echo MACOSX_DEPLOYMENT_TARGET=10.10.0 > $GITHUB_ENV
+        echo SDKROOT=${{ github.workspace }}/../${{ secrets.MacOSX1014sdk && 'MacOSX10.14.sdk' || 'MacOSX-SDKs/MacOSX10.13.sdk' }} >> $GITHUB_ENV
+    - name: build angle
+      if: steps.angle.outputs.cache-hit != 'true'
+      run: |
+        git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
+        export PATH=$PATH:$PWD/depot_tools
+        git clone https://github.com/minecraft-linux/angle.git
+        pushd angle
+        python scripts/bootstrap.py
+        gclient sync
+        gn gen out/Release --args='target_cpu="x86" is_debug=false mac_sdk_path="'"${SDKROOT}"'" mac_sdk_min="10.10.0" mac_min_system_version="10.10.0" mac_deployment_target="10.10.0" angle_enable_metal=false angle_enable_swiftshader=false angle_enable_vulkan=false treat_warnings_as_errors=false fatal_linker_warnings=false'
+        autoninja -C out/Release libEGL libGLESv2
+        gn gen out/Release64 --args='is_debug=false mac_sdk_path="'"${SDKROOT}"'" mac_sdk_min="10.10.0" mac_min_system_version="10.10.0" mac_deployment_target="10.10.0" angle_enable_swiftshader=false angle_enable_vulkan=false treat_warnings_as_errors=false fatal_linker_warnings=false'
+        autoninja -C out/Release64 libEGL libGLESv2
+        popd
+    - name: upload
+      if: steps.angle.outputs.cache-hit != 'true'
+      run: |
         mkdir -p source/osx-angle-ci/artifacts
-      if: steps.angle.outputs.cache-hit != 'true'
-    - run: |
-        from subprocess import check_call as call
-        import shutil
-        from os import path
-        DMG_MOUNT_PATH = '/Volumes/Minecraft Bedrock Launcher/'
-        DMG_FILE = 'Minecraft Bedrock Launcher.dmg'
-        call(['curl', '-sL', '-o', DMG_FILE, 'https://github.com/ChristopherHX/osx-packaging-scripts/releases/download/v0.3.0.1-352/Minecraft_Bedrock_Launcher_v0.3.0.1-macOS-x86_64-0.0.352_macOS_10.10.0.dmg'])
-        call(['hdiutil', 'attach', '-noautoopen', '-mountpoint', DMG_MOUNT_PATH, '-quiet', DMG_FILE])
-        shutil.copy2(path.join(DMG_MOUNT_PATH, 'Minecraft Bedrock Launcher.app', 'Contents', 'Frameworks', 'libEGL.dylib'), './source/osx-angle-ci/artifacts/libEGL.dylib', follow_symlinks = True)
-        shutil.copy2(path.join(DMG_MOUNT_PATH, 'Minecraft Bedrock Launcher.app', 'Contents', 'Frameworks', 'libGLESv2.dylib'), './source/osx-angle-ci/artifacts/libGLESv2.dylib', follow_symlinks = True)
-      shell: python
-      if: steps.angle.outputs.cache-hit != 'true'
+        lipo -create angle/out/Release/libEGL.dylib angle/out/Release64/libEGL.dylib -output ./source/osx-angle-ci/artifacts/libEGL.dylib
+        lipo -create angle/out/Release/libGLESv2.dylib angle/out/Release64/libGLESv2.dylib -output ./source/osx-angle-ci/artifacts/libGLESv2.dylib
+    # - uses: actions/setup-python@v4
+    #   with:
+    #     python-version: '3.x'
+    #     architecture: 'x64'
+    #   if: steps.angle.outputs.cache-hit != 'true'
+    # - run: |
+    #     mkdir -p source/osx-angle-ci/artifacts
+    #   if: steps.angle.outputs.cache-hit != 'true'
+    # - run: |
+    #     from subprocess import check_call as call
+    #     import shutil
+    #     from os import path
+    #     DMG_MOUNT_PATH = '/Volumes/Minecraft Bedrock Launcher/'
+    #     DMG_FILE = 'Minecraft Bedrock Launcher.dmg'
+    #     call(['curl', '-sL', '-o', DMG_FILE, 'https://github.com/ChristopherHX/osx-packaging-scripts/releases/download/v0.3.0.1-352/Minecraft_Bedrock_Launcher_v0.3.0.1-macOS-x86_64-0.0.352_macOS_10.10.0.dmg'])
+    #     call(['hdiutil', 'attach', '-noautoopen', '-mountpoint', DMG_MOUNT_PATH, '-quiet', DMG_FILE])
+    #     shutil.copy2(path.join(DMG_MOUNT_PATH, 'Minecraft Bedrock Launcher.app', 'Contents', 'Frameworks', 'libEGL.dylib'), './source/osx-angle-ci/artifacts/libEGL.dylib', follow_symlinks = True)
+    #     shutil.copy2(path.join(DMG_MOUNT_PATH, 'Minecraft Bedrock Launcher.app', 'Contents', 'Frameworks', 'libGLESv2.dylib'), './source/osx-angle-ci/artifacts/libGLESv2.dylib', follow_symlinks = True)
+    #   shell: python
+    #   if: steps.angle.outputs.cache-hit != 'true'
   build:
     runs-on: macos-latest
     needs: [build-libcxx, buildopenssl, buildangle]
