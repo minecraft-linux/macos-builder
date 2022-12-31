@@ -693,7 +693,7 @@ jobs:
         unzip ghr.zip
     - name: Upload ${{ github.ref == 'refs/heads/main' && !contains(github.event.head_commit.message, '[DRAFT]') && 'Latest' || 'Draft' }}
       run: |
-        ./ghr*/ghr -t ${{ secrets.GITHUB_TOKEN }} -u ChristopherHX -r osx-packaging-scripts ${{ github.ref == 'refs/heads/main' && '' || '-draft ' }}-b "$LAUNCHER_RELEASE_DESCRIPTION$(cat changelog.txt)" "$(cat version.txt)-${GITHUB_RUN_NUMBER}" dist2/
+        ./ghr*/ghr -t ${{ secrets.GITHUB_TOKEN }} -u ChristopherHX -r osx-packaging-scripts ${{ !(github.ref == 'refs/heads/main' && !contains(github.event.head_commit.message, '[DRAFT]')) && '-draft ' || '' }}-b "$LAUNCHER_RELEASE_DESCRIPTION$(cat changelog.txt)" "$(cat version.txt)-${GITHUB_RUN_NUMBER}" dist2/
       env:
         LAUNCHER_RELEASE_DESCRIPTION: |
           **You need to own Minecraft on the google play store and login with your google account to use this launcher**
