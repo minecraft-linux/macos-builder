@@ -19,9 +19,7 @@ VOL_NAME = 'Minecraft Bedrock Launcher'
 if path.exists(DMG_OUTPUT_PATH):
     remove(DMG_OUTPUT_PATH)
 
-BG_FILE = path.join(SOURCE_DIR, 'dmg-background.tif')
-if not path.exists(BG_FILE):
-    call(['curl', '-sL', '-o', BG_FILE, 'https://mrarm.io/u/dmg-background.tif'])
+BG_FILE = 'dmg-background.tif'
 
 # we assume here that sectors are 512B
 IMAGE_SECTOR_SIZE = 512

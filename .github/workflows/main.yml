@@ -591,7 +591,7 @@ jobs:
     runs-on: macos-latest
     needs: build
     # Eventually extend this job to be able to run on other repositories, otherwise replace the owner and repository name in this job
-    if: ${{ !cancelled() && github.server_url == 'https://github.com' && github.repository == 'ChristopherHX/osx-packaging-scripts' }}
+    if: ${{ !cancelled() && github.event_name == 'push' && github.server_url == 'https://github.com' && github.repository == 'ChristopherHX/osx-packaging-scripts' }}
     steps:
     - uses: actions/checkout@v2
     - run: echo "DMG_VERSION=$(cat version.txt)" >> $GITHUB_ENV
@@ -691,7 +691,7 @@ jobs:
       run: |
         curl -L https://github.com/tcnksm/ghr/releases/download/v0.13.0/ghr_v0.13.0_darwin_amd64.zip --output ghr.zip
         unzip ghr.zip
-    - name: Upload ${{ github.ref == 'refs/heads/main' && 'Latest' || 'Draft' }}
+    - name: Upload ${{ github.ref == 'refs/heads/main' && !contains(github.event.head_commit.message, '[DRAFT]') && 'Latest' || 'Draft' }}
       run: |
         ./ghr*/ghr -t ${{ secrets.GITHUB_TOKEN }} -u ChristopherHX -r osx-packaging-scripts ${{ github.ref == 'refs/heads/main' && '' || '-draft ' }}-b "$LAUNCHER_RELEASE_DESCRIPTION$(cat changelog.txt)" "$(cat version.txt)-${GITHUB_RUN_NUMBER}" dist2/
       env:
@@ -721,6 +721,6 @@ jobs:
 
           ### Changelog
     - name: Publish release
-      if: github.ref == 'refs/heads/main'
+      if: github.ref == 'refs/heads/main' && !contains(github.event.head_commit.message, '[DRAFT]')
       run: |
         ./ghr*/ghr -t ${{ secrets.GITHUB_TOKEN }} -u ChristopherHX -r osx-packaging-scripts -replace ng.dmg dist/

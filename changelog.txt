@@ -1,1 +1,1 @@
-<p>It's now possible to run mcpe with renderdragon engine on macOS! You can play up to Minecraft 1.19.40</p>
+<p>You can play up to Minecraft 1.19.60.23</p><p>New dmg background icon</p>
