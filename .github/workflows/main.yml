@@ -336,7 +336,9 @@ jobs:
         gclient sync
         gn gen out/Release --args='target_cpu="x86" is_debug=false mac_sdk_path="'"${SDKROOT}"'" mac_sdk_min="10.10.0" mac_min_system_version="10.10.0" mac_deployment_target="10.10.0" angle_enable_gl=true angle_enable_metal=false angle_enable_swiftshader=false angle_enable_vulkan=false treat_warnings_as_errors=false fatal_linker_warnings=false'
         autoninja -C out/Release libEGL libGLESv2
-        gn gen out/Release64 --args='is_debug=false mac_sdk_path="'"${SDKROOT}"'" mac_sdk_min="10.10.0" mac_min_system_version="10.10.0" mac_deployment_target="10.10.0" angle_enable_gl=true angle_enable_metal=true angle_enable_swiftshader=false angle_enable_vulkan=false treat_warnings_as_errors=false fatal_linker_warnings=false'
+        # Disabled Metal due to bug reports
+        # Black screen for 10.12 and 10.13 builds via the 10.13sdk, the 10.14sdk make this not happen as often
+        gn gen out/Release64 --args='is_debug=false mac_sdk_path="'"${SDKROOT}"'" mac_sdk_min="10.10.0" mac_min_system_version="10.10.0" mac_deployment_target="10.10.0" angle_enable_gl=true angle_enable_metal=false angle_enable_swiftshader=false angle_enable_vulkan=false treat_warnings_as_errors=false fatal_linker_warnings=false'
         autoninja -C out/Release64 libEGL libGLESv2
         popd
     - name: upload
@@ -593,7 +595,7 @@ jobs:
     # Eventually extend this job to be able to run on other repositories, otherwise replace the owner and repository name in this job
     if: ${{ !cancelled() && github.event_name == 'push' && github.server_url == 'https://github.com' && github.repository == 'ChristopherHX/osx-packaging-scripts' }}
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - run: echo "DMG_VERSION=$(cat version.txt)" >> $GITHUB_ENV
     - name: Download everything
       uses: actions/download-artifact@v3
@@ -711,7 +713,7 @@ jobs:
             - unable to debug mmap failure's without access to m1 hardware
             - No m1 ci on github actions
 
-          No free opengl es 2/3 drivers other than google/angle for macOS, leads to some graphic anomalies
+          macOS x86_64 has no native OpenGL ES 2 or 3 framework, translating the api via google/angle to OpenGL (Metal disabled due to bug reports) leads to some graphic anomalies
           - glowing sheeps, spiders and enchanted stuff
             - the macOS dark mode might help a little bit
             - lower resolutions reduce this glitch
