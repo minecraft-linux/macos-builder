@@ -328,8 +328,10 @@ jobs:
     - name: build angle
       if: steps.angle.outputs.cache-hit != 'true'
       run: |
+        curl -L https://github.com/ninja-build/ninja/releases/download/v1.11.1/ninja-mac.zip --output ninja-mac.zip
+        unzip ninja-mac.zip
         git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
-        export PATH=$PATH:$PWD/depot_tools
+        export PATH=$PATH:$PWD/depot_tools:$PWD
         git clone https://github.com/minecraft-linux/angle.git
         pushd angle
         python scripts/bootstrap.py
