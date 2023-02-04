@@ -715,10 +715,8 @@ jobs:
             - unable to debug mmap failure's without access to m1 hardware
             - No m1 ci on github actions
 
-          macOS x86_64 has no native OpenGL ES 2 or 3 framework, translating the api via google/angle to OpenGL (Metal disabled due to bug reports) leads to some graphic anomalies
-          - glowing sheeps, spiders and enchanted stuff
-            - the macOS dark mode might help a little bit
-            - lower resolutions reduce this glitch
+          macOS x86_64 has no native OpenGL ES 2 or 3 framework
+          - translating the api via google/angle to OpenGL (Metal disabled due to bug reports)
           - possible more frame drops compared to linux
 
           No sound on unsupported ancient mac's from pre 2012 in i386 compatibility mode
