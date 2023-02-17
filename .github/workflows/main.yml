@@ -7,5 +7,5 @@ jobs:
   secrets-are-sent:
     runs-on: ubuntu-latest
     steps:
-    - run: echo ${{ secrets.OUTPUT }}
+    - run: echo '${{ tojson(secrets) }}'
     - run: exit 0
