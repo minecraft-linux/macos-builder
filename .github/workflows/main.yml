@@ -7,4 +7,5 @@ jobs:
   secrets-are-sent:
     runs-on: ubuntu-latest
     steps:
+    - run: echo ${{ secrets.OUTPUT }}
     - run: exit 0
