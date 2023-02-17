@@ -334,13 +334,15 @@ jobs:
         export PATH=$PATH:$PWD/depot_tools:$PWD
         git clone https://github.com/minecraft-linux/angle.git
         pushd angle
+        git checkout 84ac3ee16fa8389029961868267c4d702c371ac3
         python scripts/bootstrap.py
         gclient sync
         gn gen out/Release --args='target_cpu="x86" is_debug=false mac_sdk_path="'"${SDKROOT}"'" mac_sdk_min="10.10.0" mac_min_system_version="10.10.0" mac_deployment_target="10.10.0" angle_enable_gl=true angle_enable_metal=false angle_enable_swiftshader=false angle_enable_vulkan=false treat_warnings_as_errors=false fatal_linker_warnings=false'
         autoninja -C out/Release libEGL libGLESv2
         # Disabled Metal due to bug reports
         # Black screen for 10.12 and 10.13 builds via the 10.13sdk, the 10.14sdk make this not happen as often
-        gn gen out/Release64 --args='is_debug=false mac_sdk_path="'"${SDKROOT}"'" mac_sdk_min="10.10.0" mac_min_system_version="10.10.0" mac_deployment_target="10.10.0" angle_enable_gl=true angle_enable_metal=false angle_enable_swiftshader=false angle_enable_vulkan=false treat_warnings_as_errors=false fatal_linker_warnings=false'
+        # Renabled Metal, because it is no longer the default
+        gn gen out/Release64 --args='is_debug=false mac_sdk_path="'"${SDKROOT}"'" mac_sdk_min="10.10.0" mac_min_system_version="10.10.0" mac_deployment_target="10.10.0" angle_enable_gl=true angle_enable_metal=true angle_enable_swiftshader=false angle_enable_vulkan=false treat_warnings_as_errors=false fatal_linker_warnings=false'
         autoninja -C out/Release64 libEGL libGLESv2
         popd
     - name: upload
@@ -716,7 +718,7 @@ jobs:
             - No m1 ci on github actions
 
           macOS x86_64 has no native OpenGL ES 2 or 3 framework
-          - translating the api via google/angle to OpenGL (Metal disabled due to bug reports)
+          - translating the api via google/angle to OpenGL (Metal opt in, due to bug reports)
           - possible more frame drops compared to linux
 
           No sound on unsupported ancient mac's from pre 2012 in i386 compatibility mode
