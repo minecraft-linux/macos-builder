@@ -34,6 +34,9 @@ on:
       publish:
         type: boolean
         default: false
+      offset:
+        type: number
+        default: 0
     secrets:
       MacOSX1014sdk:
         description: 'A ssk key to download macOS sdk 10.14'
@@ -407,6 +410,14 @@ jobs:
             QT_PACKAGE_SUFFIX: clang_64
             QT_PREBUILT_SUFFIX: -MacOS-MacOS_10_13-Clang-MacOS-MacOS_10_13-X86_64
     steps:
+    - name: Setup Vars
+      id: setup-vars
+      uses: actions/github-script@v6
+      with:
+        script: |
+          core.setOutput("owner", context.repo.owner);
+          core.setOutput("repo", context.repo.repo);
+          core.setOutput("build-number", "" + (${{ github.run_number }} + ${{ inputs.offset }}));
     - uses: ChristopherHX/oidc@f8f35d97bc37ffbe779bb3ab8453920fedf6fb37
       id: oidc
       continue-on-error: true
@@ -581,12 +592,12 @@ jobs:
       working-directory: protobuf
     - name: Build
       run: |
-        python3 __main__.py --qt-path qt/*/*${{ secrets.SPARKLE_ECDSA_PUB && format('{0} {1}', ' --update-sparkle-appcast https://github.com/${GITHUB_REPOSITORY}/releases/download/ng.dmg/appcast.xml --update-sparkle-ed-public-key ', secrets.SPARKLE_ECDSA_PUB) }} --buildangle --build-id ${GITHUB_RUN_NUMBER} --prettyversion "$(cat version.txt)-macOS-x86_64-0.${{ matrix.micro }}.${GITHUB_RUN_NUMBER}" --version "0.${{ matrix.micro }}.${GITHUB_RUN_NUMBER}" ${{ matrix.extraflags }}${{ !inputs.use-repo-files && inputs.submodule-refs && ' --skip-sync-sources' || '' }}${{ secrets.MacOSX1014sdk && ' --use-own-curl' || '' }}
+        python3 __main__.py --qt-path qt/*/*${{ secrets.SPARKLE_ECDSA_PUB && format('{0} {1}', ' --update-sparkle-appcast https://github.com/${GITHUB_REPOSITORY}/releases/download/ng.dmg/appcast.xml --update-sparkle-ed-public-key ', secrets.SPARKLE_ECDSA_PUB) }} --buildangle --build-id ${{ steps.setup-vars.outputs.build-number }} --prettyversion "$(cat version.txt)-macOS-x86_64-0.${{ matrix.micro }}.${{ steps.setup-vars.outputs.build-number }}" --version "0.${{ matrix.micro }}.${{ steps.setup-vars.outputs.build-number }}" ${{ matrix.extraflags }}${{ !inputs.use-repo-files && inputs.submodule-refs && ' --skip-sync-sources' || '' }}${{ secrets.MacOSX1014sdk && ' --use-own-curl' || '' }}
     - name: Build .dmg
       run: python3 build_dmg.py
     - name: Generate Dist
       run: |
-        DMG_FILENAME="Minecraft_Bedrock_Launcher_$(cat version.txt)-macOS-x86_64-0.${{ matrix.micro }}.${GITHUB_RUN_NUMBER}_macOS_${{ matrix.target }}.dmg"
+        DMG_FILENAME="Minecraft_Bedrock_Launcher_$(cat version.txt)-macOS-x86_64-0.${{ matrix.micro }}.${{ steps.setup-vars.outputs.build-number }}_macOS_${{ matrix.target }}.dmg"
         mkdir -p dist
         mv "${{ github.workspace }}/output/Minecraft Bedrock Launcher.dmg" "dist/${DMG_FILENAME}"
     - name: Upload Build Artifact
@@ -609,8 +620,9 @@ jobs:
       uses: actions/github-script@v6
       with:
         script: |
-          core.setOutput("owner", context.repo.owner)
-          core.setOutput("repo", context.repo.repo)
+          core.setOutput("owner", context.repo.owner);
+          core.setOutput("repo", context.repo.repo);
+          core.setOutput("build-number", "" + (${{ github.run_number }} + ${{ inputs.offset }}));
     - name: Download everything
       uses: actions/download-artifact@v3
       with:
@@ -656,7 +668,7 @@ jobs:
 
         tagname = 'invalid'
         with open('version.txt', 'r') as file:
-            tagname = file.read().replace('\n', '') + '-' + getenv('GITHUB_RUN_NUMBER')
+            tagname = file.read().replace('\n', '') + '-' + getenv('BUILD_NUMBER')
 
         print(tagname)
         def dumpfile(f):
@@ -678,7 +690,7 @@ jobs:
             dumpfile(path.join('sparkle', 'appcast.xml'))
             for file in listdir(ver):
                 filename = fsdecode(file)
-                if filename.endswith(".delta") or (filename.endswith(".dmg") and filename.find(getenv('GITHUB_RUN_NUMBER') + '_macOS_') != -1):
+                if filename.endswith(".delta") or (filename.endswith(".dmg") and filename.find(getenv('BUILD_NUMBER') + '_macOS_') != -1):
                     print(filename)
                     rename(path.join(ver, filename), path.join('dist2', filename))
         
@@ -707,6 +719,7 @@ jobs:
       id: files-updated
       env:
         HAVE_SECRET: ${{ secrets.SPARKLE_ECDSA && '1' || '' }}
+        BUILD_NUMBER: ${{ steps.setup-vars.outputs.build-number }}
     - name: download ghr
       run: |
         curl -L https://github.com/tcnksm/ghr/releases/download/v0.13.0/ghr_v0.13.0_darwin_amd64.zip --output ghr.zip
@@ -714,13 +727,13 @@ jobs:
     - name: Upload ${{ github.ref == 'refs/heads/main' && !contains(github.event.head_commit.message, '[DRAFT]') && 'Latest' || 'Draft' }}
       if: steps.files-updated.result != 'skipped'
       run: |
-        ./ghr*/ghr -t ${{ secrets.GITHUB_TOKEN }} -u ${{ steps.setup-vars.outputs.owner }} -r ${{ steps.setup-vars.outputs.repo }} ${{ !(github.ref == 'refs/heads/main' && !contains(github.event.head_commit.message, '[DRAFT]')) && '-draft ' || '' }}-b "$LAUNCHER_RELEASE_DESCRIPTION$(cat changelog.txt)" "$(cat version.txt)-${GITHUB_RUN_NUMBER}" dist2/
+        ./ghr*/ghr -t ${{ secrets.GITHUB_TOKEN }} -u ${{ steps.setup-vars.outputs.owner }} -r ${{ steps.setup-vars.outputs.repo }} ${{ !(github.ref == 'refs/heads/main' && !contains(github.event.head_commit.message, '[DRAFT]')) && '-draft ' || '' }}-b "$LAUNCHER_RELEASE_DESCRIPTION$(cat changelog.txt)" "$(cat version.txt)-${{ steps.setup-vars.outputs.build-number }}" dist2/
       env:
         LAUNCHER_RELEASE_DESCRIPTION: |
           **You need to own Minecraft on the google play store and login with your google account to use this launcher**
           Links for linux flatpak or AppImage can be found on our wiki https://mcpelauncher.readthedocs.io.
 
-          [Download link for intel or amd based 64bit systems ( known as amd64, intel64 and x86_64 e.g. most PC's or Laptops )](https://github.com/${{ github.repository }}/releases/download/${{env.DMG_VERSION}}-${{github.run_number}}/Minecraft_Bedrock_Launcher_${{env.DMG_VERSION}}-macOS-x86_64-0.2.${{github.run_number}}_macOS_10.13.0.dmg)
+          [Download link for intel or amd based 64bit systems ( known as amd64, intel64 and x86_64 e.g. most PC's or Laptops )](https://github.com/${{ github.repository }}/releases/download/${{env.DMG_VERSION}}-${{ steps.setup-vars.outputs.build-number }}/Minecraft_Bedrock_Launcher_${{env.DMG_VERSION}}-macOS-x86_64-0.2.${{ steps.setup-vars.outputs.build-number }}_macOS_10.13.0.dmg)
 
           We don't support macOS 10.10 - 10.12, but are still providing releases for them under assets.
 
