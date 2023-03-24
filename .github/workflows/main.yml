@@ -187,6 +187,7 @@ jobs:
         repository: ${{ inputs.MacOSX1014sdkRepo}}
         ref: ${{ inputs.MacOSX1014sdkRef }}
         ssh-key: ${{ secrets.MacOSX1014sdk }}
+        path: MacOSX10.14.sdk
       env:
         HAVE_SECRET: ${{ secrets.MacOSX1014sdk && '1' || '' }}
     - uses: actions/checkout@v1
@@ -234,6 +235,7 @@ jobs:
         repository: ${{ inputs.MacOSX1014sdkRepo}}
         ref: ${{ inputs.MacOSX1014sdkRef }}
         ssh-key: ${{ secrets.MacOSX1014sdk }}
+        path: MacOSX10.14.sdk
       env:
         HAVE_SECRET: ${{ secrets.MacOSX1014sdk && '1' || '' }}
     - uses: actions/checkout@v1
@@ -328,6 +330,7 @@ jobs:
         repository: ${{ inputs.MacOSX1014sdkRepo}}
         ref: ${{ inputs.MacOSX1014sdkRef }}
         ssh-key: ${{ secrets.MacOSX1014sdk }}
+        path: MacOSX10.14.sdk
       env:
         HAVE_SECRET: ${{ secrets.MacOSX1014sdk && '1' || '' }}
     - uses: actions/checkout@v1
@@ -534,6 +537,7 @@ jobs:
         repository: ${{ inputs.MacOSX1014sdkRepo}}
         ref: ${{ inputs.MacOSX1014sdkRef }}
         ssh-key: ${{ secrets.MacOSX1014sdk }}
+        path: MacOSX10.14.sdk
       env:
         HAVE_SECRET: ${{ secrets.MacOSX1014sdk && '1' || '' }}
     - uses: actions/checkout@v1
