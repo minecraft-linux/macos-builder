@@ -37,6 +37,7 @@ parser.add_argument('--force', help='Always remove the output directory', action
 parser.add_argument('--buildangle', help='build the angle graphics lib', action='store_true')
 parser.add_argument('--qtworkaround', help='apply a qt workaround', action='store_true')
 parser.add_argument('--skip-sync-sources', help='skip sync-sources', action='store_true')
+parser.add_argument('--use-own-curl', help='skip sync-sources', action='store_true')
 args = parser.parse_args()
 
 if(args.version):
@@ -95,6 +96,12 @@ QT_INSTALL_PATH = path.abspath(args.qt_path)
 CMAKE_INSTALL_PREFIX = path.abspath(path.join(SOURCE_DIR, "install"))
 CMAKE_QT_EXTRA_OPTIONS = ["-DCMAKE_PREFIX_PATH=" + QT_INSTALL_PATH, '-DCMAKE_INSTALL_RPATH_USE_LINK_PATH=ON']
 
+MCPELAUNCHER_EXTRA_OPTIONS = []
+if args.use_own_curl:
+    MCPELAUNCHER_EXTRA_OPTIONS += [ "-DUSE_OWN_CURL=ON" ]
+else:
+    MCPELAUNCHER_EXTRA_OPTIONS += [ "-DUSE_OWN_CURL=OFF" ]
+
 if not path.isdir(CMAKE_INSTALL_PREFIX):
     makedirs(CMAKE_INSTALL_PREFIX)
 
@@ -127,8 +134,8 @@ if args.update_sparkle_appcast:
 
 display_stage("Building")
 build_component("msa", ['-DENABLE_MSA_QT_UI=ON', '-DMSA_UI_PATH_DEV=OFF', '-DCMAKE_CXX_FLAGS=-DNDEBUG  -Wl,-L' + path.abspath('libcxx-build') + ',-rpath,@loader_path/../Frameworks' +' -D_LIBCPP_DISABLE_AVAILABILITY=1 -I' + path.abspath('libcxx64-build/include/cxx/v1')] + CMAKE_QT_EXTRA_OPTIONS)
-build_component("mcpelauncher", ['-DMSA_DAEMON_PATH=.', '-DENABLE_DEV_PATHS=OFF', '-DBUILD_FAKE_JNI_TESTS=OFF', '-DXAL_WEBVIEW_QT_PATH=.', '-DJNI_USE_JNIVM=ON', '-DOPENSSL_ROOT_DIR=' + path.abspath('ssl64'), '-DOPENSSL_CRYPTO_LIBRARY=' + path.abspath('ssl64/lib/libcrypto.dylib'), '-DBUILD_FAKE_JNI_EXAMPLES=OFF', '-DCMAKE_CXX_FLAGS=-DNDEBUG -Wl,-L' + path.abspath('libcxx-build') +',-rpath,@loader_path/../Frameworks -D_LIBCPP_DISABLE_AVAILABILITY=1 -I' + path.abspath('libcxx64-build/include/cxx/v1') + ' -I' + path.abspath('ssl64/include') + ' -L' + path.abspath('ssl64/lib')] + CMAKE_QT_EXTRA_OPTIONS)
-build_component32("mcpelauncher", ['-DMSA_DAEMON_PATH=.', '-DENABLE_DEV_PATHS=OFF', '-DENABLE_QT_ERROR_UI=OFF', '-DBUILD_FAKE_JNI_TESTS=OFF', '-DOPENSSL_ROOT_DIR=' + path.abspath('ssl32'), '-DOPENSSL_CRYPTO_LIBRARY=' + path.abspath('ssl32/lib/libcrypto.dylib'), '-DBUILD_FAKE_JNI_EXAMPLES=OFF', '-DCMAKE_ASM_FLAGS=-m32', '-DCMAKE_C_FLAGS=-m32', '-DCMAKE_CXX_FLAGS=-m32 -DNDEBUG -Wl,-L' + path.abspath('libcxx-build') +',-rpath,@loader_path/../Frameworks -D_LIBCPP_DISABLE_AVAILABILITY=1 -I' + path.abspath('libcxx32-build/include/cxx/v1') + ' -I' + path.abspath('ssl32/include') + ' -L' + path.abspath('ssl32/lib'), '-DCMAKE_CXX_COMPILER_TARGET=i386-apple-darwin', '-DCMAKE_LIBRARY_ARCHITECTURE=i386-apple-darwin', '-DBUILD_WEBVIEW=OFF', '-DXAL_WEBVIEW_QT_PATH=.', '-DJNI_USE_JNIVM=ON'])
+build_component("mcpelauncher", ['-DMSA_DAEMON_PATH=.', '-DENABLE_DEV_PATHS=OFF', '-DBUILD_FAKE_JNI_TESTS=OFF', '-DXAL_WEBVIEW_QT_PATH=.', '-DJNI_USE_JNIVM=ON', '-DOPENSSL_ROOT_DIR=' + path.abspath('ssl64'), '-DOPENSSL_CRYPTO_LIBRARY=' + path.abspath('ssl64/lib/libcrypto.dylib'), '-DBUILD_FAKE_JNI_EXAMPLES=OFF', '-DCMAKE_CXX_FLAGS=-DNDEBUG -Wl,-L' + path.abspath('libcxx-build') +',-rpath,@loader_path/../Frameworks -D_LIBCPP_DISABLE_AVAILABILITY=1 -I' + path.abspath('libcxx64-build/include/cxx/v1') + ' -I' + path.abspath('ssl64/include') + ' -L' + path.abspath('ssl64/lib')] + CMAKE_QT_EXTRA_OPTIONS + MCPELAUNCHER_EXTRA_OPTIONS)
+build_component32("mcpelauncher", ['-DMSA_DAEMON_PATH=.', '-DENABLE_DEV_PATHS=OFF', '-DENABLE_QT_ERROR_UI=OFF', '-DBUILD_FAKE_JNI_TESTS=OFF', '-DOPENSSL_ROOT_DIR=' + path.abspath('ssl32'), '-DOPENSSL_CRYPTO_LIBRARY=' + path.abspath('ssl32/lib/libcrypto.dylib'), '-DBUILD_FAKE_JNI_EXAMPLES=OFF', '-DCMAKE_ASM_FLAGS=-m32', '-DCMAKE_C_FLAGS=-m32', '-DCMAKE_CXX_FLAGS=-m32 -DNDEBUG -Wl,-L' + path.abspath('libcxx-build') +',-rpath,@loader_path/../Frameworks -D_LIBCPP_DISABLE_AVAILABILITY=1 -I' + path.abspath('libcxx32-build/include/cxx/v1') + ' -I' + path.abspath('ssl32/include') + ' -L' + path.abspath('ssl32/lib'), '-DCMAKE_CXX_COMPILER_TARGET=i386-apple-darwin', '-DCMAKE_LIBRARY_ARCHITECTURE=i386-apple-darwin', '-DBUILD_WEBVIEW=OFF', '-DXAL_WEBVIEW_QT_PATH=.', '-DJNI_USE_JNIVM=ON'] + MCPELAUNCHER_EXTRA_OPTIONS)
 ADDITIONAL_UI_OPTS = []
 if args.prettyversion:
     ADDITIONAL_UI_OPTS += [ "-DLAUNCHER_VERSION_NAME=" + args.prettyversion ]
