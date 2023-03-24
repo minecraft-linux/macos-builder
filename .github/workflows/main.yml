@@ -1,9 +1,4 @@
-name: CI
 on:
-  push:
-    branches:
-    - main
-  pull_request:
   workflow_call:
     inputs:
       submodule-refs:
@@ -27,6 +22,28 @@ on:
       msa-ref:
         type: string
         default: ${{ github.repository == 'minecraft-linux/msa-manifest' && (github.sha || github.ref) || 'master' }}
+      MacOSX1014sdkRepo:
+        type: string
+        default: ChristopherHX/MacOSX10.14.sdk
+      MacOSX1014sdkRef:
+        type: string
+        default: 5d1c9b28f01ef0b01225f92670ee587b430efa8e
+      use-repo-files:
+        type: boolean
+        default: false
+      publish:
+        type: boolean
+        default: false
+    secrets:
+      MacOSX1014sdk:
+        description: 'A ssk key to download macOS sdk 10.14'
+        required: false
+      SPARKLE_ECDSA:
+        description: 'sparkle ecdsa public key'
+        required: false
+      SPARKLE_ECDSA_PUB:
+        description: 'sparkle ecdsa public key'
+        required: false
 jobs:
   build-libcxx32:
     runs-on: macos-latest
@@ -164,12 +181,13 @@ jobs:
       with:
         path: ssl32
         key: ${{ runner.os }}-build-${{ env.cache-name }}
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v3
       if: env.HAVE_SECRET && steps.cache-openssl32.outputs.cache-hit != 'true'
       with:
-        repository: ChristopherHX/MacOSX10.14.sdk
-        ref: 5d1c9b28f01ef0b01225f92670ee587b430efa8e
-        token: ${{ secrets.MacOSX1014sdk }}
+        repository: ${{ inputs.MacOSX1014sdkRepo}}
+        ref: ${{ inputs.MacOSX1014sdkRef }}
+        ssh-key: ${{ secrets.MacOSX1014sdk }}
+        path: MacOSX10.14.sdk
       env:
         HAVE_SECRET: ${{ secrets.MacOSX1014sdk && '1' || '' }}
     - uses: actions/checkout@v1
@@ -183,7 +201,7 @@ jobs:
       if: steps.cache-openssl32.outputs.cache-hit != 'true'
       run: |
         echo MACOSX_DEPLOYMENT_TARGET=10.10.0 > $GITHUB_ENV
-        echo SDKROOT=${{ github.workspace }}/../${{ secrets.MacOSX1014sdk && 'MacOSX10.14.sdk' || 'MacOSX-SDKs/MacOSX10.13.sdk' }} >> $GITHUB_ENV
+        echo SDKROOT=${{ github.workspace }}/${{ secrets.MacOSX1014sdk && 'MacOSX10.14.sdk' || '../MacOSX-SDKs/MacOSX10.13.sdk' }} >> $GITHUB_ENV
     - name: Build OpenSSL
       if: steps.cache-openssl32.outputs.cache-hit != 'true'
       run: |
@@ -211,12 +229,13 @@ jobs:
       with:
         path: ssl64
         key: ${{ runner.os }}-build-${{ env.cache-name }}
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v3
       if: env.HAVE_SECRET && steps.cache-openssl64.outputs.cache-hit != 'true'
       with:
-        repository: ChristopherHX/MacOSX10.14.sdk
-        ref: 5d1c9b28f01ef0b01225f92670ee587b430efa8e
-        token: ${{ secrets.MacOSX1014sdk }}
+        repository: ${{ inputs.MacOSX1014sdkRepo}}
+        ref: ${{ inputs.MacOSX1014sdkRef }}
+        ssh-key: ${{ secrets.MacOSX1014sdk }}
+        path: MacOSX10.14.sdk
       env:
         HAVE_SECRET: ${{ secrets.MacOSX1014sdk && '1' || '' }}
     - uses: actions/checkout@v1
@@ -230,7 +249,7 @@ jobs:
       if: steps.cache-openssl64.outputs.cache-hit != 'true'
       run: |
         echo MACOSX_DEPLOYMENT_TARGET=10.10.0 > $GITHUB_ENV
-        echo SDKROOT=${{ github.workspace }}/../${{ secrets.MacOSX1014sdk && 'MacOSX10.14.sdk' || 'MacOSX-SDKs/MacOSX10.13.sdk' }} >> $GITHUB_ENV
+        echo SDKROOT=${{ github.workspace }}/${{ secrets.MacOSX1014sdk && 'MacOSX10.14.sdk' || '../MacOSX-SDKs/MacOSX10.13.sdk' }} >> $GITHUB_ENV
     
     - name: Build OpenSSL
       if: steps.cache-openssl64.outputs.cache-hit != 'true'
@@ -305,12 +324,13 @@ jobs:
       with:
         path: source/osx-angle-ci/artifacts
         key: ${{ runner.os }}-build-${{ env.cache-name }}
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v3
       if: env.HAVE_SECRET && steps.angle.outputs.cache-hit != 'true'
       with:
-        repository: ChristopherHX/MacOSX10.14.sdk
-        ref: eea27130a21aea7605cd019e5a45369535bec800
-        token: ${{ secrets.MacOSX1014sdk }}
+        repository: ${{ inputs.MacOSX1014sdkRepo}}
+        ref: ${{ inputs.MacOSX1014sdkRef }}
+        ssh-key: ${{ secrets.MacOSX1014sdk }}
+        path: MacOSX10.14.sdk
       env:
         HAVE_SECRET: ${{ secrets.MacOSX1014sdk && '1' || '' }}
     - uses: actions/checkout@v1
@@ -324,7 +344,7 @@ jobs:
       if: steps.angle.outputs.cache-hit != 'true'
       run: |
         echo MACOSX_DEPLOYMENT_TARGET=10.10.0 > $GITHUB_ENV
-        echo SDKROOT=${{ github.workspace }}/../${{ secrets.MacOSX1014sdk && 'MacOSX10.14.sdk' || 'MacOSX-SDKs/MacOSX10.13.sdk' }} >> $GITHUB_ENV
+        echo SDKROOT=${{ github.workspace }}/${{ secrets.MacOSX1014sdk && 'MacOSX10.14.sdk' || '../MacOSX-SDKs/MacOSX10.13.sdk' }} >> $GITHUB_ENV
     - name: build angle
       if: steps.angle.outputs.cache-hit != 'true'
       run: |
@@ -351,26 +371,6 @@ jobs:
         mkdir -p source/osx-angle-ci/artifacts
         lipo -create angle/out/Release/libEGL.dylib angle/out/Release64/libEGL.dylib -output ./source/osx-angle-ci/artifacts/libEGL.dylib
         lipo -create angle/out/Release/libGLESv2.dylib angle/out/Release64/libGLESv2.dylib -output ./source/osx-angle-ci/artifacts/libGLESv2.dylib
-    # - uses: actions/setup-python@v4
-    #   with:
-    #     python-version: '3.x'
-    #     architecture: 'x64'
-    #   if: steps.angle.outputs.cache-hit != 'true'
-    # - run: |
-    #     mkdir -p source/osx-angle-ci/artifacts
-    #   if: steps.angle.outputs.cache-hit != 'true'
-    # - run: |
-    #     from subprocess import check_call as call
-    #     import shutil
-    #     from os import path
-    #     DMG_MOUNT_PATH = '/Volumes/Minecraft Bedrock Launcher/'
-    #     DMG_FILE = 'Minecraft Bedrock Launcher.dmg'
-    #     call(['curl', '-sL', '-o', DMG_FILE, 'https://github.com/ChristopherHX/osx-packaging-scripts/releases/download/v0.3.0.1-352/Minecraft_Bedrock_Launcher_v0.3.0.1-macOS-x86_64-0.0.352_macOS_10.10.0.dmg'])
-    #     call(['hdiutil', 'attach', '-noautoopen', '-mountpoint', DMG_MOUNT_PATH, '-quiet', DMG_FILE])
-    #     shutil.copy2(path.join(DMG_MOUNT_PATH, 'Minecraft Bedrock Launcher.app', 'Contents', 'Frameworks', 'libEGL.dylib'), './source/osx-angle-ci/artifacts/libEGL.dylib', follow_symlinks = True)
-    #     shutil.copy2(path.join(DMG_MOUNT_PATH, 'Minecraft Bedrock Launcher.app', 'Contents', 'Frameworks', 'libGLESv2.dylib'), './source/osx-angle-ci/artifacts/libGLESv2.dylib', follow_symlinks = True)
-    #   shell: python
-    #   if: steps.angle.outputs.cache-hit != 'true'
   build:
     runs-on: macos-latest
     needs: [build-libcxx, buildopenssl, buildangle]
@@ -412,10 +412,10 @@ jobs:
       continue-on-error: true
     - uses: actions/checkout@v3
       with:
-        repository: ${{ steps.oidc.outputs.job_workflow_repo_name_and_owner || inputs.submodule-refs && 'ChristopherHX/osx-packaging-scripts' || github.repository }}
+        repository: ${{ steps.oidc.outputs.job_workflow_repo_name_and_owner || inputs.submodule-refs && 'minecraft-linux/macos-builder' || github.repository }}
         ref: ${{ steps.oidc.outputs.job_workflow_repo_ref || inputs.submodule-refs && 'main' || github.sha || github.ref }}
     - name: Sync Submodule Sources
-      if: ${{ inputs.submodule-refs }}
+      if: ${{ !inputs.use-repo-files && inputs.submodule-refs }}
       uses: actions/github-script@v6
       with:
         github-token: none
@@ -531,12 +531,13 @@ jobs:
         QT_PACKAGE_PREFIX: ${{ matrix.QT_PACKAGE_PREFIX }}
         QT_PACKAGE_SUFFIX: ${{ matrix.QT_PACKAGE_SUFFIX }}
         QT_PREBUILT_SUFFIX: ${{ matrix.QT_PREBUILT_SUFFIX }}
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v3
       if: env.HAVE_SECRET
       with:
-        repository: ChristopherHX/MacOSX10.14.sdk
-        ref: eea27130a21aea7605cd019e5a45369535bec800
-        token: ${{ secrets.MacOSX1014sdk }}
+        repository: ${{ inputs.MacOSX1014sdkRepo}}
+        ref: ${{ inputs.MacOSX1014sdkRef }}
+        ssh-key: ${{ secrets.MacOSX1014sdk }}
+        path: MacOSX10.14.sdk
       env:
         HAVE_SECRET: ${{ secrets.MacOSX1014sdk && '1' || '' }}
     - uses: actions/checkout@v1
@@ -549,7 +550,7 @@ jobs:
     - name: Update env
       run: |
         echo MACOSX_DEPLOYMENT_TARGET=${{ matrix.target }} > $GITHUB_ENV
-        echo SDKROOT=${{ github.workspace }}/../${{ secrets.MacOSX1014sdk && 'MacOSX10.14.sdk' || 'MacOSX-SDKs/MacOSX10.13.sdk' }} >> $GITHUB_ENV
+        echo SDKROOT=${{ github.workspace }}/${{ secrets.MacOSX1014sdk && 'MacOSX10.14.sdk' || '../MacOSX-SDKs/MacOSX10.13.sdk' }} >> $GITHUB_ENV
     - name: Get Source libzip
       run: |
         git clone https://github.com/nih-at/libzip libzip
@@ -580,7 +581,7 @@ jobs:
       working-directory: protobuf
     - name: Build
       run: |
-        python3 __main__.py --qt-path qt/*/*${{ secrets.SPARKLE_ECDSA_PUB && format('{0} {1}', ' --update-sparkle-appcast https://github.com/${GITHUB_REPOSITORY}/releases/download/ng.dmg/appcast.xml --update-sparkle-ed-public-key ', secrets.SPARKLE_ECDSA_PUB) }} --buildangle --build-id ${GITHUB_RUN_NUMBER} --prettyversion "$(cat version.txt)-macOS-x86_64-0.${{ matrix.micro }}.${GITHUB_RUN_NUMBER}" --version "0.${{ matrix.micro }}.${GITHUB_RUN_NUMBER}" ${{ matrix.extraflags }}${{ inputs.submodule-refs && ' --skip-sync-sources' || '' }}
+        python3 __main__.py --qt-path qt/*/*${{ secrets.SPARKLE_ECDSA_PUB && format('{0} {1}', ' --update-sparkle-appcast https://github.com/${GITHUB_REPOSITORY}/releases/download/ng.dmg/appcast.xml --update-sparkle-ed-public-key ', secrets.SPARKLE_ECDSA_PUB) }} --buildangle --build-id ${GITHUB_RUN_NUMBER} --prettyversion "$(cat version.txt)-macOS-x86_64-0.${{ matrix.micro }}.${GITHUB_RUN_NUMBER}" --version "0.${{ matrix.micro }}.${GITHUB_RUN_NUMBER}" ${{ matrix.extraflags }}${{ inputs.submodule-refs && ' --skip-sync-sources' || '' }}${{ secrets.MacOSX1014sdk && ' --use-own-curl' || '' }}
     - name: Build .dmg
       run: python3 build_dmg.py
     - name: Generate Dist
@@ -597,10 +598,19 @@ jobs:
     runs-on: macos-latest
     needs: build
     # Eventually extend this job to be able to run on other repositories, otherwise replace the owner and repository name in this job
-    if: ${{ !cancelled() && github.event_name == 'push' && github.server_url == 'https://github.com' && github.repository == 'ChristopherHX/osx-packaging-scripts' }}
+    if: ${{ !cancelled() && inputs.publish }}
     steps:
     - uses: actions/checkout@v3
-    - run: echo "DMG_VERSION=$(cat version.txt)" >> $GITHUB_ENV
+    - name: Setup Env
+      run: |
+        echo "DMG_VERSION=$(cat version.txt)" >> $GITHUB_ENV
+    - name: Setup Vars
+      id: setup-vars
+      uses: actions/github-script@v6
+      with:
+        script: |
+          core.setOutput("owner", context.repo.owner)
+          core.setOutput("repo", context.repo.repo)
     - name: Download everything
       uses: actions/download-artifact@v3
       with:
@@ -621,7 +631,7 @@ jobs:
         from subprocess import check_call
         makedirs('dist')
         makedirs('dist2')
-        check_call(['curl', '-L', '-o', path.abspath(path.join('sparkle', 'appcast.xml')), 'https://github.com/ChristopherHX/osx-packaging-scripts/releases/download/ng.dmg/appcast.xml'])
+        check_call(['curl', '-L', '-o', path.abspath(path.join('sparkle', 'appcast.xml')), 'https://github.com/${{ github.repository }}/releases/download/ng.dmg/appcast.xml'])
         tree = ET.parse(path.join('sparkle', 'appcast.xml'))
         root = tree.getroot()
         i = 0
@@ -662,7 +672,7 @@ jobs:
             dumpfile(path.join('sparkle', 'appcast.xml'))
             rename(path.join('sparkle', 'appcast.xml'), path.join(ver, 'appcast.xml'))
             dumpfile(path.join(ver, 'appcast.xml'))
-            check_call(['./bin/generate_appcast', '-s', '${{ secrets.SPARKLE_ECDSA }}', '--download-url-prefix', 'https://github.com/ChristopherHX/osx-packaging-scripts/releases/download/' + tagname + '/', ver ])
+            check_call(['./bin/generate_appcast', '-s', '${{ secrets.SPARKLE_ECDSA }}', '--download-url-prefix', 'https://github.com/${{ github.repository }}/releases/download/' + tagname + '/', ver ])
             dumpfile(path.join(ver, 'appcast.xml'))
             rename(path.join(ver, 'appcast.xml'), path.join('sparkle', 'appcast.xml'))
             dumpfile(path.join('sparkle', 'appcast.xml'))
@@ -693,19 +703,24 @@ jobs:
         tree2.write(path.join('dist', 'appcast.xml'), encoding='utf-8', xml_declaration=True)
         dumpfile(path.join('dist', 'appcast.xml'))
         tree2.write(path.join('dist2', 'appcast.xml'), encoding='utf-8', xml_declaration=True)
+      if: env.HAVE_SECRET
+      id: files-updated
+      env:
+        HAVE_SECRET: ${{ secrets.SPARKLE_ECDSA && '1' || '' }}
     - name: download ghr
       run: |
         curl -L https://github.com/tcnksm/ghr/releases/download/v0.13.0/ghr_v0.13.0_darwin_amd64.zip --output ghr.zip
         unzip ghr.zip
     - name: Upload ${{ github.ref == 'refs/heads/main' && !contains(github.event.head_commit.message, '[DRAFT]') && 'Latest' || 'Draft' }}
+      if: steps.files-updated.result != 'skipped'
       run: |
-        ./ghr*/ghr -t ${{ secrets.GITHUB_TOKEN }} -u ChristopherHX -r osx-packaging-scripts ${{ !(github.ref == 'refs/heads/main' && !contains(github.event.head_commit.message, '[DRAFT]')) && '-draft ' || '' }}-b "$LAUNCHER_RELEASE_DESCRIPTION$(cat changelog.txt)" "$(cat version.txt)-${GITHUB_RUN_NUMBER}" dist2/
+        ./ghr*/ghr -t ${{ secrets.GITHUB_TOKEN }} -u ${{ steps.setup-vars.outputs.owner }} -r ${{ steps.setup-vars.outputs.repo }} ${{ !(github.ref == 'refs/heads/main' && !contains(github.event.head_commit.message, '[DRAFT]')) && '-draft ' || '' }}-b "$LAUNCHER_RELEASE_DESCRIPTION$(cat changelog.txt)" "$(cat version.txt)-${GITHUB_RUN_NUMBER}" dist2/
       env:
         LAUNCHER_RELEASE_DESCRIPTION: |
           **You need to own Minecraft on the google play store and login with your google account to use this launcher**
           Links for linux flatpak or AppImage can be found on our wiki https://mcpelauncher.readthedocs.io.
 
-          [Download link for intel or amd based 64bit systems ( known as amd64, intel64 and x86_64 e.g. most PC's or Laptops )](https://github.com/ChristopherHX/osx-packaging-scripts/releases/download/${{env.DMG_VERSION}}-${{github.run_number}}/Minecraft_Bedrock_Launcher_${{env.DMG_VERSION}}-macOS-x86_64-0.2.${{github.run_number}}_macOS_10.13.0.dmg)
+          [Download link for intel or amd based 64bit systems ( known as amd64, intel64 and x86_64 e.g. most PC's or Laptops )](https://github.com/${{ github.repository }}/releases/download/${{env.DMG_VERSION}}-${{github.run_number}}/Minecraft_Bedrock_Launcher_${{env.DMG_VERSION}}-macOS-x86_64-0.2.${{github.run_number}}_macOS_10.13.0.dmg)
 
           We don't support macOS 10.10 - 10.12, but are still providing releases for them under assets.
 
@@ -725,6 +740,6 @@ jobs:
 
           ### Changelog
     - name: Publish release
-      if: github.ref == 'refs/heads/main' && !contains(github.event.head_commit.message, '[DRAFT]')
+      if: steps.files-updated.result != 'skipped' && !contains(github.event.head_commit.message, '[DRAFT]')
       run: |
-        ./ghr*/ghr -t ${{ secrets.GITHUB_TOKEN }} -u ChristopherHX -r osx-packaging-scripts -replace ng.dmg dist/
+        ./ghr*/ghr -t ${{ secrets.GITHUB_TOKEN }} -u ${{ steps.setup-vars.outputs.owner }} -r ${{ steps.setup-vars.outputs.repo }} -replace ng.dmg dist/
