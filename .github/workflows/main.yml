@@ -421,9 +421,9 @@ jobs:
     - name: Build Protobuf
       if: steps.cache.outputs.cache-hit != 'true'
       run: |
-        mkdir -p protobuf-build
+        mkdir -p ../protobuf-build
         ./autogen.sh
-        ./configure --prefix=protobuf-build
+        ./configure --prefix="$PWD/../protobuf-build"
         make -j8
         make install -j8
       working-directory: protobuf
