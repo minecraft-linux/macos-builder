@@ -377,13 +377,67 @@ jobs:
         mkdir -p source/osx-angle-ci/artifacts
         lipo -create angle/out/Release/libEGL.dylib angle/out/Release64/libEGL.dylib -output ./source/osx-angle-ci/artifacts/libEGL.dylib
         lipo -create angle/out/Release/libGLESv2.dylib angle/out/Release64/libGLESv2.dylib -output ./source/osx-angle-ci/artifacts/libGLESv2.dylib
+  build-protobuf:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/cache/restore@v3
+      id: cache
+      with:
+        path: protobuf-build
+        key: protobuf-macos-x64
+        lookup-only: true
+    - uses: actions/checkout@v3
+      if: env.HAVE_SECRET && steps.cache.outputs.cache-hit != 'true'
+      with:
+        repository: ${{ inputs.MacOSX1014sdkRepo}}
+        ref: ${{ inputs.MacOSX1014sdkRef }}
+        ssh-key: ${{ secrets.MacOSX1014sdk }}
+        path: MacOSX10.14.sdk
+      env:
+        HAVE_SECRET: ${{ secrets.MacOSX1014sdk && '1' || '' }}
+    - uses: actions/checkout@v1
+      if: env.MISSING_SECRET && steps.cache.outputs.cache-hit != 'true'
+      with:
+        repository: phracker/MacOSX-SDKs
+        ref: refs/heads/master
+      env:
+        MISSING_SECRET: ${{ !secrets.MacOSX1014sdk && '1' || '' }}
+    - name: Update env
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: |
+        echo MACOSX_DEPLOYMENT_TARGET=10.10.0 > $GITHUB_ENV
+        echo SDKROOT=${{ github.workspace }}/${{ secrets.MacOSX1014sdk && 'MacOSX10.14.sdk' || '../MacOSX-SDKs/MacOSX10.13.sdk' }} >> $GITHUB_ENV
+    - name: Install brew dependencies
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: |
+        brew install autoconf || :
+        brew install automake || :
+        brew install libtool || :
+    - name: Get Source Protobuf
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: |
+        git clone https://github.com/protocolbuffers/protobuf.git -b 21.x protobuf
+        git -C protobuf submodule update --init --recursive
+    - name: Build Protobuf
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: |
+        mkdir -p protobuf-build
+        ./autogen.sh
+        ./configure --prefix=protobuf-build
+        make -j8
+        make install -j8
+      working-directory: protobuf
+    - uses: actions/cache/save@v3
+      with:
+        path: protobuf-build
+        key: protobuf-macos-x64
   build-m1:
     if: inputs.build-m1
     uses: ./.github/workflows/m1.yml
   build:
     runs-on: macos-latest
     if: "!(cancelled() || failure())"
-    needs: [build-libcxx, buildopenssl, buildangle, build-m1]
+    needs: [build-libcxx, buildopenssl, buildangle, build-protobuf, build-m1]
     permissions:
       id-token: write # required to get an oidc token
       contents: read
@@ -542,6 +596,11 @@ jobs:
       with:
         path: source/osx-angle-ci/artifacts
         key: ${{ runner.os }}-build-${{ env.cache-name }}
+    - uses: actions/cache/restore@v3
+      with:
+        fail-on-cache-miss: true
+        path: protobuf-build
+        key: protobuf-macos-x64
     - name: brew install / link
       run: |
         brew install p7zip automake
@@ -598,25 +657,10 @@ jobs:
         sudo cmake --build libzip-build --target install --parallel
     - name: Install python dependencies
       run: pip3 install jinja2 ds_store
-
-    - name: Install brew dependencies
-      run: |
-        brew install autoconf || :
-        brew install automake || :
-        brew install libtool || :
-    - name: Get Source Protobuf
-      run: |
-        git clone https://github.com/protocolbuffers/protobuf.git -b 21.x protobuf
-        git -C protobuf submodule update --init --recursive
-    - name: Build Protobuf
-      run: |
-        ./autogen.sh
-        ./configure
-        make -j8
-        sudo make install -j8
-      working-directory: protobuf
+    
     - name: add deps to base app
       run: |
+        sudo cp -R protobuf-build/* /usr/local/
         mkdir -p base-app/Contents/Frameworks/
         cp libcxx-build/* base-app/Contents/Frameworks/
         cp ssl/lib/* base-app/Contents/Frameworks/

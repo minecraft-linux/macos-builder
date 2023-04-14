@@ -37,7 +37,7 @@ parser.add_argument('--force', help='Always remove the output directory', action
 parser.add_argument('--qtworkaround', help='apply a qt workaround', action='store_true')
 parser.add_argument('--skip-sync-sources', help='skip sync-sources', action='store_true')
 parser.add_argument('--use-own-curl', help='skip sync-sources', action='store_true')
-parser.add_argument('--app-root', help='base folder of the Application before running macdeployqt', action='store_true')
+parser.add_argument('--app-root', help='base folder of the Application before running macdeployqt')
 args = parser.parse_args()
 
 if(args.version):
