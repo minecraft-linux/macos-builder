@@ -160,7 +160,7 @@ def copy_installed_files(from_path, to_path):
     for f in listdir(from_path):
         print("Copying file: " + f)
         if path.isdir(path.join(from_path, f)):
-            copytree(path.join(from_path, f), path.join(to_path, f), True)
+            copytree(path.join(from_path, f), path.join(to_path, f), True, dirs_exist_ok = True)
         else:
             shutil.copy2(path.join(from_path, f), path.join(to_path, f), follow_symlinks = False)
 
