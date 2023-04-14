@@ -1,0 +1,226 @@
+name: Manual Build
+on:
+  workflow_call:
+    inputs:
+      mcpelauncher-manifest-repo:
+        description: 'mcpelauncher repo'
+        default: 'https://github.com/minecraft-linux/mcpelauncher-manifest.git'
+      mcpelauncher-manifest-ref:
+        description: 'mcpelauncher ref'
+        default: 'm1-dev'
+      
+jobs:
+  openssl:
+    runs-on: ${{ matrix.OS }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - OS: macos-latest
+            deps: ''
+            sdkroot: ''
+            version: '11.0'
+            arch: 'arm64'
+            opensslflags: darwin64-arm64-cc
+    env:
+      MACOSX_DEPLOYMENT_TARGET: ${{ matrix.version }}
+      cache-name: cache-openssl-${{ matrix.OS }}-${{ matrix.version }}-${{ matrix.arch }}
+    steps:
+    - name: Cache openssl
+      id: cache
+      uses: actions/cache@v3
+      with:
+        path: output
+        key: ${{ env.cache-name }}
+    - uses: actions/checkout@v1
+      if: ${{ steps.cache.outputs.cache-hit != 'true' && startsWith(matrix.OS, 'macOS') && matrix.sdkroot != '' && !startsWith(matrix.sdkroot, '/') }}
+      with:
+        repository: phracker/MacOSX-SDKs
+        ref: refs/heads/master
+    - name: Install Deps
+      if: ${{ steps.cache.outputs.cache-hit != 'true' && matrix.deps != '' }}
+      run: ${{ matrix.deps }}
+    - name: Build OpenSSL
+      if: steps.cache.outputs.cache-hit != 'true'
+      shell: pwsh
+      run: |
+        if ('${{ matrix.sdkroot }}' -ne '') {
+          if ('${{ matrix.sdkroot }}'.StartsWith('/')) {
+            $Env:SDKROOT = '${{ matrix.sdkroot }}'
+          } else {
+            $Env:SDKROOT = '${{ github.workspace }}/${{ matrix.sdkroot }}'
+          }
+        }
+        git clone https://github.com/openssl/openssl.git -b OpenSSL_1_1_1-stable
+        $INSDIR = (Get-Location).ToString() + "/output"
+        pushd openssl
+        # Workaround not merged arm64 mac support
+        git remote add darwin_arm https://github.com/stuartcarnie/openssl.git
+        git pull darwin_arm sgc/darwin64_arm
+        perl ./Configure ${{ matrix.opensslflags }} ('--prefix=' + $INSDIR)
+        make install_sw
+    - name: Create tar archive
+      run: |
+        install_name_tool -id @rpath/libssl.dylib -add_rpath @loader_path/../Frameworks lib/libssl.dylib
+        install_name_tool -id @rpath/libcrypto.dylib -add_rpath @loader_path/../Frameworks lib/libcrypto.dylib
+        tar cJf ../openssl.tar.xz .
+      working-directory: output
+    - name: Upload Binary
+      uses: actions/upload-artifact@v3
+      with:
+        name: openssl-${{ matrix.OS }}-${{ matrix.version }}-${{ matrix.arch }}
+        path: output/
+    - name: Upload Binary
+      uses: actions/upload-artifact@v3
+      with:
+        name: openssl-${{ matrix.OS }}-${{ matrix.version }}-${{ matrix.arch }}-tar
+        path: openssl.tar.xz
+  angle:
+    runs-on: ${{ matrix.OS }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - OS: macos-latest
+            deps: ''
+            version: '11.0'
+            arch: 'arm64'
+    env:
+      MACOSX_DEPLOYMENT_TARGET: ${{ matrix.version }}
+      cache-name: cache-angle-${{ matrix.OS }}-${{ matrix.version }}-${{ matrix.arch }}
+    steps:
+    - name: Cache angle
+      id: cache
+      uses: actions/cache@v3
+      with:
+        path: output
+        key: ${{ env.cache-name }}
+    - uses: actions/checkout@v1
+      if: ${{ steps.cache.outputs.cache-hit != 'true' && startsWith(matrix.OS, 'macOS') && matrix.sdkroot != '' && !startsWith(matrix.sdkroot, '/') }}
+      with:
+        repository: phracker/MacOSX-SDKs
+        ref: refs/heads/master
+    - name: Install Deps
+      if: ${{ steps.cache.outputs.cache-hit != 'true' && matrix.deps != '' }}
+      run: ${{ matrix.deps }}
+    - name: Build angle
+      if: steps.cache.outputs.cache-hit != 'true'
+      shell: pwsh
+      run: |
+        if ('${{ matrix.sdkroot }}' -ne '') {
+          if ('${{ matrix.sdkroot }}'.StartsWith('/')) {
+            $Env:SDKROOT = '${{ matrix.sdkroot }}'
+          } else {
+            $Env:SDKROOT = '${{ github.workspace }}/${{ matrix.sdkroot }}'
+          }
+        }
+        $INSDIR = (Get-Location).ToString() + "/output"
+        mkdir $INSDIR
+        git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
+        $Env:PATH = $Env:PATH + ':' + $PWD.ToString() + '/depot_tools'
+        git clone https://github.com/minecraft-linux/angle.git -b angle-renderdragon
+        pushd angle
+        python scripts/bootstrap.py
+        gclient sync
+        gn gen ($INSDIR) ('--args=target_cpu=\"${{ matrix.arch }}\" is_debug=false mac_sdk_path=\"' + $Env:SDKROOT + '\" mac_sdk_min=\"${{ matrix.version }}\" mac_min_system_version=\"${{ matrix.version }}\" mac_deployment_target=\"${{ matrix.version }}\" angle_enable_metal=true angle_enable_swiftshader=false angle_enable_vulkan=false')
+        autoninja -C ($INSDIR) libEGL libGLESv2
+    - name: Create tar archive
+      run: |
+        tar cJf ../angle.tar.xz .
+      working-directory: output
+    - name: Upload Binary
+      uses: actions/upload-artifact@v3
+      with:
+        name: angle-${{ matrix.OS }}-${{ matrix.version }}-${{ matrix.arch }}
+        path: output/
+    - name: Upload Binary
+      uses: actions/upload-artifact@v3
+      with:
+        name: angle-${{ matrix.OS }}-${{ matrix.version }}-${{ matrix.arch }}-tar
+        path: angle.tar.xz
+  build:
+    runs-on: ${{ matrix.OS }}
+    needs: [ "openssl" ]
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - AppImage: false
+            OS: macos-latest
+            arch: arm64
+            version: "11.0"
+            container: '{}'
+            deps: |
+              brew install autoconf automake
+              echo 'set(CMAKE_SYSTEM_NAME Darwin)' > toolchain.txt
+              echo 'set(CMAKE_SYSTEM_PROCESSOR aarch64)' >> toolchain.txt
+            triple: arm64-apple-darwin
+            cmakeextraflags: ('-DCMAKE_TOOLCHAIN_FILE='+ $INSDIR + '/../toolchain.txt')
+            openssl: true
+    env:
+      MACOSX_DEPLOYMENT_TARGET: ${{ matrix.version }}
+      CC: clang
+      CXX: clang++
+      DEBIAN_FRONTEND: noninteractive
+    # container: ${{ fromJson(matrix.container) }}
+    steps:
+    - uses: actions/checkout@v1
+      if: ${{ startsWith(matrix.OS, 'macOS') && matrix.sdkroot != '' && !startsWith(matrix.sdkroot, '/') }}
+      with:
+        repository: phracker/MacOSX-SDKs
+        ref: refs/heads/master
+    - name: Install Deps
+      shell: pwsh
+      run: ${{ matrix.deps }}
+    - name: Cloning mcpelauncher ${{ github.event.inputs.mcpelauncher-manifest-repo }}/${{ github.event.inputs.mcpelauncher-manifest-ref }}
+      shell: pwsh
+      run: git clone --recursive ${{ github.event.inputs.mcpelauncher-manifest-repo }} -b ${{ github.event.inputs.mcpelauncher-manifest-ref }} mcpelauncher
+    - uses: actions/download-artifact@v3
+      id: openssl
+      if: ${{ matrix.openssl }}
+      with:
+        name: openssl-${{ matrix.OS }}-${{ matrix.version }}-${{ matrix.arch }}
+    - name: Building mcpelauncher ${{ github.event.inputs.mcpelauncher-manifest-repo }}/${{ github.event.inputs.mcpelauncher-manifest-ref }}
+      shell: pwsh
+      env:
+        CC: clang
+        CXX: clang++
+      run: |
+        if ('${{ matrix.sdkroot }}' -ne '') {
+          if ('${{ matrix.sdkroot }}'.StartsWith('/')) {
+            $Env:SDKROOT = '${{ matrix.sdkroot }}'
+          } else {
+            $Env:SDKROOT = '${{ github.workspace }}/${{ matrix.sdkroot }}'
+          }
+        }
+        mkdir output
+        mkdir build
+        $INSDIR = (Get-Location).ToString() + "/output"
+        ${{ matrix.envflags }}
+        pushd build
+        $EXTRA_FLAGS = ''
+        if ('${{steps.openssl.outputs.download-path}}' -ne '') {
+          if ($EXTRA_FLAGS -ne '') {
+            $EXTRA_FLAGS += ' '
+          }
+          $EXTRA_FLAGS += '-DOPENSSL_ROOT_DIR="${{steps.openssl.outputs.download-path}}"'
+        }
+        cmake ../mcpelauncher -DCMAKE_BUILD_TYPE=Release -DBUILD_UI=OFF ('-DCMAKE_INSTALL_PREFIX=' + $INSDIR) -DCMAKE_ASM_FLAGS="--target=${{ matrix.triple }}" -DCMAKE_C_FLAGS="--target=${{ matrix.triple }} ${{ matrix.cflags }}" -DCMAKE_CXX_FLAGS="--target=${{ matrix.triple }} ${{ matrix.cxxflags }}" -DCMAKE_CXX_COMPILER_TARGET=${{ matrix.triple }} $EXTRA_FLAGS ${{ matrix.cmakeextraflags }}
+        make install -j4
+        popd
+        popd
+
+    - name: Create tar archive
+      run: |
+        tar cJf ../mcpelauncher.tar.xz .
+      working-directory: output
+    - name: Upload Binary
+      uses: actions/upload-artifact@v3
+      with:
+        name: mcpelauncher-${{ matrix.OS }}-${{ matrix.version }}-${{ matrix.arch }}
+        path: output/
+    - name: Upload tar
+      uses: actions/upload-artifact@v3
+      with:
+        name: mcpelauncher-${{ matrix.OS }}-${{ matrix.version }}-${{ matrix.arch }}-tar
+        path: mcpelauncher.tar.xz

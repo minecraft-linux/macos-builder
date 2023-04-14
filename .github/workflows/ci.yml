@@ -3,7 +3,7 @@ on:
   push:
     branches:
     - main
-  pull_request_target:
+  pull_request:
   workflow_dispatch:
 jobs:
   ci:
@@ -12,4 +12,5 @@ jobs:
       publish: ${{ github.event_name == 'push' && github.server_url == 'https://github.com' }}
       use-repo-files: true
       offset: 400
+      build-m1: true
     secrets: inherit
