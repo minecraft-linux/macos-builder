@@ -174,15 +174,15 @@ jobs:
     - name: Install Deps
       shell: pwsh
       run: ${{ matrix.deps }}
-    - name: Cloning mcpelauncher ${{ inputs..mcpelauncher-manifest-repo }}/${{ inputs..mcpelauncher-manifest-ref }}
+    - name: Cloning mcpelauncher ${{ inputs.mcpelauncher-manifest-repo }}/${{ inputs.mcpelauncher-manifest-ref }}
       shell: pwsh
-      run: git clone --recursive ${{ inputs..mcpelauncher-manifest-repo }} -b ${{ inputs..mcpelauncher-manifest-ref }} mcpelauncher
+      run: git clone --recursive ${{ inputs.mcpelauncher-manifest-repo }} -b ${{ inputs.mcpelauncher-manifest-ref }} mcpelauncher
     - uses: actions/download-artifact@v3
       id: openssl
       if: ${{ matrix.openssl }}
       with:
         name: openssl-${{ matrix.OS }}-${{ matrix.version }}-${{ matrix.arch }}
-    - name: Building mcpelauncher ${{ inputs..mcpelauncher-manifest-repo }}/${{ inputs..mcpelauncher-manifest-ref }}
+    - name: Building mcpelauncher ${{ inputs.mcpelauncher-manifest-repo }}/${{ inputs.mcpelauncher-manifest-ref }}
       shell: pwsh
       env:
         CC: clang
