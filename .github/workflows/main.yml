@@ -632,7 +632,7 @@ jobs:
         mkdir -p base-app/Contents/Resources/
         cp -R m1-artifacts/share/* base-app/Contents/Resources/
         mkdir -p base-app/Contents/MacOS/
-        cp -R m1-artifacts/bin/* base-app/Contents/MacOS/
+        cp -R m1-artifacts/bin/mcpelauncher-client base-app/Contents/MacOS/mcpelauncher-client-arm64-v8a
     - name: Build
       run: |
         python3 __main__.py --qt-path qt/*/*${{ secrets.SPARKLE_ECDSA_PUB && format('{0} {1}', ' --update-sparkle-appcast https://github.com/${GITHUB_REPOSITORY}/releases/download/ng.dmg/appcast.xml --update-sparkle-ed-public-key ', secrets.SPARKLE_ECDSA_PUB) }} --app-root base-app --build-id ${{ steps.setup-vars.outputs.build-number }} --prettyversion "$(cat version.txt)-macOS-x86_64-0.${{ matrix.micro }}.${{ steps.setup-vars.outputs.build-number }}" --version "0.${{ matrix.micro }}.${{ steps.setup-vars.outputs.build-number }}" ${{ matrix.extraflags }}${{ !inputs.use-repo-files && inputs.submodule-refs && ' --skip-sync-sources' || '' }}${{ secrets.MacOSX1014sdk && ' --use-own-curl' || '' }}
