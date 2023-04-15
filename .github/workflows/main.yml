@@ -769,6 +769,14 @@ jobs:
             ver = path.join('sparkle', fsdecode(file))
             if not path.isdir(ver):
                 continue
+            founddmg = False
+            for file in listdir(ver):
+                filename = fsdecode(file)
+                if filename.endswith(".dmg"):
+                    founddmg = True
+                    break
+            if not founddmg:
+                continue
             print(ver)
             dumpfile(path.join('sparkle', 'appcast.xml'))
             rename(path.join('sparkle', 'appcast.xml'), path.join(ver, 'appcast.xml'))
