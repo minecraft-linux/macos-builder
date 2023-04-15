@@ -34,10 +34,10 @@ parser.add_argument('--update-sparkle-ed-public-key', help='Enable checking upda
 parser.add_argument('--version', help='App version')
 parser.add_argument('--prettyversion', help='App pretty version in settings')
 parser.add_argument('--force', help='Always remove the output directory', action='store_true')
-parser.add_argument('--buildangle', help='build the angle graphics lib', action='store_true')
 parser.add_argument('--qtworkaround', help='apply a qt workaround', action='store_true')
 parser.add_argument('--skip-sync-sources', help='skip sync-sources', action='store_true')
 parser.add_argument('--use-own-curl', help='skip sync-sources', action='store_true')
+parser.add_argument('--app-root', help='base folder of the Application before running macdeployqt')
 args = parser.parse_args()
 
 if(args.version):
@@ -87,8 +87,6 @@ if not args.skip_sync_sources:
         clone_repo('mcpelauncher', 'https://github.com/minecraft-linux/mcpelauncher-manifest.git', file.read().replace('\n', ''))
     with open('mcpelauncher-ui.commit', 'r') as file:
         clone_repo('mcpelauncher-ui', 'https://github.com/minecraft-linux/mcpelauncher-ui-manifest.git', file.read().replace('\n', ''))
-    #if args.buildangle:
-    #    clone_repo('osx-angle-ci', 'https://github.com/christopherhx/osx-angle-ci.git', 'master')
 
 # Build
 # QT_INSTALL_PATH = subprocess.check_output(['brew', '--prefix', 'qt']).decode('utf-8').strip()
@@ -156,28 +154,25 @@ with open('versionsdbremote.txt', 'r') as file:
     ADDITIONAL_UI_OPTS += [ "-DLAUNCHER_VERSIONDB_URL=https://raw.githubusercontent.com/minecraft-linux/mcpelauncher-versiondb/" + ref]
 
 build_component("mcpelauncher-ui", ['-DGAME_LAUNCHER_PATH=.', '-DCMAKE_CXX_FLAGS=-DNDEBUG -Wl,-F'+ QT_INSTALL_PATH + '/lib/,-L' + path.abspath('libcxx-build') +',-rpath,@loader_path/../Frameworks -D_LIBCPP_DISABLE_AVAILABILITY=1 -I' + path.abspath('libcxx64-build/include/cxx/v1'), "-DQt5QuickCompiler_FOUND=OFF", "-DLAUNCHER_ENABLE_GOOGLE_PLAY_LICENCE_CHECK=ON", "-DLAUNCHER_DISABLE_DEV_MODE=OFF"] + VERSION_OPTS + SPARKLE_OPTS + CMAKE_QT_EXTRA_OPTIONS + ADDITIONAL_UI_OPTS)
-#if args.buildangle:
-#    call(['bash', '-c', './build.sh'], cwd=path.abspath(path.join(SOURCE_DIR, "osx-angle-ci")))
 
 display_stage("Copying files")
 def copy_installed_files(from_path, to_path):
     for f in listdir(from_path):
         print("Copying file: " + f)
         if path.isdir(path.join(from_path, f)):
-            copytree(path.join(from_path, f), path.join(to_path, f), True)
+            copytree(path.join(from_path, f), path.join(to_path, f), True, dirs_exist_ok = True)
         else:
             shutil.copy2(path.join(from_path, f), path.join(to_path, f), follow_symlinks = False)
 
+if path.exists(args.app_root):
+    copy_installed_files(args.app_root, APP_OUTPUT_DIR)
+
 copy_installed_files(path.join(CMAKE_INSTALL_PREFIX, 'bin'), path.join(APP_OUTPUT_DIR, 'Contents', 'MacOS'))
 copy_installed_files(path.join(CMAKE_INSTALL_PREFIX, 'share'), path.join(APP_OUTPUT_DIR, 'Contents', 'Resources'))
-copy_installed_files('libcxx-build', path.join(APP_OUTPUT_DIR, 'Contents', 'Frameworks'))
-copy_installed_files('ssl/lib', path.join(APP_OUTPUT_DIR, 'Contents', 'Frameworks'))
 # Workaround Qt 5.9.2
 if args.qtworkaround:
     copy_installed_files(path.join(QT_INSTALL_PATH, 'qml', 'QtQuick'), path.join(APP_OUTPUT_DIR, 'Contents', 'Resources', 'qml', 'QtQuick'))
     copy_installed_files(path.join(QT_INSTALL_PATH, 'qml', 'QtQuick.2'), path.join(APP_OUTPUT_DIR, 'Contents', 'Resources', 'qml', 'QtQuick.2'))
-if args.buildangle:
-    copy_installed_files(path.abspath(path.join(SOURCE_DIR, "osx-angle-ci/artifacts")), path.join(APP_OUTPUT_DIR, 'Contents', 'Frameworks'))
 
 display_stage("Building Info.plist file")
 with open(path.join(TEMPLATES_DIR, 'Info.plist.tmpl'), 'r') as raw:
