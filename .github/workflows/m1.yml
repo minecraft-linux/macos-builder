@@ -63,8 +63,8 @@ jobs:
         make install_sw
     - name: Create tar archive
       run: |
-        install_name_tool -id @rpath/libssl.1.1.1.arm64.dylib -add_rpath @loader_path/../Frameworks lib/libssl.dylib || :
-        install_name_tool -id @rpath/libcrypto.1.1.1.arm64.dylib -add_rpath @loader_path/../Frameworks lib/libcrypto.dylib || :
+        install_name_tool -id @rpath/libssl.dylib -add_rpath @loader_path/../Frameworks lib/libssl.dylib || :
+        install_name_tool -id @rpath/libcrypto.dylib -add_rpath @loader_path/../Frameworks lib/libcrypto.dylib || :
         tar cJf ../openssl.tar.xz .
       working-directory: output
     - name: Upload Binary

@@ -669,8 +669,8 @@ jobs:
       if: inputs.build-m1
       run: |
         mkdir -p base-app/Contents/Frameworks/
-        cp m1-artifacts/lib/libssl.dylib base-app/Contents/Frameworks/libcrypto.1.1.1.arm64.dylib
-        cp m1-artifacts/lib/libcrypto.dylib base-app/Contents/Frameworks/libcrypto.1.1.1.arm64.dylib
+        lipo -create m1-artifacts/lib/libssl.dylib base-app/Contents/Frameworks/libssl.dylib -output base-app/Contents/Frameworks/libssl.dylib
+        lipo -create m1-artifacts/lib/libcrypto.dylib base-app/Contents/Frameworks/libcrypto.dylib -output base-app/Contents/Frameworks/libcrypto.dylib
         lipo -create m1-artifacts/libEGL.dylib base-app/Contents/Frameworks/libEGL.dylib -output base-app/Contents/Frameworks/libEGL.dylib
         lipo -create m1-artifacts/libGLESv2.dylib base-app/Contents/Frameworks/libGLESv2.dylib -output base-app/Contents/Frameworks/libGLESv2.dylib
         mkdir -p base-app/Contents/Resources/
@@ -678,6 +678,7 @@ jobs:
         mkdir -p base-app/Contents/MacOS/
         cp m1-artifacts/bin/mcpelauncher-client base-app/Contents/MacOS/mcpelauncher-client-arm64-v8a
         chmod +x base-app/Contents/MacOS/mcpelauncher-client-arm64-v8a
+        install_name_tool -add_rpath @loader_path/../Frameworks base-app/Contents/MacOS/mcpelauncher-client-arm64-v8a || :
     - name: Build
       run: |
         python3 __main__.py --qt-path qt/*/*${{ secrets.SPARKLE_ECDSA_PUB && format('{0} {1}', ' --update-sparkle-appcast https://github.com/${GITHUB_REPOSITORY}/releases/download/ng.dmg/appcast.xml --update-sparkle-ed-public-key ', secrets.SPARKLE_ECDSA_PUB) }} --app-root base-app --build-id ${{ steps.setup-vars.outputs.build-number }} --prettyversion "$(cat version.txt)-macOS-x86_64-0.${{ matrix.micro }}.${{ steps.setup-vars.outputs.build-number }}" --version "0.${{ matrix.micro }}.${{ steps.setup-vars.outputs.build-number }}" ${{ matrix.extraflags }}${{ !inputs.use-repo-files && inputs.submodule-refs && ' --skip-sync-sources' || '' }}${{ secrets.MacOSX1014sdk && ' --use-own-curl' || '' }}
