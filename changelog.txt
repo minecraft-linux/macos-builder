@@ -1,1 +1,1 @@
-<p>Initial 1.19.8x support with rollforward, no longer waiting for every Minecraft patch release to be tested</p><p>Implement xbox live websockets to fix joining xbox live friends</p>
+<p>fixes a problem that mcpelauncher m1 cannot find mcpelauncher-webview</p>
