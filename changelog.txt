@@ -1,1 +1,1 @@
-<p>fixes a problem that mcpelauncher m1 cannot find mcpelauncher-webview</p>
+<p>Port game launcher to macOS/arm64</p><p>Fix issues with 1.20.0 and 1.20.10.21</p><p>File picking on linux, this does not work on macOS yet</p><p>Fix a crash while using xbox live multiplayer</p>
