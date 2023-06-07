@@ -42,7 +42,7 @@ on:
         default: false
     secrets:
       MacOSX1014sdk:
-        description: 'A ssk key to download macOS sdk 10.14'
+        description: 'A ssh key to download macOS sdk 10.14'
         required: false
       SPARKLE_ECDSA:
         description: 'sparkle ecdsa public key'
@@ -434,6 +434,9 @@ jobs:
   build-m1:
     if: inputs.build-m1
     uses: ./.github/workflows/m1.yml
+    with:
+      mcpelauncher-manifest-repo: ${{ inputs.mcpelauncher-repo }}
+      mcpelauncher-manifest-ref: ${{ inputs.mcpelauncher-ref }}
   build:
     runs-on: macos-latest
     if: "!(cancelled() || failure())"
