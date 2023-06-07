@@ -174,9 +174,23 @@ jobs:
     - name: Install Deps
       shell: pwsh
       run: ${{ matrix.deps }}
-    - name: Cloning mcpelauncher ${{ inputs.mcpelauncher-manifest-repo }}/${{ inputs.mcpelauncher-manifest-ref }}
-      shell: pwsh
-      run: git clone --recursive ${{ inputs.mcpelauncher-manifest-repo }} -b ${{ inputs.mcpelauncher-manifest-ref }} mcpelauncher
+    - name: Sync Submodule Sources
+      uses: actions/github-script@v6
+      with:
+        github-token: none
+        script: |
+          var downloadRepo = async function(path, repo, ref) {
+            await io.mkdirP(path);
+            await exec.exec("git", ["init"], { cwd: path });
+            await exec.exec("git", ["remote", "add", "origin", repo], { cwd: path });
+            await exec.exec("git", ["fetch", "origin", ref], { cwd: path });
+            await exec.exec("git", ["reset", "--hard", "FETCH_HEAD"], { cwd: path });
+            await exec.exec("git", ["submodule", "update", "--init", "--recursive"], { cwd: path });
+          };
+          await downloadRepo("mcpelauncher", process.env.MCPELAUNCHER_REPO, process.env.MCPELAUNCHER_REF);
+      env:
+        MCPELAUNCHER_REPO: ${{ inputs.mcpelauncher-manifest-repo }}
+        MCPELAUNCHER_REF: ${{ inputs.mcpelauncher-manifest-ref }}
     - uses: actions/download-artifact@v3
       id: openssl
       if: ${{ matrix.openssl }}
