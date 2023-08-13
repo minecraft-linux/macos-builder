@@ -97,6 +97,10 @@ jobs:
             deps: ''
             version: '11.0'
             arch: 'arm64'
+          - OS: macos-latest
+            deps: ''
+            version: '10.14'
+            arch: 'x86_64'
     env:
       MACOSX_DEPLOYMENT_TARGET: ${{ matrix.version }}
       cache-name: cache-angle-${{ matrix.OS }}-${{ matrix.version }}-${{ matrix.arch }}
