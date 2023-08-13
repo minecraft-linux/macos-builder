@@ -428,6 +428,7 @@ jobs:
         make install -j8
       working-directory: protobuf
     - uses: actions/cache/save@v3
+      if: steps.cache.outputs.cache-hit != 'true'
       with:
         path: protobuf-build
         key: protobuf-macos-x64
