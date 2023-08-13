@@ -8,7 +8,17 @@ on:
         type: string
       mcpelauncher-manifest-ref:
         description: 'mcpelauncher ref'
-        default: 'm1-dev'
+        default: 'ng'
+        type: string
+  workflow_dispatch:
+    inputs:
+      mcpelauncher-manifest-repo:
+        description: 'mcpelauncher repo'
+        default: 'https://github.com/minecraft-linux/mcpelauncher-manifest.git'
+        type: string
+      mcpelauncher-manifest-ref:
+        description: 'mcpelauncher ref'
+        default: 'ng'
         type: string
       
 jobs:
