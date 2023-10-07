@@ -39,7 +39,7 @@ on:
         default: 0
       build-m1:
         type: boolean
-        default: false
+        default: true
     secrets:
       MacOSX1014sdk:
         description: 'A ssh key to download macOS sdk 10.14'
@@ -438,6 +438,7 @@ jobs:
     with:
       mcpelauncher-manifest-repo: ${{ inputs.mcpelauncher-repo }}
       mcpelauncher-manifest-ref: ${{ inputs.mcpelauncher-ref }}
+      submodule-refs: ${{ inputs.submodule-refs }}
   build:
     runs-on: macos-latest
     if: "!(cancelled() || failure())"
@@ -844,8 +845,8 @@ jobs:
 
           No sound on unsupported ancient mac's from pre 2012 in i386 compatibility mode
 
-          macOS/m1 mode is experimental and may be very unstable
-          To try it out see here https://github.com/minecraft-linux/mcpelauncher-manifest/discussions/819
+          macOS/m1 mode is experimental and is very unstable, **since macOS 14 you are no longer able to use the intel game client and have to use the m1/arm64-v8 game client**
+          Please leave a comment https://github.com/minecraft-linux/mcpelauncher-manifest/discussions/819 if the arm64 game launcher doesn't work at all on your m1/m2 mac, together with the whole log file of the crash or the log after a force quit
 
           ### Changelog
     - name: Publish release

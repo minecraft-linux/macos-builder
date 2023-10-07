@@ -10,6 +10,9 @@ on:
         description: 'mcpelauncher ref'
         default: 'ng'
         type: string
+      submodule-refs:
+        type: string
+        default: "[]"
   workflow_dispatch:
     inputs:
       mcpelauncher-manifest-repo:
@@ -20,6 +23,9 @@ on:
         description: 'mcpelauncher ref'
         default: 'ng'
         type: string
+      submodule-refs:
+        type: string
+        default: "[]"
       
 jobs:
   openssl:
@@ -198,7 +204,15 @@ jobs:
             await exec.exec("git", ["submodule", "update", "--init", "--recursive"], { cwd: path });
           };
           await downloadRepo("mcpelauncher", process.env.MCPELAUNCHER_REPO, process.env.MCPELAUNCHER_REF);
+          var submoduleRefs = JSON.parse(process.env.SUBMODULEREFS);
+          for(var submoduleRef of submoduleRefs) {
+            if(submoduleRef.project === "mcpelauncher") {
+              await exec.exec("git", ["fetch", submoduleRef.origin || "origin", submoduleRef.ref], { cwd: `${submoduleRef.project}/${submoduleRef.path}` });
+              await exec.exec("git", ["checkout", "FETCH_HEAD"], { cwd: `{submoduleRef.project}/${submoduleRef.path}` });
+            }
+          }
       env:
+        SUBMODULEREFS: ${{ inputs.submodule-refs || '[]' }}
         MCPELAUNCHER_REPO: ${{ inputs.mcpelauncher-manifest-repo }}
         MCPELAUNCHER_REF: ${{ inputs.mcpelauncher-manifest-ref }}
     - uses: actions/download-artifact@v3
