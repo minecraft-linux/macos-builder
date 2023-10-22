@@ -208,7 +208,7 @@ jobs:
           for(var submoduleRef of submoduleRefs) {
             if(submoduleRef.project === "mcpelauncher") {
               await exec.exec("git", ["fetch", submoduleRef.origin || "origin", submoduleRef.ref], { cwd: `${submoduleRef.project}/${submoduleRef.path}` });
-              await exec.exec("git", ["checkout", "FETCH_HEAD"], { cwd: `{submoduleRef.project}/${submoduleRef.path}` });
+              await exec.exec("git", ["checkout", "FETCH_HEAD"], { cwd: `${submoduleRef.project}/${submoduleRef.path}` });
             }
           }
       env:
