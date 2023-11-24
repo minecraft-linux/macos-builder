@@ -1,1 +1,1 @@
-<p>Fix fake AAsset loader to work with 1.20.50.21 (ChristopherHX)</p><p>AInputQueue mouse input for breaking changes in 1.20.50.22 (GameParrot)</p><p>Build bookworm based AppImages (ChristopherHX)</p><p>Fix xbox live ssl problems in arm64 debs (ChristopherHX)</p>
+<p>Remove support for running the Game Launcher via intel binaries under Rosetta 2 to avoid a crash on m-series macs caused by macOS 14 (ChristopherHX)</p>
