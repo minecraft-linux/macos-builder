@@ -695,9 +695,9 @@ jobs:
         mkdir -p dist
         mv "${{ github.workspace }}/output/Minecraft Bedrock Launcher.dmg" "dist/${DMG_FILENAME}"
     - name: Upload Build Artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
-        name: ${{ matrix.target }}
+        name: dmg-${{ matrix.target }}
         path: dist
   publish:
     runs-on: macos-latest
@@ -718,9 +718,10 @@ jobs:
           core.setOutput("repo", context.repo.repo);
           core.setOutput("build-number", "" + (${{ github.run_number }} + ${{ inputs.offset }}));
     - name: Download everything
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         path: sparkle
+        pattern: dmg-*
     - name: Download sparkle
       run: |
         curl -L -C - -o sparkle.tar.xz https://github.com/sparkle-project/Sparkle/releases/download/1.26.0/Sparkle-1.26.0.tar.xz
