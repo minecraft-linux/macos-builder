@@ -339,6 +339,18 @@ jobs:
         path: MacOSX10.14.sdk
       env:
         HAVE_SECRET: ${{ secrets.MacOSX1014sdk && '1' || '' }}
+    - name: Set up Python 3
+      if: steps.angle.outputs.cache-hit != 'true'
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3
+    - name: Set up Python 2
+      if: steps.angle.outputs.cache-hit != 'true'
+      uses: actions/setup-python@v4
+      with:
+        python-version: 2
+    - run: python --version
+      if: steps.angle.outputs.cache-hit != 'true'
     - uses: actions/checkout@v1
       if: env.MISSING_SECRET && steps.angle.outputs.cache-hit != 'true'
       with:
