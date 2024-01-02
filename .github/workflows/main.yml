@@ -352,6 +352,9 @@ jobs:
         shutil.copy2(path.join(DMG_MOUNT_PATH, 'Minecraft Bedrock Launcher.app', 'Contents', 'Frameworks', 'libGLESv2.dylib'), './source/osx-angle-ci/artifacts/libGLESv2.dylib', follow_symlinks = True)
       shell: python
       if: steps.angle.outputs.cache-hit != 'true'
+    - run: |
+        lipo -remove arm64 ./source/osx-angle-ci/artifacts/libEGL.dylib -output ./source/osx-angle-ci/artifacts/libEGL.dylib
+        lipo -remove arm64 ./source/osx-angle-ci/artifacts/libGLESv2.dylib -output ./source/osx-angle-ci/artifacts/libGLESv2.dylib
   build-protobuf:
     runs-on: macos-latest
     steps:
