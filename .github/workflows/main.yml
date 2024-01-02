@@ -330,65 +330,28 @@ jobs:
       with:
         path: source/osx-angle-ci/artifacts
         key: ${{ runner.os }}-build-${{ env.cache-name }}
-    - uses: actions/checkout@v3
-      if: env.HAVE_SECRET && steps.angle.outputs.cache-hit != 'true'
+    # See https://github.com/minecraft-linux/macos-builder/commit/2588136caaad8c993f3912d981dab13b9846360e for building it
+    # python2 now runs via python3 in macOS hosted runners
+    - uses: actions/setup-python@v4
       with:
-        repository: ${{ inputs.MacOSX1014sdkRepo}}
-        ref: ${{ inputs.MacOSX1014sdkRef }}
-        ssh-key: ${{ secrets.MacOSX1014sdk }}
-        path: MacOSX10.14.sdk
-      env:
-        HAVE_SECRET: ${{ secrets.MacOSX1014sdk && '1' || '' }}
-    - name: Set up Python 3
+        python-version: '3.x'
+        architecture: 'x64'
       if: steps.angle.outputs.cache-hit != 'true'
-      uses: actions/setup-python@v4
-      with:
-        python-version: 3
-    - name: Set up Python 2
-      if: steps.angle.outputs.cache-hit != 'true'
-      uses: actions/setup-python@v4
-      with:
-        python-version: 2
-    - run: python --version
-      if: steps.angle.outputs.cache-hit != 'true'
-    - uses: actions/checkout@v1
-      if: env.MISSING_SECRET && steps.angle.outputs.cache-hit != 'true'
-      with:
-        repository: phracker/MacOSX-SDKs
-        ref: refs/heads/master
-      env:
-        MISSING_SECRET: ${{ !secrets.MacOSX1014sdk && '1' || '' }}
-    - name: Update env
-      if: steps.angle.outputs.cache-hit != 'true'
-      run: |
-        echo MACOSX_DEPLOYMENT_TARGET=10.10.0 > $GITHUB_ENV
-        echo SDKROOT=${{ github.workspace }}/${{ secrets.MacOSX1014sdk && 'MacOSX10.14.sdk' || '../MacOSX-SDKs/MacOSX10.13.sdk' }} >> $GITHUB_ENV
-    - name: build angle
-      if: steps.angle.outputs.cache-hit != 'true'
-      run: |
-        curl -L https://github.com/ninja-build/ninja/releases/download/v1.11.1/ninja-mac.zip --output ninja-mac.zip
-        unzip ninja-mac.zip
-        git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
-        export PATH=$PATH:$PWD/depot_tools:$PWD
-        git clone https://github.com/minecraft-linux/angle.git
-        pushd angle
-        git checkout 26930173647bc0a4e8795f77c05456c5c0c37b8e
-        python scripts/bootstrap.py
-        gclient sync
-        gn gen out/Release --args='target_cpu="x86" is_debug=false mac_sdk_path="'"${SDKROOT}"'" mac_sdk_min="10.10.0" mac_min_system_version="10.10.0" mac_deployment_target="10.10.0" angle_enable_gl=true angle_enable_metal=false angle_enable_swiftshader=false angle_enable_vulkan=false treat_warnings_as_errors=false fatal_linker_warnings=false'
-        autoninja -C out/Release libEGL libGLESv2
-        # Disabled Metal due to bug reports
-        # Black screen for 10.12 and 10.13 builds via the 10.13sdk, the 10.14sdk make this not happen as often
-        # Renabled Metal, because it is no longer the default
-        gn gen out/Release64 --args='is_debug=false mac_sdk_path="'"${SDKROOT}"'" mac_sdk_min="10.10.0" mac_min_system_version="10.10.0" mac_deployment_target="10.10.0" angle_enable_gl=true angle_enable_metal=true angle_enable_swiftshader=false angle_enable_vulkan=false treat_warnings_as_errors=false fatal_linker_warnings=false'
-        autoninja -C out/Release64 libEGL libGLESv2
-        popd
-    - name: upload
-      if: steps.angle.outputs.cache-hit != 'true'
-      run: |
+    - run: |
         mkdir -p source/osx-angle-ci/artifacts
-        lipo -create angle/out/Release/libEGL.dylib angle/out/Release64/libEGL.dylib -output ./source/osx-angle-ci/artifacts/libEGL.dylib
-        lipo -create angle/out/Release/libGLESv2.dylib angle/out/Release64/libGLESv2.dylib -output ./source/osx-angle-ci/artifacts/libGLESv2.dylib
+      if: steps.angle.outputs.cache-hit != 'true'
+    - run: |
+        from subprocess import check_call as call
+        import shutil
+        from os import path
+        DMG_MOUNT_PATH = '/Volumes/Minecraft Bedrock Launcher/'
+        DMG_FILE = 'Minecraft Bedrock Launcher.dmg'
+        call(['curl', '-sL', '-o', DMG_FILE, 'https://github.com/minecraft-linux/macos-builder/releases/download/v0.12.2-448/Minecraft_Bedrock_Launcher_v0.12.2-macOS-x86_64-0.2.448_macOS_10.13.0.dmg'])
+        call(['hdiutil', 'attach', '-noautoopen', '-mountpoint', DMG_MOUNT_PATH, '-quiet', DMG_FILE])
+        shutil.copy2(path.join(DMG_MOUNT_PATH, 'Minecraft Bedrock Launcher.app', 'Contents', 'Frameworks', 'libEGL.dylib'), './source/osx-angle-ci/artifacts/libEGL.dylib', follow_symlinks = True)
+        shutil.copy2(path.join(DMG_MOUNT_PATH, 'Minecraft Bedrock Launcher.app', 'Contents', 'Frameworks', 'libGLESv2.dylib'), './source/osx-angle-ci/artifacts/libGLESv2.dylib', follow_symlinks = True)
+      shell: python
+      if: steps.angle.outputs.cache-hit != 'true'
   build-protobuf:
     runs-on: macos-latest
     steps:
