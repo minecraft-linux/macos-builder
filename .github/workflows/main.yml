@@ -355,6 +355,7 @@ jobs:
     - run: |
         lipo -remove arm64 ./source/osx-angle-ci/artifacts/libEGL.dylib -output ./source/osx-angle-ci/artifacts/libEGL.dylib
         lipo -remove arm64 ./source/osx-angle-ci/artifacts/libGLESv2.dylib -output ./source/osx-angle-ci/artifacts/libGLESv2.dylib
+      if: steps.angle.outputs.cache-hit != 'true'
   build-protobuf:
     runs-on: macos-latest
     steps:
