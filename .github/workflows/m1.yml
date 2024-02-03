@@ -138,7 +138,7 @@ jobs:
         python scripts/bootstrap.py
         gclient sync
         @"
-        --args=target_cpu="${{ matrix.arch }}"
+        target_cpu="${{ matrix.arch }}"
         is_debug=false
         mac_sdk_min="${{ matrix.version }}"
         mac_min_system_version="${{ matrix.version }}"
