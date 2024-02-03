@@ -39,7 +39,7 @@ jobs:
             sdkroot: ''
             version: '11.0'
             arch: 'arm64'
-            opensslflags: darwin64-arm64-cc
+            opensslflags: darwin64-arm64
     env:
       MACOSX_DEPLOYMENT_TARGET: ${{ matrix.version }}
       cache-name: cache-openssl-${{ matrix.OS }}-${{ matrix.version }}-${{ matrix.arch }}
@@ -69,12 +69,9 @@ jobs:
             $Env:SDKROOT = '${{ github.workspace }}/${{ matrix.sdkroot }}'
           }
         }
-        git clone https://github.com/openssl/openssl.git -b OpenSSL_1_1_1-stable
+        git clone https://github.com/openssl/openssl.git -b openssl-3.2
         $INSDIR = (Get-Location).ToString() + "/output"
         pushd openssl
-        # Workaround not merged arm64 mac support
-        git remote add darwin_arm https://github.com/stuartcarnie/openssl.git
-        git pull darwin_arm sgc/darwin64_arm
         perl ./Configure ${{ matrix.opensslflags }} ('--prefix=' + $INSDIR)
         make install_sw
     - name: Create tar archive
@@ -240,6 +237,7 @@ jobs:
         pushd build
         $EXTRA_FLAGS = ''
         if ('${{steps.openssl.outputs.download-path}}' -ne '') {
+          brew uninstall openssl@3
           if ($EXTRA_FLAGS -ne '') {
             $EXTRA_FLAGS += ' '
           }

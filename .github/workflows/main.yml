@@ -211,7 +211,7 @@ jobs:
     - name: Build OpenSSL
       if: steps.cache-openssl32.outputs.cache-hit != 'true'
       run: |
-        git clone https://github.com/openssl/openssl.git -b OpenSSL_1_1_1-stable
+        git clone https://github.com/openssl/openssl.git -b openssl-3.2
         cd openssl
         KERNEL_BITS=32 ./config --prefix="$PWD/../ssl32"
         make -j8
@@ -260,7 +260,7 @@ jobs:
     - name: Build OpenSSL
       if: steps.cache-openssl64.outputs.cache-hit != 'true'
       run: |
-        git clone https://github.com/openssl/openssl.git -b OpenSSL_1_1_1-stable
+        git clone https://github.com/openssl/openssl.git -b openssl-3.2
         cd openssl
         KERNEL_BITS=64 ./config --prefix="$PWD/../ssl64"
         make -j8
@@ -588,6 +588,7 @@ jobs:
     - name: brew install / link
       run: |
         brew install p7zip automake
+        brew uninstall openssl@3 || :
       env:
         HOMEBREW_NO_AUTO_UPDATE: 1
     - name: Cache qt
