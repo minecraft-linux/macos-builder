@@ -211,7 +211,8 @@ jobs:
     - name: Build OpenSSL
       if: steps.cache-openssl32.outputs.cache-hit != 'true'
       run: |
-        git clone https://github.com/openssl/openssl.git -b openssl-3.2
+        # Keep sing openssl 1.1.1 on 32bit, 3.2 refuses to configure
+        git clone https://github.com/openssl/openssl.git -b OpenSSL_1_1_1-stable
         cd openssl
         KERNEL_BITS=32 ./config --prefix="$PWD/../ssl32"
         make -j8
