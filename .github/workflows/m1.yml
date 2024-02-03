@@ -137,7 +137,7 @@ jobs:
         pushd angle
         python scripts/bootstrap.py
         gclient sync
-        gn gen ($INSDIR) ('--args=target_cpu=\"${{ matrix.arch }}\" is_debug=false mac_sdk_path=\"' + $Env:SDKROOT + '\" mac_sdk_min=\"${{ matrix.version }}\" mac_min_system_version=\"${{ matrix.version }}\" mac_deployment_target=\"${{ matrix.version }}\" angle_enable_metal=true angle_enable_swiftshader=false angle_enable_vulkan=false')
+        gn gen ($INSDIR) ('--args=target_cpu="${{ matrix.arch }}" is_debug=false mac_sdk_path="' + $Env:SDKROOT + '" mac_sdk_min="${{ matrix.version }}" mac_min_system_version="${{ matrix.version }}" mac_deployment_target="${{ matrix.version }}" angle_enable_metal=true angle_enable_swiftshader=false angle_enable_vulkan=false')
         autoninja -C ($INSDIR) libEGL libGLESv2
     - name: Create tar archive
       run: |
