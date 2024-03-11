@@ -253,7 +253,7 @@ jobs:
         pushd build
         $EXTRA_FLAGS = ''
         if ('${{steps.openssl.outputs.download-path}}' -ne '') {
-          brew uninstall openssl@3
+          brew uninstall --ignore-dependencies openssl@3
           if ($EXTRA_FLAGS -ne '') {
             $EXTRA_FLAGS += ' '
           }
