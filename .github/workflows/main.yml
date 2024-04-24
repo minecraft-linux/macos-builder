@@ -420,7 +420,7 @@ jobs:
       mcpelauncher-manifest-ref: ${{ inputs.mcpelauncher-ref }}
       submodule-refs: ${{ inputs.submodule-refs }}
   build:
-    runs-on: macos-13
+    runs-on: macos-12
     if: "!(cancelled() || failure())"
     needs: [build-libcxx, buildopenssl, buildangle, build-protobuf, build-m1]
     permissions:
