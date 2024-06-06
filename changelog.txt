@@ -1,1 +1,1 @@
-<p>Fix Minecraft Client to Client communication (webrtc) on macOS</p><p>Minecraft Client to Server communication (raknet) was working before this change</p>
+<p>New UI rewritten by devendrn, backported to qt5 and modified by christopherhx</p><p>Developer Settings mode are deprecated again for regular User, because they have been misused to break the Launcher without knowing it</p><p>webrtc patch from macOS now partially applied to linux</p><p>The gamelog window moved to sidebar</p><p>You can now encrypt your google credentials, to opt in logout and login again in settings</p>
