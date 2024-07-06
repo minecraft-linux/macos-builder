@@ -1,1 +1,1 @@
-<p>Fix a crash that could occur in getifaddr on startup of the game, after fixing lan multiplayer for macs</p>
+<p>Fixed ipv6 webrtc multiplayer problems by GameParrot</p><p>Custom Scaling of the menubar</p><p>Alt no longer focuses the menuabar by default, you would need to enable it yourself</p>
