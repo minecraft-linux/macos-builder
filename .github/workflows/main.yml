@@ -814,8 +814,20 @@ jobs:
         ./ghr*/ghr -t ${{ secrets.GITHUB_TOKEN }} -u ${{ steps.setup-vars.outputs.owner }} -r ${{ steps.setup-vars.outputs.repo }} ${{ !(github.ref == 'refs/heads/main' && !contains(github.event.head_commit.message, '[DRAFT]')) && '-draft ' || '' }}-b "$LAUNCHER_RELEASE_DESCRIPTION$(cat changelog.txt)" "$(cat version.txt)-${{ steps.setup-vars.outputs.build-number }}" dist2/
       env:
         LAUNCHER_RELEASE_DESCRIPTION: |
-          **You need to own Minecraft on the google play store and login with your google account to use this launcher**
           Links for linux flatpak or AppImage can be found on our wiki https://mcpelauncher.readthedocs.io.
+          
+          > [!CAUTION]
+          > - You need to own Minecraft on the google play store and login with your google account to use this launcher
+          > - Only mac models first sold in 2012 or later can run versions after Minecraft 1.20.15
+          
+          > [!IMPORTANT]  
+          > - There is no arm64 dmg file
+          >   - use the intel dmg for macOS 10.13 or newer
+          >   - the game itself will run on arm64
+          > - Hi CPU Load
+          >   - VSync is broken when not opt in to Metal in Profile Editor
+          >   - Metal Mode may cause a black Screen on game versions after 1.18.15
+          >   - The performance is better for linux, because we don't have to translate the Graphic Api
 
           [Download link for intel or amd based 64bit systems ( known as amd64, intel64 and x86_64 e.g. most PC's or Laptops )](https://github.com/${{ github.repository }}/releases/download/${{env.DMG_VERSION}}-${{ steps.setup-vars.outputs.build-number }}/Minecraft_Bedrock_Launcher_${{env.DMG_VERSION}}-macOS-x86_64-0.2.${{ steps.setup-vars.outputs.build-number }}_macOS_10.13.0.dmg)
 
