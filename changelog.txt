@@ -1,1 +1,1 @@
-<p>Fixed ipv6 webrtc multiplayer problems by GameParrot</p><p>Custom Scaling of the menubar</p><p>Alt no longer focuses the menuabar by default, you would need to enable it yourself</p>
+<p>Moved wiki to minecraft-linux.github.io</p><p>Fix audio when -fes is disabled like on macOS</p>
