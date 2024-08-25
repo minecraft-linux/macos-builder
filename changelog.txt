@@ -1,1 +1,3 @@
+<p>The current macOS port is about to stop receiving Minecraft updates in March 2025. Mojang is going to make OpenGL ES 3.1 required</p>
+<p>Removed (proprietary) fmod binaries, using the fmod for android instead bundled with the game</p><p>1.21.30 fmod fixes</p><p>WIP Mod list</p><p>Minecraft Trial and ChromeOS UI Support</p><p>A lot of minor changes</p>
 <p>Moved wiki to minecraft-linux.github.io</p><p>Fix audio when -fes is disabled like on macOS</p>
