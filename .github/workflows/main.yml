@@ -814,8 +814,12 @@ jobs:
         ./ghr*/ghr -t ${{ secrets.GITHUB_TOKEN }} -u ${{ steps.setup-vars.outputs.owner }} -r ${{ steps.setup-vars.outputs.repo }} ${{ !(github.ref == 'refs/heads/main' && !contains(github.event.head_commit.message, '[DRAFT]')) && '-draft ' || '' }}-b "$LAUNCHER_RELEASE_DESCRIPTION$(cat changelog.txt)" "$(cat version.txt)-${{ steps.setup-vars.outputs.build-number }}" dist2/
       env:
         LAUNCHER_RELEASE_DESCRIPTION: |
-          Links for linux flatpak or AppImage can be found on our wiki https://mcpelauncher.readthedocs.io.
+          Links for linux flatpak or AppImage can be found on our wiki https://minecraft-linux.github.io.
           
+          > [!WARNING]
+          > The current macOS port is about to stop receiving Minecraft updates in March 2025
+          > mojang is going to make OpenGL ES 3.1 required
+
           > [!CAUTION]
           > - You need to own Minecraft on the google play store and login with your google account to use this launcher
           > - Only mac models first sold in 2012 or later can run versions after Minecraft 1.20.15
