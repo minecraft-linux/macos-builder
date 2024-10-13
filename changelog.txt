@@ -1,1 +1,1 @@
-<p>This is a downgrade from a freely distributable app to use proprietary binares again</p><p>v1.0.x to 0.16.x, for Minecraft 1.21.20 or lower you still have release v0.15.2</p><p>Proprietary fmod rerelease</p>
+<p>Updated to be able to run up to 1.21.50.22 beta</p>
