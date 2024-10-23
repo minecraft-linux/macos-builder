@@ -17,7 +17,7 @@ jobs:
   ci:
     uses: ./.github/workflows/main.yml
     with:
-      publish: ${{ github.event_name == 'push' && github.server_url == 'https://github.com' }}
+      publish: ${{ github.event_name == 'push' && github.server_url == 'https://github.com' || github.event_name == 'workflow_dispatch' && inputs.type == 'release' }}
       use-repo-files: true
       offset: 400
       build-m1: true
