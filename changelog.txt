@@ -1,1 +1,1 @@
-<p>Updated to be able to run up to 1.21.50.22 beta</p>
+<p>Allow Minecraft 1.21.40 (ChromeOS Trial) to run</p>
