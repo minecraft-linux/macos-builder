@@ -238,6 +238,246 @@ jobs:
         cache-name: cache-openssl64-macos-10-10
       with:
         path: ssl64
+        key: ${{ runner.os }}-build-${{ env.cache-nameon:
+  workflow_call:
+    inputs:
+      submodule-refs:
+        type: string
+        default: "[]"
+      mcpelauncher-repo:
+        type: string
+        default: https://github.com/minecraft-linux/mcpelauncher-manifest
+      mcpelauncher-ref:
+        type: string
+        default: ${{ github.repository == 'minecraft-linux/mcpelauncher-manifest' && (github.sha || github.ref) || 'ng' }}
+      mcpelauncher-ui-repo:
+        type: string
+        default: https://github.com/minecraft-linux/mcpelauncher-ui-manifest
+      mcpelauncher-ui-ref:
+        type: string
+        default: ${{ github.repository == 'minecraft-linux/mcpelauncher-ui-manifest' && (github.sha || github.ref) || 'ng' }}
+      msa-repo:
+        type: string
+        default: https://github.com/minecraft-linux/msa-manifest
+      msa-ref:
+        type: string
+        default: ${{ github.repository == 'minecraft-linux/msa-manifest' && (github.sha || github.ref) || 'master' }}
+      MacOSX1014sdkRepo:
+        type: string
+        default: ChristopherHX/MacOSX10.14.sdk
+      MacOSX1014sdkRef:
+        type: string
+        default: 5d1c9b28f01ef0b01225f92670ee587b430efa8e
+      use-repo-files:
+        type: boolean
+        default: false
+      publish:
+        type: boolean
+        default: false
+      draft:
+        type: boolean
+        default: false
+      offset:
+        type: number
+        default: 0
+      build-m1:
+        type: boolean
+        default: true
+    secrets:
+      MacOSX1014sdk:
+        description: 'A ssh key to download macOS sdk 10.14'
+        required: false
+      SPARKLE_ECDSA:
+        description: 'sparkle ecdsa public key'
+        required: false
+      SPARKLE_ECDSA_PUB:
+        description: 'sparkle ecdsa public key'
+        required: false
+jobs:
+  build-libcxx32:
+    runs-on: macos-12
+    steps:
+    - name: Check Cache libcxx32
+      id: libcxx32-llvm
+      uses: ChristopherHX/check-cache@main
+      env:
+        cache-name: cache-libcxx32--macos-10-10-4
+      with:
+        path: libcxx32-build
+        key: ${{ runner.os }}-build-${{ env.cache-name }}
+    - name: Cache libcxx32
+      if: steps.libcxx32-llvm.outputs.cache-hit != 'true'
+      uses: actions/cache@v3
+      env:
+        cache-name: cache-libcxx32--macos-10-10-4
+      with:
+        path: libcxx32-build
+        key: ${{ runner.os }}-build-${{ env.cache-name }}
+    - uses: actions/checkout@v1
+      if: steps.libcxx32-llvm.outputs.cache-hit != 'true'
+      with:
+        repository: phracker/MacOSX-SDKs
+        ref: refs/heads/master
+    - name: Build libcxx, libcxxabi
+      if: steps.libcxx32-llvm.outputs.cache-hit != 'true'
+      run: |
+        export MACOSX_DEPLOYMENT_TARGET=10.10.0
+        export SDKROOT=${{ github.workspace }}/../MacOSX-SDKs/MacOSX10.10.sdk
+        git clone https://github.com/llvm/llvm-project.git llvm -b release/10.x
+        mkdir -p libcxx32-build
+        cd libcxx32-build
+        cmake ../llvm/llvm -DLLVM_ENABLE_PROJECTS="libcxx;libcxxabi" -DCMAKE_BUILD_TYPE=Release -DLIBCXX_BUILD_32_BITS=ON -DLIBCXXABI_BUILD_32_BITS=ON -DLLVM_BUILD_32_BITS=ON
+        make -j8 cxx cxxabi
+  build-libcxx64:
+    runs-on: macos-12
+    steps:
+    - name: Check Cache libcxx64
+      id: libcxx64-llvm
+      uses: ChristopherHX/check-cache@main
+      env:
+        cache-name: cache-libcxx64--macos-10-10-4
+      with:
+        path: libcxx64-build
+        key: ${{ runner.os }}-build-${{ env.cache-name }}
+    - name: Cache libcxx64
+      if: steps.libcxx64-llvm.outputs.cache-hit != 'true'
+      uses: actions/cache@v3
+      env:
+        cache-name: cache-libcxx64--macos-10-10-4
+      with:
+        path: libcxx64-build
+        key: ${{ runner.os }}-build-${{ env.cache-name }}
+    - uses: actions/checkout@v1
+      if: steps.libcxx64-llvm.outputs.cache-hit != 'true'
+      with:
+        repository: phracker/MacOSX-SDKs
+        ref: refs/heads/master
+    - name: Build libcxx, libcxxabi
+      if: steps.libcxx64-llvm.outputs.cache-hit != 'true'
+      run: |
+        export MACOSX_DEPLOYMENT_TARGET=10.10.0
+        export SDKROOT=${{ github.workspace }}/../MacOSX-SDKs/MacOSX10.10.sdk
+        git clone https://github.com/llvm/llvm-project.git llvm -b release/10.x
+        mkdir -p libcxx64-build
+        cd libcxx64-build
+        cmake ../llvm/llvm -DLLVM_ENABLE_PROJECTS="libcxx;libcxxabi" -DCMAKE_BUILD_TYPE=Release
+        make -j8 cxx cxxabi
+  build-libcxx:
+    runs-on: macos-13
+    needs: [build-libcxx32,build-libcxx64]
+    steps:
+    - name: Check libcxx
+      id: libcxx-llvm
+      uses: ChristopherHX/check-cache@main
+      env:
+        cache-name: cache-libcxx--macos-10-10-4
+      with:
+        path: libcxx-build
+        key: ${{ runner.os }}-build-${{ env.cache-name }}
+    - name: Cache libcxx32
+      if: steps.libcxx-llvm.outputs.cache-hit != 'true'
+      id: libcxx32-llvm
+      uses: actions/cache@v3
+      env:
+        cache-name: cache-libcxx32--macos-10-10-4
+      with:
+        path: libcxx32-build
+        key: ${{ runner.os }}-build-${{ env.cache-name }}
+    - name: Cache libcxx64
+      if: steps.libcxx-llvm.outputs.cache-hit != 'true'
+      id: libcxx64-llvm
+      uses: actions/cache@v3
+      env:
+        cache-name: cache-libcxx64--macos-10-10-4
+      with:
+        path: libcxx64-build
+        key: ${{ runner.os }}-build-${{ env.cache-name }}
+    - name: Cache libcxx
+      if: steps.libcxx-llvm.outputs.cache-hit != 'true'
+      uses: actions/cache@v3
+      env:
+        cache-name: cache-libcxx--macos-10-10-4
+      with:
+        path: libcxx-build
+        key: ${{ runner.os }}-build-${{ env.cache-name }}
+    - name: Build universal lib
+      if: steps.libcxx-llvm.outputs.cache-hit != 'true'
+      run: |
+        mkdir -p libcxx-build/
+        lipo -create libcxx32-build/lib/libc++.dylib libcxx64-build/lib/libc++.dylib -output libcxx-build/libc++.1.dylib
+        lipo -create libcxx32-build/lib/libc++abi.dylib libcxx64-build/lib/libc++abi.dylib -output libcxx-build/libc++abi.1.dylib
+        cd libcxx-build
+        ln -s libc++.1.dylib libc++.dylib
+        ln -s libc++abi.1.dylib libc++abi.dylib
+        install_name_tool -rpath @loader_path/../lib @loader_path/../Frameworks libc++.dylib
+        install_name_tool -rpath @loader_path/../lib @loader_path/../Frameworks libc++abi.dylib
+  buildopenssl32:
+    runs-on: macos-13
+    steps:
+    - name: Check for openssl
+      id: cache-openssl32
+      uses: ChristopherHX/check-cache@main
+      env:
+        cache-name: cache-openssl32-macos-10-10
+      with:
+        path: ssl32
+        key: ${{ runner.os }}-build-${{ env.cache-name }}
+    - name: Cache openssl
+      if: steps.cache-openssl32.outputs.cache-hit != 'true'
+      uses: actions/cache@v3
+      env:
+        cache-name: cache-openssl32-macos-10-10
+      with:
+        path: ssl32
+        key: ${{ runner.os }}-build-${{ env.cache-name }}
+    - uses: actions/checkout@v3
+      if: env.HAVE_SECRET && steps.cache-openssl32.outputs.cache-hit != 'true'
+      with:
+        repository: ${{ inputs.MacOSX1014sdkRepo}}
+        ref: ${{ inputs.MacOSX1014sdkRef }}
+        ssh-key: ${{ secrets.MacOSX1014sdk }}
+        path: MacOSX10.14.sdk
+      env:
+        HAVE_SECRET: ${{ secrets.MacOSX1014sdk && '1' || '' }}
+    - uses: actions/checkout@v1
+      if: env.MISSING_SECRET && steps.cache-openssl32.outputs.cache-hit != 'true'
+      with:
+        repository: phracker/MacOSX-SDKs
+        ref: refs/heads/master
+      env:
+        MISSING_SECRET: ${{ !secrets.MacOSX1014sdk && '1' || '' }}
+    - name: Update env
+      if: steps.cache-openssl32.outputs.cache-hit != 'true'
+      run: |
+        echo MACOSX_DEPLOYMENT_TARGET=10.10.0 > $GITHUB_ENV
+        echo SDKROOT=${{ github.workspace }}/${{ secrets.MacOSX1014sdk && 'MacOSX10.14.sdk' || '../MacOSX-SDKs/MacOSX10.13.sdk' }} >> $GITHUB_ENV
+    - name: Build OpenSSL
+      if: steps.cache-openssl32.outputs.cache-hit != 'true'
+      run: |
+        # Keep sing openssl 1.1.1 on 32bit, 3.2 refuses to configure
+        git clone https://github.com/openssl/openssl.git -b OpenSSL_1_1_1-stable
+        cd openssl
+        KERNEL_BITS=32 ./config --prefix="$PWD/../ssl32"
+        make -j8
+        sudo make install_sw -j8
+  buildopenssl64:
+    runs-on: macos-13
+    steps:
+    - name: Check for openssl
+      id: cache-openssl64
+      uses: ChristopherHX/check-cache@main
+      env:
+        cache-name: cache-openssl64-macos-10-10
+      with:
+        path: ssl64
+        key: ${{ runner.os }}-build-${{ env.cache-name }}
+    - name: Cache openssl
+      if: steps.cache-openssl64.outputs.cache-hit != 'true'
+      uses: actions/cache@v3
+      env:
+        cache-name: cache-openssl64-macos-10-10
+      with:
+        path: ssl64
         key: ${{ runner.os }}-build-${{ env.cache-name }}
     - uses: actions/checkout@v3
       if: env.HAVE_SECRET && steps.cache-openssl64.outputs.cache-hit != 'true'
@@ -415,7 +655,22 @@ jobs:
       with:
         path: protobuf-build
         key: protobuf-macos-x64
+  read-repo-files:
+    if: inputs.build-m1 && inputs.use-repo-files && !inputs.submodule-refs
+    runs-on: ubuntu-latest
+    steps:
+    - uses: ChristopherHX/oidc@f8f35d97bc37ffbe779bb3ab8453920fedf6fb37
+      id: oidc
+      continue-on-error: true
+    - uses: actions/checkout@v3
+      with:
+        repository: ${{ steps.oidc.outputs.job_workflow_repo_name_and_owner || inputs.submodule-refs && 'minecraft-linux/macos-builder' || github.repository }}
+        ref: ${{ steps.oidc.outputs.job_workflow_repo_ref || inputs.submodule-refs && 'main' || github.sha || github.ref }}
+    - name: Setup Env
+      run: |
+        echo "DMG_VERSION=$(cat mcpelauncher.txt)" >> $GITHUB_OUTPUT
   build-m1:
+    needs: read-repo-files
     if: inputs.build-m1
     uses: ./.github/workflows/m1.yml
     with:
@@ -862,6 +1117,12 @@ jobs:
               - all xbox http requests are signed by an ecdsa key
               - the second request using the token for sisu auth are always rejected by Xbox Live Servers with http code 403 Forbidden
             - this problem is not reproducable for developers
+
+          ### Changelog
+    - name: Publish release
+      if: steps.files-updated.result != 'skipped' && !contains(github.event.head_commit.message, '[DRAFT]') && !inputs.draft
+      run: |
+        ./ghr*/ghr -t ${{ secrets.GITHUB_TOKEN }} -u ${{ steps.setup-vars.outputs.owner }} -r ${{ steps.setup-vars.outputs.repo }} -replace ng.dmg dist/
 
           ### Changelog
     - name: Publish release
