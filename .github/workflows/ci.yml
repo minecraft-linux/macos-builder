@@ -23,7 +23,7 @@ jobs:
       run: |
         echo "mcpelauncher-ref=$(cat mcpelauncher.commit)" >> $GITHUB_OUTPUT
     outputs:
-      mcpelauncher-ref: ${{ steps.out.mcpelauncher-ref }}
+      mcpelauncher-ref: ${{ steps.out.outputs.mcpelauncher-ref }}
   ci:
     needs: read-repo-files
     if: (!cancelled())
