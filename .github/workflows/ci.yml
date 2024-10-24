@@ -14,7 +14,19 @@ on:
         - draft
         - release
 jobs:
+  read-repo-files:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup Outputs
+      id: out
+      run: |
+        echo "mcpelauncher-ref=$(cat mcpelauncher.commit)" >> $GITHUB_OUTPUT
+    outputs:
+      mcpelauncher-ref: ${{ steps.out.outputs.mcpelauncher-ref }}
   ci:
+    needs: read-repo-files
+    if: (!cancelled())
     uses: ./.github/workflows/main.yml
     with:
       publish: ${{ github.event_name == 'push' && github.server_url == 'https://github.com' || github.event_name == 'workflow_dispatch' && inputs.type == 'release' }}
@@ -22,4 +34,5 @@ jobs:
       offset: 400
       build-m1: true
       draft: ${{ github.event_name == 'workflow_dispatch' && inputs.type == 'draft' }}
+      mcpelauncher-ref: ${{ needs.read-repo-files.outputs.mcpelauncher-ref || 'ng' }}
     secrets: inherit
