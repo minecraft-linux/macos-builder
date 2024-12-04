@@ -410,8 +410,9 @@ jobs:
         mkdir -p "$GITHUB_WORKSPACE/protobuf-build"
         ./autogen.sh
         ./configure --prefix="$GITHUB_WORKSPACE/protobuf-build"
-        make -j8
-        make install -j8
+        cmake . -DCMAKE_BUILD_TYPE=Release -Dprotobuf_BUILD_TESTS=OFF -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/protobuf-build"
+        cmake --build . --parallel
+        cmake --build . --target install
       working-directory: protobuf
     - uses: actions/cache/save@v3
       if: steps.cache.outputs.cache-hit != 'true'
