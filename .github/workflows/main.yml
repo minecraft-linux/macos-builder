@@ -55,7 +55,7 @@ on:
         required: false
 jobs:
   build-libcxx32:
-    runs-on: macos-12
+    runs-on: macos-13
     steps:
     - name: Check Cache libcxx32
       id: libcxx32-llvm
@@ -89,7 +89,7 @@ jobs:
         cmake ../llvm/llvm -DLLVM_ENABLE_PROJECTS="libcxx;libcxxabi" -DCMAKE_BUILD_TYPE=Release -DLIBCXX_BUILD_32_BITS=ON -DLIBCXXABI_BUILD_32_BITS=ON -DLLVM_BUILD_32_BITS=ON
         make -j8 cxx cxxabi
   build-libcxx64:
-    runs-on: macos-12
+    runs-on: macos-13
     steps:
     - name: Check Cache libcxx64
       id: libcxx64-llvm
@@ -361,7 +361,7 @@ jobs:
         lipo -remove arm64 ./source/osx-angle-ci/artifacts/libGLESv2.dylib -output ./source/osx-angle-ci/artifacts/libGLESv2.dylib
       if: steps.angle.outputs.cache-hit != 'true'
   build-protobuf:
-    runs-on: macos-12
+    runs-on: macos-13
     steps:
     - uses: actions/cache/restore@v3
       id: cache
@@ -423,7 +423,7 @@ jobs:
       mcpelauncher-manifest-ref: ${{ inputs.mcpelauncher-ref }}
       submodule-refs: ${{ inputs.submodule-refs }}
   build:
-    runs-on: macos-12
+    runs-on: macos-13
     if: "!(cancelled() || failure())"
     needs: [build-libcxx, buildopenssl, buildangle, build-protobuf, build-m1]
     permissions:
