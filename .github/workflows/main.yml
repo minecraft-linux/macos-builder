@@ -408,8 +408,6 @@ jobs:
       if: steps.cache.outputs.cache-hit != 'true'
       run: |
         mkdir -p "$GITHUB_WORKSPACE/protobuf-build"
-        ./autogen.sh
-        ./configure --prefix="$GITHUB_WORKSPACE/protobuf-build"
         cmake . -DCMAKE_BUILD_TYPE=Release -Dprotobuf_BUILD_TESTS=OFF -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/protobuf-build"
         cmake --build . --parallel
         cmake --build . --target install
