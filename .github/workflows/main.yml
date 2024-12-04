@@ -362,9 +362,6 @@ jobs:
       if: steps.angle.outputs.cache-hit != 'true'
   build-protobuf:
     runs-on: macos-13
-    env:
-      CC: clang
-      CXX: clang++
     steps:
     - uses: actions/cache/restore@v3
       id: cache
