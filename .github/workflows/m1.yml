@@ -81,12 +81,12 @@ jobs:
         tar cJf ../openssl.tar.xz .
       working-directory: output
     - name: Upload Binary
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: openssl-${{ matrix.OS }}-${{ matrix.version }}-${{ matrix.arch }}
         path: output/
     - name: Upload Binary
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: openssl-${{ matrix.OS }}-${{ matrix.version }}-${{ matrix.arch }}-tar
         path: openssl.tar.xz
@@ -160,12 +160,12 @@ jobs:
         tar cJf ../angle.tar.xz .
       working-directory: output
     - name: Upload Binary
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: angle-${{ matrix.OS }}-${{ matrix.version }}-${{ matrix.arch }}
         path: output/
     - name: Upload Binary
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: angle-${{ matrix.OS }}-${{ matrix.version }}-${{ matrix.arch }}-tar
         path: angle.tar.xz
@@ -269,12 +269,12 @@ jobs:
         tar cJf ../mcpelauncher.tar.xz .
       working-directory: output
     - name: Upload Binary
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: mcpelauncher-${{ matrix.OS }}-${{ matrix.version }}-${{ matrix.arch }}
         path: output/
     - name: Upload tar
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: mcpelauncher-${{ matrix.OS }}-${{ matrix.version }}-${{ matrix.arch }}-tar
         path: mcpelauncher.tar.xz
