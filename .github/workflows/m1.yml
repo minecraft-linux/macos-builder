@@ -46,7 +46,7 @@ jobs:
     steps:
     - name: Cache openssl
       id: cache
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: output
         key: ${{ env.cache-name }}
@@ -106,7 +106,7 @@ jobs:
     steps:
     - name: Cache angle
       id: cache
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: output
         key: ${{ env.cache-name }}
