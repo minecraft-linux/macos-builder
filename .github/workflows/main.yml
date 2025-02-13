@@ -75,7 +75,7 @@ jobs:
       with:
         path: libcxx32-build
         key: ${{ runner.os }}-build-${{ env.cache-name }}
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v4
       if: steps.libcxx32-llvm.outputs.cache-hit != 'true'
       with:
         repository: phracker/MacOSX-SDKs
@@ -109,7 +109,7 @@ jobs:
       with:
         path: libcxx64-build
         key: ${{ runner.os }}-build-${{ env.cache-name }}
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v4
       if: steps.libcxx64-llvm.outputs.cache-hit != 'true'
       with:
         repository: phracker/MacOSX-SDKs
@@ -192,7 +192,7 @@ jobs:
       with:
         path: ssl32
         key: ${{ runner.os }}-build-${{ env.cache-name }}
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       if: env.HAVE_SECRET && steps.cache-openssl32.outputs.cache-hit != 'true'
       with:
         repository: ${{ inputs.MacOSX1014sdkRepo}}
@@ -201,7 +201,7 @@ jobs:
         path: MacOSX10.14.sdk
       env:
         HAVE_SECRET: ${{ secrets.MacOSX1014sdk && '1' || '' }}
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v4
       if: env.MISSING_SECRET && steps.cache-openssl32.outputs.cache-hit != 'true'
       with:
         repository: phracker/MacOSX-SDKs
@@ -241,7 +241,7 @@ jobs:
       with:
         path: ssl64
         key: ${{ runner.os }}-build-${{ env.cache-name }}
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       if: env.HAVE_SECRET && steps.cache-openssl64.outputs.cache-hit != 'true'
       with:
         repository: ${{ inputs.MacOSX1014sdkRepo}}
@@ -250,7 +250,7 @@ jobs:
         path: MacOSX10.14.sdk
       env:
         HAVE_SECRET: ${{ secrets.MacOSX1014sdk && '1' || '' }}
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v4
       if: env.MISSING_SECRET && steps.cache-openssl64.outputs.cache-hit != 'true'
       with:
         repository: phracker/MacOSX-SDKs
@@ -373,7 +373,7 @@ jobs:
         path: protobuf-build
         key: protobuf-macos-x64
         lookup-only: true
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       if: env.HAVE_SECRET && steps.cache.outputs.cache-hit != 'true'
       with:
         repository: ${{ inputs.MacOSX1014sdkRepo}}
@@ -382,7 +382,7 @@ jobs:
         path: MacOSX10.14.sdk
       env:
         HAVE_SECRET: ${{ secrets.MacOSX1014sdk && '1' || '' }}
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v4
       if: env.MISSING_SECRET && steps.cache.outputs.cache-hit != 'true'
       with:
         repository: phracker/MacOSX-SDKs
@@ -476,7 +476,7 @@ jobs:
     - uses: ChristopherHX/oidc@f8f35d97bc37ffbe779bb3ab8453920fedf6fb37
       id: oidc
       continue-on-error: true
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         repository: ${{ steps.oidc.outputs.job_workflow_repo_name_and_owner || inputs.submodule-refs && 'minecraft-linux/macos-builder' || github.repository }}
         ref: ${{ steps.oidc.outputs.job_workflow_repo_ref || inputs.submodule-refs && 'main' || github.sha || github.ref }}
@@ -621,7 +621,7 @@ jobs:
         QT_PACKAGE_PREFIX: ${{ matrix.QT_PACKAGE_PREFIX }}
         QT_PACKAGE_SUFFIX: ${{ matrix.QT_PACKAGE_SUFFIX }}
         QT_PREBUILT_SUFFIX: ${{ matrix.QT_PREBUILT_SUFFIX }}
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       if: env.HAVE_SECRET
       with:
         repository: ${{ inputs.MacOSX1014sdkRepo}}
@@ -630,7 +630,7 @@ jobs:
         path: MacOSX10.14.sdk
       env:
         HAVE_SECRET: ${{ secrets.MacOSX1014sdk && '1' || '' }}
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v4
       if: env.MISSING_SECRET
       with:
         repository: phracker/MacOSX-SDKs
@@ -695,7 +695,7 @@ jobs:
     # Eventually extend this job to be able to run on other repositories, otherwise replace the owner and repository name in this job
     if: ${{ !cancelled() && inputs.publish }}
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Setup Env
       run: |
         echo "DMG_VERSION=$(cat version.txt)" >> $GITHUB_ENV
