@@ -467,7 +467,7 @@ jobs:
       run: sudo xcode-select -switch /Applications/Xcode_14.2.app
     - name: Setup Vars
       id: setup-vars
-      uses: actions/github-script@v6
+      uses: actions/github-script@v7
       with:
         script: |
           core.setOutput("owner", context.repo.owner);
@@ -482,7 +482,7 @@ jobs:
         ref: ${{ steps.oidc.outputs.job_workflow_repo_ref || inputs.submodule-refs && 'main' || github.sha || github.ref }}
     - name: Sync Submodule Sources
       if: ${{ !inputs.use-repo-files && inputs.submodule-refs }}
-      uses: actions/github-script@v6
+      uses: actions/github-script@v7
       with:
         github-token: none
         script: |
@@ -701,7 +701,7 @@ jobs:
         echo "DMG_VERSION=$(cat version.txt)" >> $GITHUB_ENV
     - name: Setup Vars
       id: setup-vars
-      uses: actions/github-script@v6
+      uses: actions/github-script@v7
       with:
         script: |
           core.setOutput("owner", context.repo.owner);
