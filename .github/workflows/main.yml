@@ -513,19 +513,19 @@ jobs:
 
     - name: download m1 angle
       if: inputs.build-m1
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: angle-macos-latest-11.0-arm64
         path: "m1-artifacts"
     - name: download m1 openssl
       if: inputs.build-m1
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: openssl-macos-latest-11.0-arm64
         path: "m1-artifacts"
     - name: download m1 mcpelauncher
       if: inputs.build-m1
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: mcpelauncher-macos-latest-11.0-arm64
         path: "m1-artifacts"
