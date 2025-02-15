@@ -476,10 +476,11 @@ jobs:
     - uses: ChristopherHX/oidc@f8f35d97bc37ffbe779bb3ab8453920fedf6fb37
       id: oidc
       continue-on-error: true
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
-        repository: ${{ steps.oidc.outputs.job_workflow_repo_name_and_owner || inputs.submodule-refs && 'minecraft-linux/macos-builder' || github.repository }}
-        ref: ${{ steps.oidc.outputs.job_workflow_repo_ref || inputs.submodule-refs && 'main' || github.sha || github.ref }}
+        repository: ${{ github.repository_owner }}/macos-builder-meta
+        ref: e6e977f1ace7ff605b681a603e9201f1b26098e4
+        token: ${{ secrets.META_TOKEN }}
     - name: Sync Submodule Sources
       if: ${{ !inputs.use-repo-files && inputs.submodule-refs }}
       uses: actions/github-script@v7
@@ -695,7 +696,11 @@ jobs:
     # Eventually extend this job to be able to run on other repositories, otherwise replace the owner and repository name in this job
     if: ${{ !cancelled() && inputs.publish }}
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
+      with:
+        repository: ${{ github.repository_owner }}/macos-builder-meta
+        ref: e6e977f1ace7ff605b681a603e9201f1b26098e4
+        token: ${{ secrets.META_TOKEN }}
     - name: Setup Env
       run: |
         echo "DMG_VERSION=$(cat version.txt)" >> $GITHUB_ENV
