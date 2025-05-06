@@ -473,7 +473,7 @@ jobs:
           core.setOutput("owner", context.repo.owner);
           core.setOutput("repo", context.repo.repo);
           core.setOutput("build-number", "" + (${{ github.run_number }} + ${{ inputs.offset }}));
-    - uses: ChristopherHX/oidc@f8f35d97bc37ffbe779bb3ab8453920fedf6fb37
+    - uses: ChristopherHX/oidc@73eee1ff03fdfce10eda179f617131532209edbd
       id: oidc
       continue-on-error: true
     - uses: actions/checkout@v3
