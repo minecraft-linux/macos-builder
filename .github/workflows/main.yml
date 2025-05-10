@@ -27,7 +27,7 @@ on:
         default: ChristopherHX/MacOSX10.14.sdk
       MacOSX1014sdkRef:
         type: string
-        default: 5d1c9b28f01ef0b01225f92670ee587b430efa8e
+        default: 18f574aa8d71402560dd3cbf349a9f8b2cec3833
       use-repo-files:
         type: boolean
         default: false
