@@ -338,7 +338,7 @@ jobs:
         key: ${{ runner.os }}-build-${{ env.cache-name }}
     # See https://github.com/minecraft-linux/macos-builder/commit/2588136caaad8c993f3912d981dab13b9846360e for building it
     # python2 now runs via python3 in macOS hosted runners
-    - uses: actions/setup-python@v5
+    - uses: actions/setup-python@v6
       with:
         python-version: '3.x'
         architecture: 'x64'
@@ -717,7 +717,7 @@ jobs:
         curl -L -C - -o sparkle.tar.xz https://github.com/sparkle-project/Sparkle/releases/download/1.26.0/Sparkle-1.26.0.tar.xz
         tar -xf ./sparkle.tar.xz
     - name: Set up Python 3.9
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v6
       with:
         python-version: 3.9
     - name: Download some old dmg's and generate deltas
