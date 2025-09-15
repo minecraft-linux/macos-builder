@@ -61,7 +61,7 @@ jobs:
     - name: Setup CMake 4
       uses: jwlawson/actions-setup-cmake@v2
       with:
-        cmake-version: '4.x'
+        cmake-version: '3.x'
     - name: Select Xcode
       run: sudo xcode-select -switch /Applications/Xcode_14.2.app
     - name: Check Cache libcxx32
@@ -101,7 +101,7 @@ jobs:
     - name: Setup CMake 4
       uses: jwlawson/actions-setup-cmake@v2
       with:
-        cmake-version: '4.x'
+        cmake-version: '3.x'
     - name: Check Cache libcxx64
       id: libcxx64-llvm
       uses: ChristopherHX/check-cache@main
@@ -140,7 +140,7 @@ jobs:
     - name: Setup CMake 4
       uses: jwlawson/actions-setup-cmake@v2
       with:
-        cmake-version: '4.x'
+        cmake-version: '3.x'
     - name: Check libcxx
       id: libcxx-llvm
       uses: ChristopherHX/check-cache@main
@@ -192,7 +192,7 @@ jobs:
     - name: Setup CMake 4
       uses: jwlawson/actions-setup-cmake@v2
       with:
-        cmake-version: '4.x'
+        cmake-version: '3.x'
     - name: Check for openssl
       id: cache-openssl32
       uses: ChristopherHX/check-cache@main
@@ -245,7 +245,7 @@ jobs:
     - name: Setup CMake 4
       uses: jwlawson/actions-setup-cmake@v2
       with:
-        cmake-version: '4.x'
+        cmake-version: '3.x'
     - name: Check for openssl
       id: cache-openssl64
       uses: ChristopherHX/check-cache@main
@@ -299,7 +299,7 @@ jobs:
     - name: Setup CMake 4
       uses: jwlawson/actions-setup-cmake@v2
       with:
-        cmake-version: '4.x'
+        cmake-version: '3.x'
     - name: Check openssl
       id: openssl
       uses: ChristopherHX/check-cache@main
@@ -491,7 +491,7 @@ jobs:
     - name: Setup CMake 4
       uses: jwlawson/actions-setup-cmake@v2
       with:
-        cmake-version: '4.x'
+        cmake-version: '3.x'
     - name: Select Xcode
       run: sudo xcode-select -switch /Applications/Xcode_14.2.app
     - name: Setup Vars
