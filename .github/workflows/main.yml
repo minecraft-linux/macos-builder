@@ -54,9 +54,14 @@ on:
         description: 'sparkle ecdsa public key'
         required: false
 jobs:
+
   build-libcxx32:
     runs-on: macos-13
     steps:
+    - name: Setup CMake 4
+      uses: jwlawson/actions-setup-cmake@v2
+      with:
+        cmake-version: '4.x'
     - name: Select Xcode
       run: sudo xcode-select -switch /Applications/Xcode_14.2.app
     - name: Check Cache libcxx32
@@ -93,6 +98,10 @@ jobs:
   build-libcxx64:
     runs-on: macos-13
     steps:
+    - name: Setup CMake 4
+      uses: jwlawson/actions-setup-cmake@v2
+      with:
+        cmake-version: '4.x'
     - name: Check Cache libcxx64
       id: libcxx64-llvm
       uses: ChristopherHX/check-cache@main
@@ -128,6 +137,10 @@ jobs:
     runs-on: macos-13
     needs: [build-libcxx32,build-libcxx64]
     steps:
+    - name: Setup CMake 4
+      uses: jwlawson/actions-setup-cmake@v2
+      with:
+        cmake-version: '4.x'
     - name: Check libcxx
       id: libcxx-llvm
       uses: ChristopherHX/check-cache@main
@@ -176,6 +189,10 @@ jobs:
   buildopenssl32:
     runs-on: macos-13
     steps:
+    - name: Setup CMake 4
+      uses: jwlawson/actions-setup-cmake@v2
+      with:
+        cmake-version: '4.x'
     - name: Check for openssl
       id: cache-openssl32
       uses: ChristopherHX/check-cache@main
@@ -225,6 +242,10 @@ jobs:
   buildopenssl64:
     runs-on: macos-13
     steps:
+    - name: Setup CMake 4
+      uses: jwlawson/actions-setup-cmake@v2
+      with:
+        cmake-version: '4.x'
     - name: Check for openssl
       id: cache-openssl64
       uses: ChristopherHX/check-cache@main
@@ -275,6 +296,10 @@ jobs:
     runs-on: macos-13
     needs: [buildopenssl32, buildopenssl64]
     steps:
+    - name: Setup CMake 4
+      uses: jwlawson/actions-setup-cmake@v2
+      with:
+        cmake-version: '4.x'
     - name: Check openssl
       id: openssl
       uses: ChristopherHX/check-cache@main
@@ -463,6 +488,10 @@ jobs:
             QT_PACKAGE_SUFFIX: clang_64
             QT_PREBUILT_SUFFIX: -MacOS-MacOS_10_13-Clang-MacOS-MacOS_10_13-X86_64
     steps:
+    - name: Setup CMake 4
+      uses: jwlawson/actions-setup-cmake@v2
+      with:
+        cmake-version: '4.x'
     - name: Select Xcode
       run: sudo xcode-select -switch /Applications/Xcode_14.2.app
     - name: Setup Vars
