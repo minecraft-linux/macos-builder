@@ -203,7 +203,7 @@ jobs:
     - name: Setup CMake 4
       uses: jwlawson/actions-setup-cmake@v2
       with:
-        cmake-version: '4.x'
+        cmake-version: '3.x'
     - name: Install Deps
       shell: pwsh
       run: ${{ matrix.deps }}
@@ -282,5 +282,6 @@ jobs:
       with:
         name: mcpelauncher-${{ matrix.OS }}-${{ matrix.version }}-${{ matrix.arch }}-tar
         path: mcpelauncher.tar.xz
+
 
 
