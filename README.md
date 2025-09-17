@@ -9,7 +9,7 @@ Any attempt to document workarounds or make it easy to import an paid apk withou
 
 Game licenses can be revoked at any point of time by you, Microsoft/Mojang or Google, as it happened for all residents of Russia.
 
-Ignoring this policy may cause suspension including termination of this project like when it happened between 2022-2023.
+Violation of this policy may result in the suspension or termination of this project, which has occurred during the 2022-23 period.
 
 _Exception to the rule are Minecraft Trial and Edu where the latter doesn't work at this time._
 
