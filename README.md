@@ -13,4 +13,4 @@ Violation of this policy may result in the suspension or termination of this pro
 
 _Exception to the rule are Minecraft Trial and Edu where the latter doesn't work at this time._
 
-For the most current version of this rule, please see https://minecraft-linux.github.io/faq/index.html#can-i-play-with-an-apk
+For the latest version of this rule, please see https://minecraft-linux.github.io/faq/index.html#can-i-play-with-an-apk
