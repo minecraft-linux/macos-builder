@@ -54,7 +54,6 @@ on:
         description: 'sparkle ecdsa public key'
         required: false
 jobs:
-
   build-libcxx32:
     runs-on: macos-13
     steps:
