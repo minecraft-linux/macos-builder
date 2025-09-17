@@ -58,7 +58,7 @@ jobs:
   build-libcxx32:
     runs-on: macos-13
     steps:
-    - name: Setup CMake 4
+    - name: Setup CMake 3
       uses: jwlawson/actions-setup-cmake@v2
       with:
         cmake-version: '3.x'
@@ -98,7 +98,7 @@ jobs:
   build-libcxx64:
     runs-on: macos-13
     steps:
-    - name: Setup CMake 4
+    - name: Setup CMake 3
       uses: jwlawson/actions-setup-cmake@v2
       with:
         cmake-version: '3.x'
@@ -137,7 +137,7 @@ jobs:
     runs-on: macos-13
     needs: [build-libcxx32,build-libcxx64]
     steps:
-    - name: Setup CMake 4
+    - name: Setup CMake 3
       uses: jwlawson/actions-setup-cmake@v2
       with:
         cmake-version: '3.x'
@@ -189,7 +189,7 @@ jobs:
   buildopenssl32:
     runs-on: macos-13
     steps:
-    - name: Setup CMake 4
+    - name: Setup CMake 3
       uses: jwlawson/actions-setup-cmake@v2
       with:
         cmake-version: '3.x'
@@ -242,7 +242,7 @@ jobs:
   buildopenssl64:
     runs-on: macos-13
     steps:
-    - name: Setup CMake 4
+    - name: Setup CMake 3
       uses: jwlawson/actions-setup-cmake@v2
       with:
         cmake-version: '3.x'
@@ -296,7 +296,7 @@ jobs:
     runs-on: macos-13
     needs: [buildopenssl32, buildopenssl64]
     steps:
-    - name: Setup CMake 4
+    - name: Setup CMake 3
       uses: jwlawson/actions-setup-cmake@v2
       with:
         cmake-version: '3.x'
@@ -488,7 +488,7 @@ jobs:
             QT_PACKAGE_SUFFIX: clang_64
             QT_PREBUILT_SUFFIX: -MacOS-MacOS_10_13-Clang-MacOS-MacOS_10_13-X86_64
     steps:
-    - name: Setup CMake 4
+    - name: Setup CMake 3
       uses: jwlawson/actions-setup-cmake@v2
       with:
         cmake-version: '3.x'
