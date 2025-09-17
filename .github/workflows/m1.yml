@@ -200,7 +200,7 @@ jobs:
       with:
         repository: phracker/MacOSX-SDKs
         ref: refs/heads/master
-    - name: Setup CMake 4
+    - name: Setup CMake 3
       uses: jwlawson/actions-setup-cmake@v2
       with:
         cmake-version: '3.x'
@@ -282,6 +282,3 @@ jobs:
       with:
         name: mcpelauncher-${{ matrix.OS }}-${{ matrix.version }}-${{ matrix.arch }}-tar
         path: mcpelauncher.tar.xz
-
-
-
