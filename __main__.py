@@ -103,7 +103,8 @@ else:
 if not path.isdir(CMAKE_INSTALL_PREFIX):
     makedirs(CMAKE_INSTALL_PREFIX)
 
-cmake_cmd = ['cmake', source_dir, '-DCMAKE_INSTALL_PREFIX=' + CMAKE_INSTALL_PREFIX, '-DCMAKE_POLICY_VERSION_MINIMUM=4.0']
+def cmake_cmd(source_dir):
+    return ['cmake', source_dir, '-DCMAKE_INSTALL_PREFIX=' + CMAKE_INSTALL_PREFIX, '-DCMAKE_POLICY_VERSION_MINIMUM=4.0']
 
 def build_component(name, cmake_opts):
     display_stage("Building: " + name)
@@ -111,7 +112,7 @@ def build_component(name, cmake_opts):
     build_dir = path.join(SOURCE_DIR, "build", name)
     if not path.isdir(build_dir):
         makedirs(build_dir)
-    call(cmake_cmd + cmake_opts, cwd=build_dir)
+    call(cmake_cmd(source_dir) + cmake_opts, cwd=build_dir)
     call(['make', '-j' + str(cpu_count()), 'install'], cwd=build_dir)
 
 def build_component32(name, cmake_opts):
@@ -120,7 +121,7 @@ def build_component32(name, cmake_opts):
     build_dir = path.join(SOURCE_DIR, "build", name)
     if not path.isdir(build_dir):
         makedirs(build_dir)
-    call(cmake_cmd + cmake_opts, cwd=build_dir)
+    call(cmake_cmd(source_dir) + cmake_opts, cwd=build_dir)
     call(['make', '-j' + str(cpu_count())], cwd=build_dir)
     shutil.copy2(path.join(build_dir, 'mcpelauncher-client', 'mcpelauncher-client'), path.join(CMAKE_INSTALL_PREFIX, 'bin', 'mcpelauncher-client32'))
 
