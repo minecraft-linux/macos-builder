@@ -711,7 +711,7 @@ jobs:
     # Eventually extend this job to be able to run on other repositories, otherwise replace the owner and repository name in this job
     if: ${{ !cancelled() && inputs.publish }}
     env:
-      DRAFT: ${{ !inputs.release && (github.ref != 'refs/heads/main' || contains(github.event.head_commit.message, '[DRAFT]') || inputs.draft) && '1' || '0'
+      DRAFT: ${{ !inputs.release && (github.ref != 'refs/heads/main' || contains(github.event.head_commit.message, '[DRAFT]') || inputs.draft) && '1' || '0' }}
     steps:
     - uses: actions/checkout@v4
       with:
