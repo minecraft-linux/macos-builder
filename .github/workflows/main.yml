@@ -37,6 +37,9 @@ on:
       draft:
         type: boolean
         default: false
+      release:
+        type: boolean
+        default: false
       offset:
         type: number
         default: 0
@@ -707,6 +710,8 @@ jobs:
     needs: build
     # Eventually extend this job to be able to run on other repositories, otherwise replace the owner and repository name in this job
     if: ${{ !cancelled() && inputs.publish }}
+    env:
+      DRAFT: ${{ !inputs.release && (github.ref != 'refs/heads/main' || contains(github.event.head_commit.message, '[DRAFT]') || inputs.draft) && '1' || '0'
     steps:
     - uses: actions/checkout@v4
       with:
@@ -834,10 +839,10 @@ jobs:
       run: |
         curl -L https://github.com/tcnksm/ghr/releases/download/v0.13.0/ghr_v0.13.0_darwin_amd64.zip --output ghr.zip
         unzip ghr.zip
-    - name: Upload ${{ github.ref == 'refs/heads/main' && !contains(github.event.head_commit.message, '[DRAFT]' && !inputs.draft) && 'Latest' || 'Draft' }}
+    - name: Upload ${{ env.DRAFT == '0' && 'Latest' || 'Draft' }}
       if: steps.files-updated.result != 'skipped'
       run: |
-        ./ghr*/ghr -c ${{ github.sha }} -t ${{ secrets.GITHUB_TOKEN }} -u ${{ steps.setup-vars.outputs.owner }} -r ${{ steps.setup-vars.outputs.repo }} ${{ !(github.ref == 'refs/heads/main' && !contains(github.event.head_commit.message, '[DRAFT]') && !inputs.draft) && '-draft ' || '' }}-b "$LAUNCHER_RELEASE_DESCRIPTION$(cat changelog.txt)" "$(cat version.txt)-${{ steps.setup-vars.outputs.build-number }}" dist2/
+        ./ghr*/ghr -c ${{ github.sha }} -t ${{ secrets.GITHUB_TOKEN }} -u ${{ steps.setup-vars.outputs.owner }} -r ${{ steps.setup-vars.outputs.repo }} ${{ env.DRAFT == '1' && '-draft ' || '' }}-b "$LAUNCHER_RELEASE_DESCRIPTION$(cat changelog.txt)" "$(cat version.txt)-${{ steps.setup-vars.outputs.build-number }}" dist2/
       env:
         LAUNCHER_RELEASE_DESCRIPTION: |
           Links for linux flatpak or AppImage can be found on our wiki https://minecraft-linux.github.io.
@@ -888,6 +893,6 @@ jobs:
 
           ### Changelog
     - name: Publish release
-      if: steps.files-updated.result != 'skipped' && !contains(github.event.head_commit.message, '[DRAFT]') && !inputs.draft
+      if: steps.files-updated.result != 'skipped' && env.DRAFT == '0'
       run: |
         ./ghr*/ghr -t ${{ secrets.GITHUB_TOKEN }} -u ${{ steps.setup-vars.outputs.owner }} -r ${{ steps.setup-vars.outputs.repo }} -replace ng.dmg dist/

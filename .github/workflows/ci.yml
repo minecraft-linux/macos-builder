@@ -34,10 +34,11 @@ jobs:
     if: (!cancelled())
     uses: ./.github/workflows/main.yml
     with:
-      publish: ${{ github.event_name == 'push' && github.server_url == 'https://github.com' || github.event_name == 'workflow_dispatch' && inputs.type == 'release' }}
+      publish: ${{ github.event_name == 'push' && github.server_url == 'https://github.com' || github.event_name == 'workflow_dispatch' && (inputs.type == 'release' || inputs.type == 'draft') }}
       use-repo-files: true
       offset: 400
       build-m1: true
+      release: ${{ github.event_name == 'workflow_dispatch' && inputs.type == 'release' }}
       draft: ${{ github.event_name == 'workflow_dispatch' && inputs.type == 'draft' }}
       mcpelauncher-ref: ${{ needs.read-repo-files.outputs.mcpelauncher-ref || 'ng' }}
     secrets: inherit
