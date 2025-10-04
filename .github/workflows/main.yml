@@ -27,7 +27,7 @@ on:
         default: ChristopherHX/MacOSX10.14.sdk
       MacOSX1014sdkRef:
         type: string
-        default: 5d1c9b28f01ef0b01225f92670ee587b430efa8e
+        default: 18f574aa8d71402560dd3cbf349a9f8b2cec3833
       use-repo-files:
         type: boolean
         default: false
@@ -88,7 +88,7 @@ jobs:
         git clone https://github.com/llvm/llvm-project.git llvm -b release/10.x
         mkdir -p libcxx32-build
         cd libcxx32-build
-        cmake ../llvm/llvm -DHAVE_CXX_ATOMICS_WITHOUT_LIB=ON -DHAVE_CXX_ATOMICS64_WITHOUT_LIB=ON -DLLVM_ENABLE_PROJECTS="libcxx;libcxxabi" -DCMAKE_BUILD_TYPE=Release -DLIBCXX_BUILD_32_BITS=ON -DLIBCXXABI_BUILD_32_BITS=ON -DLLVM_BUILD_32_BITS=ON
+        cmake ../llvm/llvm -DCMAKE_POLICY_VERSION_MINIMUM=4.0 -DHAVE_CXX_ATOMICS_WITHOUT_LIB=ON -DHAVE_CXX_ATOMICS64_WITHOUT_LIB=ON -DLLVM_ENABLE_PROJECTS="libcxx;libcxxabi" -DCMAKE_BUILD_TYPE=Release -DLIBCXX_BUILD_32_BITS=ON -DLIBCXXABI_BUILD_32_BITS=ON -DLLVM_BUILD_32_BITS=ON
         make -j8 cxx cxxabi
   build-libcxx64:
     runs-on: macos-13
@@ -122,7 +122,7 @@ jobs:
         git clone https://github.com/llvm/llvm-project.git llvm -b release/10.x
         mkdir -p libcxx64-build
         cd libcxx64-build
-        cmake ../llvm/llvm -DHAVE_CXX_ATOMICS_WITHOUT_LIB=ON -DHAVE_CXX_ATOMICS64_WITHOUT_LIB=ON -DLLVM_ENABLE_PROJECTS="libcxx;libcxxabi" -DCMAKE_BUILD_TYPE=Release
+        cmake ../llvm/llvm -DCMAKE_POLICY_VERSION_MINIMUM=4.0 -DHAVE_CXX_ATOMICS_WITHOUT_LIB=ON -DHAVE_CXX_ATOMICS64_WITHOUT_LIB=ON -DLLVM_ENABLE_PROJECTS="libcxx;libcxxabi" -DCMAKE_BUILD_TYPE=Release
         make -j8 cxx cxxabi
   build-libcxx:
     runs-on: macos-13
@@ -462,6 +462,8 @@ jobs:
             QT_PACKAGE_PREFIX: qt.qt5.5150.
             QT_PACKAGE_SUFFIX: clang_64
             QT_PREBUILT_SUFFIX: -MacOS-MacOS_10_13-Clang-MacOS-MacOS_10_13-X86_64
+    env:
+      CMAKE_OSX_ARCHITECTURES: x86_64 # Is this needed? archive member: libglfw3.a(cocoa_init.m.o) cputype (16777223) does not match previous archive members cputype (7) (all members must match)
     steps:
     - name: Select Xcode
       run: sudo xcode-select -switch /Applications/Xcode_14.2.app
@@ -648,7 +650,7 @@ jobs:
         git -C libzip checkout v1.9.2
     - name: Build libzip
       run: |
-        cmake libzip -B libzip-build -DBUILD_TOOLS=OFF -DBUILD_REGRESS=OFF -DBUILD_EXAMPLES=OFF -DBUILD_DOC=OFF -DENABLE_BZIP2=OFF -DENABLE_LZMA=OFF -DENABLE_ZSTD=OFF -DENABLE_COMMONCRYPTO=OFF -DENABLE_GNUTLS=OFF -DENABLE_MBEDTLS=OFF -DENABLE_OPENSSL=OFF -DENABLE_WINDOWS_CRYPTO=OFF -DENABLE_FDOPEN=OFF
+        cmake libzip -B libzip-build -DCMAKE_POLICY_VERSION_MINIMUM=4.0 -DBUILD_TOOLS=OFF -DBUILD_REGRESS=OFF -DBUILD_EXAMPLES=OFF -DBUILD_DOC=OFF -DENABLE_BZIP2=OFF -DENABLE_LZMA=OFF -DENABLE_ZSTD=OFF -DENABLE_COMMONCRYPTO=OFF -DENABLE_GNUTLS=OFF -DENABLE_MBEDTLS=OFF -DENABLE_OPENSSL=OFF -DENABLE_WINDOWS_CRYPTO=OFF -DENABLE_FDOPEN=OFF
         cmake --build libzip-build --parallel
         sudo cmake --build libzip-build --target install --parallel
     - name: Install python dependencies

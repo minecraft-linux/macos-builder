@@ -1,3 +1,6 @@
+> [!WARNING]
+>  Deprecated CI scripts, I don't like piracy
+
 ### Can I play with an APK?
 
 No, this allowed piracy that is forbidden in this project.
