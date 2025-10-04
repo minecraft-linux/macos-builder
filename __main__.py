@@ -104,7 +104,7 @@ if not path.isdir(CMAKE_INSTALL_PREFIX):
     makedirs(CMAKE_INSTALL_PREFIX)
 
 def cmake_cmd(source_dir):
-    return ['cmake', source_dir, '-DCMAKE_INSTALL_PREFIX=' + CMAKE_INSTALL_PREFIX, '-DCMAKE_POLICY_VERSION_MINIMUM=4.0']
+    return ['cmake', source_dir, '-DCMAKE_INSTALL_PREFIX=' + CMAKE_INSTALL_PREFIX, '-DCMAKE_POLICY_VERSION_MINIMUM=3.5']
 
 def build_component(name, cmake_opts):
     display_stage("Building: " + name)

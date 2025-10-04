@@ -259,7 +259,7 @@ jobs:
           }
           $EXTRA_FLAGS += '-DOPENSSL_ROOT_DIR=${{steps.openssl.outputs.download-path}}'
         }
-        cmake ../mcpelauncher '-DCMAKE_POLICY_VERSION_MINIMUM=4.0' '-DCMAKE_BUILD_TYPE=Release' '-DBUILD_UI=OFF' ('-DCMAKE_INSTALL_PREFIX=' + $INSDIR) -DCMAKE_ASM_FLAGS="--target=${{ matrix.triple }}" -DCMAKE_C_FLAGS="--target=${{ matrix.triple }} ${{ matrix.cflags }}" -DCMAKE_CXX_FLAGS="--target=${{ matrix.triple }} ${{ matrix.cxxflags }}" -DCMAKE_CXX_COMPILER_TARGET=${{ matrix.triple }} $EXTRA_FLAGS ${{ matrix.cmakeextraflags }} '-DMSA_DAEMON_PATH=.' '-DENABLE_DEV_PATHS=OFF' '-DXAL_WEBVIEW_QT_PATH=.'
+        cmake ../mcpelauncher '-DCMAKE_POLICY_VERSION_MINIMUM=3.5' '-DCMAKE_BUILD_TYPE=Release' '-DBUILD_UI=OFF' ('-DCMAKE_INSTALL_PREFIX=' + $INSDIR) -DCMAKE_ASM_FLAGS="--target=${{ matrix.triple }}" -DCMAKE_C_FLAGS="--target=${{ matrix.triple }} ${{ matrix.cflags }}" -DCMAKE_CXX_FLAGS="--target=${{ matrix.triple }} ${{ matrix.cxxflags }}" -DCMAKE_CXX_COMPILER_TARGET=${{ matrix.triple }} $EXTRA_FLAGS ${{ matrix.cmakeextraflags }} '-DMSA_DAEMON_PATH=.' '-DENABLE_DEV_PATHS=OFF' '-DXAL_WEBVIEW_QT_PATH=.'
         make install -j4
         popd
         popd
