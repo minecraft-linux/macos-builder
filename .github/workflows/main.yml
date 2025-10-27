@@ -515,19 +515,19 @@ jobs:
 
     - name: download m1 angle
       if: inputs.build-m1
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v6
       with:
         name: angle-macos-latest-11.0-arm64
         path: "m1-artifacts"
     - name: download m1 openssl
       if: inputs.build-m1
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v6
       with:
         name: openssl-macos-latest-11.0-arm64
         path: "m1-artifacts"
     - name: download m1 mcpelauncher
       if: inputs.build-m1
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v6
       with:
         name: mcpelauncher-macos-latest-11.0-arm64
         path: "m1-artifacts"
@@ -710,7 +710,7 @@ jobs:
           core.setOutput("repo", context.repo.repo);
           core.setOutput("build-number", "" + (${{ github.run_number }} + ${{ inputs.offset }}));
     - name: Download everything
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v6
       with:
         path: sparkle
         pattern: dmg-*
