@@ -57,8 +57,8 @@ jobs:
   build-libcxx32:
     runs-on: macos-15-intel
     steps:
-    - name: Select Xcode
-      run: sudo xcode-select -switch /Applications/Xcode_14.2.app
+    #- name: Select Xcode
+    #  run: sudo xcode-select -switch /Applications/Xcode_14.2.app
     - name: Check Cache libcxx32
       id: libcxx32-llvm
       uses: ChristopherHX/check-cache@main
@@ -365,8 +365,8 @@ jobs:
   build-protobuf:
     runs-on: macos-15-intel
     steps:
-    - name: Select Xcode
-      run: sudo xcode-select -switch /Applications/Xcode_14.2.app
+    #- name: Select Xcode
+    #  run: sudo xcode-select -switch /Applications/Xcode_14.2.app
     - uses: actions/cache/restore@v4
       id: cache
       with:
@@ -465,8 +465,8 @@ jobs:
     env:
       CMAKE_OSX_ARCHITECTURES: x86_64 # Is this needed? archive member: libglfw3.a(cocoa_init.m.o) cputype (16777223) does not match previous archive members cputype (7) (all members must match)
     steps:
-    - name: Select Xcode
-      run: sudo xcode-select -switch /Applications/Xcode_14.2.app
+    #- name: Select Xcode
+    #  run: sudo xcode-select -switch /Applications/Xcode_14.2.app
     - name: Setup Vars
       id: setup-vars
       uses: actions/github-script@v7
