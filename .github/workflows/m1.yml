@@ -228,7 +228,7 @@ jobs:
         SUBMODULEREFS: ${{ inputs.submodule-refs || '[]' }}
         MCPELAUNCHER_REPO: ${{ inputs.mcpelauncher-manifest-repo }}
         MCPELAUNCHER_REF: ${{ inputs.mcpelauncher-manifest-ref }}
-    - uses: actions/download-artifact@v4
+    - uses: actions/download-artifact@v6
       id: openssl
       if: ${{ matrix.openssl }}
       with:
