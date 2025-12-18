@@ -652,8 +652,8 @@ jobs:
         cmake libzip -B libzip-build -DCMAKE_POLICY_VERSION_MINIMUM=4.0 -DBUILD_TOOLS=OFF -DBUILD_REGRESS=OFF -DBUILD_EXAMPLES=OFF -DBUILD_DOC=OFF -DENABLE_BZIP2=OFF -DENABLE_LZMA=OFF -DENABLE_ZSTD=OFF -DENABLE_COMMONCRYPTO=OFF -DENABLE_GNUTLS=OFF -DENABLE_MBEDTLS=OFF -DENABLE_OPENSSL=OFF -DENABLE_WINDOWS_CRYPTO=OFF -DENABLE_FDOPEN=OFF
         cmake --build libzip-build --parallel
         sudo cmake --build libzip-build --target install --parallel
-    - name: Install python dependencies
-      run: pip3 install jinja2 ds_store
+    - name: Install python dependencies # This is a throw away VM
+      run: pip3 install --break-system-packages jinja2 ds_store
     
     - name: add deps to base app
       run: |
