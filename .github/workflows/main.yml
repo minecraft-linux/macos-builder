@@ -80,6 +80,11 @@ jobs:
       with:
         repository: phracker/MacOSX-SDKs
         ref: refs/heads/master
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.13'
+      id: setup-py
     - name: Build libcxx, libcxxabi
       if: steps.libcxx32-llvm.outputs.cache-hit != 'true'
       run: |
@@ -88,7 +93,7 @@ jobs:
         git clone https://github.com/llvm/llvm-project.git llvm -b release/10.x
         mkdir -p libcxx32-build
         cd libcxx32-build
-        cmake ../llvm/llvm -DCMAKE_POLICY_VERSION_MINIMUM=4.0 -DHAVE_CXX_ATOMICS_WITHOUT_LIB=ON -DHAVE_CXX_ATOMICS64_WITHOUT_LIB=ON -DLLVM_ENABLE_PROJECTS="libcxx;libcxxabi" -DCMAKE_BUILD_TYPE=Release -DLIBCXX_BUILD_32_BITS=ON -DLIBCXXABI_BUILD_32_BITS=ON -DLLVM_BUILD_32_BITS=ON
+        cmake ../llvm/llvm -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -DHAVE_CXX_ATOMICS_WITHOUT_LIB=ON -DHAVE_CXX_ATOMICS64_WITHOUT_LIB=ON -DLLVM_ENABLE_PROJECTS="libcxx;libcxxabi" -DCMAKE_BUILD_TYPE=Release -DLIBCXX_BUILD_32_BITS=ON -DLIBCXXABI_BUILD_32_BITS=ON -DLLVM_BUILD_32_BITS=ON -DPYTHON_EXECUTABLE=${{ steps.setup-py.outputs.python-path }}
         make -j8 cxx cxxabi
   build-libcxx64:
     runs-on: macos-15-intel
@@ -114,6 +119,11 @@ jobs:
       with:
         repository: phracker/MacOSX-SDKs
         ref: refs/heads/master
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.13'
+      id: setup-py
     - name: Build libcxx, libcxxabi
       if: steps.libcxx64-llvm.outputs.cache-hit != 'true'
       run: |
@@ -122,7 +132,7 @@ jobs:
         git clone https://github.com/llvm/llvm-project.git llvm -b release/10.x
         mkdir -p libcxx64-build
         cd libcxx64-build
-        cmake ../llvm/llvm -DCMAKE_POLICY_VERSION_MINIMUM=4.0 -DHAVE_CXX_ATOMICS_WITHOUT_LIB=ON -DHAVE_CXX_ATOMICS64_WITHOUT_LIB=ON -DLLVM_ENABLE_PROJECTS="libcxx;libcxxabi" -DCMAKE_BUILD_TYPE=Release
+        cmake ../llvm/llvm -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -DHAVE_CXX_ATOMICS_WITHOUT_LIB=ON -DHAVE_CXX_ATOMICS64_WITHOUT_LIB=ON -DLLVM_ENABLE_PROJECTS="libcxx;libcxxabi" -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=${{ steps.setup-py.outputs.python-path }}
         make -j8 cxx cxxabi
   build-libcxx:
     runs-on: macos-15-intel
