@@ -214,6 +214,7 @@ jobs:
         echo MACOSX_DEPLOYMENT_TARGET=10.10.0 > $GITHUB_ENV
         echo SDKROOT=${{ github.workspace }}/${{ secrets.MacOSX1014sdk && 'MacOSX10.14.sdk' || '../MacOSX-SDKs/MacOSX10.13.sdk' }} >> $GITHUB_ENV
     - name: Prepare Legacy sdk
+      if: steps.cache-openssl32.outputs.cache-hit != 'true'
       run: |
         cd "$SDKROOT/usr/include"
         ln -s "$(xcrun --sdk macosx --show-sdk-path)/usr/include/c++" c++
@@ -267,6 +268,7 @@ jobs:
         echo MACOSX_DEPLOYMENT_TARGET=10.10.0 > $GITHUB_ENV
         echo SDKROOT=${{ github.workspace }}/${{ secrets.MacOSX1014sdk && 'MacOSX10.14.sdk' || '../MacOSX-SDKs/MacOSX10.13.sdk' }} >> $GITHUB_ENV
     - name: Prepare Legacy sdk
+      if: steps.cache-openssl64.outputs.cache-hit != 'true'
       run: |
         cd "$SDKROOT/usr/include"
         ln -s "$(xcrun --sdk macosx --show-sdk-path)/usr/include/c++" c++
@@ -402,6 +404,7 @@ jobs:
         echo MACOSX_DEPLOYMENT_TARGET=10.10.0 > $GITHUB_ENV
         echo SDKROOT=${{ github.workspace }}/${{ secrets.MacOSX1014sdk && 'MacOSX10.14.sdk' || '../MacOSX-SDKs/MacOSX10.13.sdk' }} >> $GITHUB_ENV
     - name: Prepare Legacy sdk
+      if: steps.cache.outputs.cache-hit != 'true'
       run: |
         cd "$SDKROOT/usr/include"
         ln -s "$(xcrun --sdk macosx --show-sdk-path)/usr/include/c++" c++
