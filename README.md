@@ -14,3 +14,21 @@ Ignoring this policy may cause suspension including termination of this project 
 _Exception to the rule are Minecraft Trial and Edu where the latter doesn't work at this time._
 
 For the most current version of this rule see https://minecraft-linux.github.io/faq/index.html#can-i-play-with-an-apk
+
+
+## macOS Troubleshooting & Performance Optimization
+
+### ANGLE & Metal Backend Setup
+- On macOS Apple Silicon (M1/M2/M3/M4) and Intel Macs, ANGLE translates GLES graphics calls via Metal or OpenGL.
+- To enable the native Metal backend override, set:
+  ```bash
+  ANGLE_DEFAULT_PLATFORM=metal
+  ```
+- For GPU rendering compatibility on Bedrock, you can pass:
+  ```bash
+  force_gl_renderer="Adreno (TM) 740"
+  ```
+
+### Xbox Live / MSA Authentication
+- Ensure `libcurl` version is 8.21.0 or newer to prevent ECDSA token verification errors on `sisu.xboxlive.com`.
+- If login code "Drowned" occurs, clear stale auth cache tokens in `~/Library/Application Support/mcpelauncher/pass.token`.
